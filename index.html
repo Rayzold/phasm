@@ -683,13 +683,14 @@ function pairScore(pool,a,b){
   return {worst:Math.max(...bins), exp:bins.reduce((s,n)=>s+n*n,0)/pool.length};
 }
 // ---- verdict: ένα μόνο πιθανό ghost ----
-// Απατεώνες που βγαίνουν με ΛΑΘΟΣ ✗: αν ταιριάζουν σε όλα τα ✓/behaviors και κόπηκαν
-// μόνο από ✗, ένα βιαστικό ✗ μπορεί να μας ξεγελά — γι' αυτό το σχόλιο.
-const TRICKSTERS={
- "The Mimic":"Το <strong>Mimic</strong> κόπηκε μόνο από ✗ — δείχνει ψεύτικα Orbs και μιμείται συμπεριφορές. Αν κάποιο ✗ σου ήταν βιαστικό (Spirit Box που «δεν μίλησε», UV/Freezing που δεν έψαξες καλά), ξανατσέκαρε πριν κλειδώσεις την απάντηση.",
- "Obake":"Το <strong>Obake</strong> κόπηκε μόνο από ✗ — με το ability του αφήνει λιγότερα fingerprints και ξεθωριάζουν στον μισό χρόνο. Ένα ✗ στο Ultraviolet δεν το αποκλείει 100%: ξαναδές για prints (ή 6 δάχτυλα!).",
- "Goryo":"Το <strong>Goryo</strong> κόπηκε μόνο από ✗ — δείχνει D.O.T.S. ΜΟΝΟ μέσα από video camera και μόνο με άδειο δωμάτιο. Το false ✗ εδώ είναι κλασικό: στήσε κάμερα στο D.O.T.S. και βγες από το δωμάτιο.",
-};
+// Απατεώνες: ο καθένας μπορεί να «κρύψει» ΕΝΑ συγκεκριμένο evidence. Προειδοποιούμε
+// μόνο αν ακριβώς αυτό το evidence έχει ✗ και ο απατεώνας ταιριάζει σε όλα τα ✓/behaviors —
+// τότε (και μόνο τότε) το ✗ μπορεί να είναι ψεύτικο και να μας ξεγελά.
+const TRICKSTERS=[
+ {name:"The Mimic", key:"ORB", msg:"Έκοψες τα <strong>Ghost Orbs</strong> με ✗, αλλά το <strong>Mimic</strong> δείχνει πάντα ψεύτικα Orbs — αν η κάμερα δεν κοίταζε σωστά το δωμάτιο ή είχε φως, μπορεί απλώς να τα έχασες. Ξαναστήσε την πριν κλειδώσεις."},
+ {name:"Obake", key:"UV", msg:"Έκοψες το <strong>Ultraviolet</strong> με ✗, αλλά το <strong>Obake</strong> με το ability του αφήνει λιγότερα fingerprints και ξεθωριάζουν στον μισό χρόνο. Ξαναδές για prints (ή 6 δάχτυλα!) πριν κλειδώσεις."},
+ {name:"Goryo", key:"DOTS", msg:"Έκοψες το <strong>D.O.T.S.</strong> με ✗, αλλά το <strong>Goryo</strong> το δείχνει ΜΟΝΟ μέσα από video camera και μόνο με άδειο δωμάτιο. Στήσε κάμερα στο projector και βγες από το δωμάτιο πριν κλειδώσεις."},
+];
 function updateVerdict(pool,onKeys,offKeys){
   const box=document.getElementById("verdictBox");
   if(pool.length!==1){ box.classList.remove("show"); return; }
@@ -699,13 +700,11 @@ function updateVerdict(pool,onKeys,offKeys){
   if(g.mimic){
     warns.push("Θυμήσου: τα Ghost Orbs του Mimic είναι <strong>ψεύτικα</strong> — τα πραγματικά του evidence είναι Spirit Box, Ultraviolet και Freezing. Επιβεβαίωσε τουλάχιστον ένα από αυτά.");
   }
-  Object.keys(TRICKSTERS).forEach(name=>{
-    if(name===g.name) return;
-    const t=GHOSTS.find(x=>x.name===name);
-    const ev=effEv(t);
-    const matchesChecks = onKeys.every(k=>ev.includes(k)) && passesBehaviors(t);
-    const cutOnlyByX = offKeys.some(k=>ev.includes(k));
-    if(matchesChecks && cutOnlyByX) warns.push("⚠ "+TRICKSTERS[name]);
+  TRICKSTERS.forEach(t=>{
+    if(t.name===g.name || !offKeys.includes(t.key)) return;
+    const tg=GHOSTS.find(x=>x.name===t.name);
+    const ev=effEv(tg);
+    if(onKeys.every(k=>ev.includes(k)) && passesBehaviors(tg)) warns.push("⚠ "+t.msg);
   });
   document.getElementById("verdictWarn").innerHTML=warns.join("<br><br>");
   box.classList.add("show");
