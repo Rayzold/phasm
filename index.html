@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phasmo Journal — Ghost Cheat Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0D12;          /* σκοτεινό βαν, νύχτα */
+    --bg2:#11161f;
+    --paper:#EDE4CE;       /* σελίδα journal */
+    --paper2:#E4D9BE;
+    --ink:#2A2620;
+    --ink-soft:#5A5244;
+    --nv:#8FE388;          /* night-vision green */
+    --nv-dim:#57996b;
+    --danger:#E15B5B;
+    --warn:#F0C674;
+    --muted:#8A93A3;
+    --line:#232b38;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    background-image:radial-gradient(ellipse at 50% -10%, #16202b 0%, var(--bg) 55%);
+    color:#D7DCE4;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    min-height:100vh;
+    padding:20px 14px 60px;
+  }
+  .wrap{max-width:1060px;margin:0 auto}
+  /* ---------- header ---------- */
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  h1{
+    font-family:"Special Elite","Courier New",monospace;
+    font-size:clamp(26px,5vw,40px);
+    color:var(--nv);
+    margin:0;
+    letter-spacing:1px;
+    text-shadow:0 0 18px rgba(143,227,136,.25);
+  }
+  .rec{display:inline-flex;align-items:center;gap:7px;font-family:"Special Elite",monospace;color:var(--muted);font-size:13px;letter-spacing:2px}
+  .rec::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--danger);animation:blink 1.4s steps(1) infinite}
+  @keyframes blink{50%{opacity:.15}}
+  .sub{color:var(--muted);font-size:14px;margin:2px 0 22px;max-width:640px;line-height:1.5}
+  /* ---------- section labels ---------- */
+  .panel{
+    border:1px solid var(--line);
+    background:linear-gradient(180deg,var(--bg2),#0d1219);
+    border-radius:10px;
+    padding:16px 16px 12px;
+    margin-bottom:22px;
+  }
+  .panel-label{
+    font-family:"Special Elite",monospace;
+    font-size:12px;letter-spacing:3px;color:var(--nv-dim);
+    text-transform:uppercase;margin-bottom:12px;
+  }
+  /* ---------- evidence toggles ---------- */
+  .ev-grid{display:flex;flex-wrap:wrap;gap:9px}
+  .ev{
+    border:1px solid var(--line);
+    background:#0c1118;
+    color:#B9C2CE;
+    border-radius:8px;
+    padding:9px 13px;
+    font-size:14px;
+    cursor:pointer;
+    user-select:none;
+    display:inline-flex;align-items:center;gap:8px;
+    transition:all .12s ease;
+    font-family:inherit;
+  }
+  .ev:hover{border-color:#3a465a}
+  .ev .mark{
+    width:17px;height:17px;border-radius:4px;
+    border:1.5px solid #4a5568;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;line-height:1;
+    color:transparent;
+    flex:none;
+  }
+  .ev.on{border-color:var(--nv);color:var(--nv);box-shadow:0 0 12px rgba(143,227,136,.12)}
+  .ev.on .mark{border-color:var(--nv);color:var(--nv)}
+  .ev.on .mark::before{content:"✓"}
+  .ev.off{border-color:var(--danger);color:var(--danger);opacity:.9}
+  .ev.off .mark{border-color:var(--danger);color:var(--danger)}
+  .ev.off .mark::before{content:"✗"}
+  .ev.off .name{text-decoration:line-through}
+  .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+  .count{
+    font-family:"Special Elite",monospace;
+    font-size:15px;color:var(--nv);letter-spacing:1px;
+  }
+  .count b{font-size:20px}
+  .reset{
+    margin-left:auto;
+    background:none;border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:inherit;
+  }
+  .reset:hover{border-color:var(--danger);color:var(--danger)}
+  .hint{font-size:12.5px;color:var(--muted)}
+  .mimic-warn{
+    display:none;margin-top:12px;font-size:13.5px;color:#F0C674;
+    border:1px dashed #6b5a2a;border-radius:8px;padding:9px 12px;line-height:1.45;
+    background:rgba(240,198,116,.05);
+  }
+  .mimic-warn.show{display:block}
+  /* ---------- sanity tracker + smudge timer ---------- */
+  .tools-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}
+  @media (max-width:760px){.tools-grid{grid-template-columns:1fr}}
+  .tool-col{border:1px solid var(--line);border-radius:8px;padding:14px 14px 12px;background:#0c1119}
+  .tool-title{font-family:"Special Elite",monospace;font-size:12px;letter-spacing:2px;color:var(--nv-dim);text-transform:uppercase;margin-bottom:10px}
+  /* sanity */
+  .sanity-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+  .sanity-value{font-family:"Special Elite",monospace;font-size:34px;color:var(--nv);line-height:1}
+  .sanity-status{font-size:12.5px;padding:6px 11px;border-radius:20px;white-space:nowrap;border:1px solid var(--line)}
+  .status-safe{background:rgba(143,227,136,.12);color:var(--nv);border-color:var(--nv-dim)}
+  .status-warn{background:rgba(240,198,116,.12);color:var(--warn);border-color:#6b5a2a}
+  .status-danger{background:rgba(225,91,91,.15);color:var(--danger);border-color:var(--danger)}
+  input[type=range]{width:100%;accent-color:var(--nv);margin:6px 0 10px}
+  .presets{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:4px}
+  .preset{
+    background:none;border:1px solid var(--line);color:var(--muted);
+    border-radius:20px;padding:5px 12px;font-size:12.5px;cursor:pointer;font-family:inherit;
+  }
+  .preset:hover{border-color:var(--nv);color:var(--nv)}
+  .sanity-note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+  /* smudge */
+  .smudge-display{
+    font-family:"Special Elite",monospace;font-size:40px;color:var(--nv);text-align:center;
+    letter-spacing:2px;margin:2px 0 8px;
+  }
+  .smudge-display.done{color:var(--danger)}
+  .smudge-bar{height:6px;border-radius:4px;background:#1a212c;overflow:hidden;margin-bottom:12px}
+  .smudge-bar > div{height:100%;background:var(--nv);width:100%;transition:width 1s linear}
+  .smudge-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .btn{
+    border:1px solid var(--line);background:#0c1118;color:#B9C2CE;
+    border-radius:8px;padding:8px 13px;font-size:13px;cursor:pointer;font-family:inherit;
+  }
+  .btn.primary{border-color:var(--nv);color:var(--nv)}
+  .btn.primary:hover{box-shadow:0 0 12px rgba(143,227,136,.15)}
+  .btn.ghostvar{border-color:var(--warn);color:var(--warn)}
+  .btn:hover{border-color:#3a465a}
+  .btn:disabled{opacity:.4;cursor:default}
+  .smudge-note{font-size:12px;color:var(--muted);line-height:1.5}
+  /* ---------- threshold quick-reference ---------- */
+  .thresh-wrap{overflow-x:auto}
+  table.thresh{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+  table.thresh th{
+    text-align:left;font-family:"Special Elite",monospace;font-size:11px;letter-spacing:1.5px;
+    color:var(--muted);text-transform:uppercase;padding:6px 10px;border-bottom:1px solid var(--line);
+  }
+  table.thresh td{padding:7px 10px;border-bottom:1px solid #171d27;color:#C7CEDA}
+  table.thresh tr.hot td{background:rgba(225,91,91,.10);color:#F3D3D3}
+  table.thresh tr.hot td.gname{color:#fff;font-weight:600}
+  table.thresh tr.dim td{opacity:.35}
+  table.thresh td.gname{font-family:"Special Elite",monospace;color:#EAEDF2}
+  table.thresh td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .any-badge{font-size:10.5px;background:rgba(225,91,91,.18);color:var(--danger);border:1px solid var(--danger);border-radius:10px;padding:1px 7px;margin-left:6px}
+  .var-badge{font-size:10.5px;background:rgba(240,198,116,.15);color:var(--warn);border:1px solid #6b5a2a;border-radius:10px;padding:1px 7px;margin-left:6px}
+  /* ---------- ghost cards ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .card{
+    background:var(--paper);
+    background-image:linear-gradient(175deg,var(--paper) 60%,var(--paper2));
+    color:var(--ink);
+    border-radius:6px;
+    padding:15px 16px 13px;
+    box-shadow:0 3px 14px rgba(0,0,0,.45);
+    position:relative;
+    line-height:1.45;
+  }
+  .card::after{ /* συνδετήρας-πινέζα */
+    content:"";position:absolute;top:8px;right:10px;width:10px;height:10px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #c9524a, #7e2b25);
+    box-shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+  .g-name{
+    font-family:"Special Elite","Courier New",monospace;
+    font-size:21px;margin:0 0 7px;color:#1c1914;letter-spacing:.5px;
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+  .chip{
+    font-size:11.5px;padding:3px 8px;border-radius:20px;
+    border:1px solid #b7ab8c;color:var(--ink-soft);background:rgba(255,255,255,.35);
+    white-space:nowrap;
+  }
+  .chip.hit{border-color:#3f7d3a;color:#2c5d28;background:rgba(105,180,95,.18);font-weight:600}
+  .meta{font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;display:flex;gap:14px;flex-wrap:wrap}
+  .meta b{color:#8a3530}
+  .hunt-ribbon{
+    display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;
+    color:#7a1f1f;background:#f3c9c2;border:1px solid #c9524a;border-radius:6px;
+    padding:3px 8px;margin-bottom:8px;
+  }
+  .tell{font-size:13.5px;border-top:1px dashed #c3b591;padding-top:8px;margin-top:2px}
+  .tell strong{color:#1c1914}
+  .card.gone{display:none}
+  .empty{
+    display:none;text-align:center;color:var(--muted);padding:50px 10px;font-size:15px;line-height:1.6;
+  }
+  .empty.show{display:block}
+  .empty .big{font-family:"Special Elite",monospace;font-size:22px;color:var(--danger);display:block;margin-bottom:8px}
+  footer{margin-top:34px;color:#5b6473;font-size:12px;text-align:center;line-height:1.6}
+  @media (prefers-reduced-motion:reduce){.rec::before{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>PHASMO JOURNAL</h1>
+    <span class="rec">REC · NIGHT VISION</span>
+  </header>
+  <p class="sub">Τσέκαρε τα evidence που βρίσκεις (1 κλικ = ✓ το έχω, 2 κλικ = ✗ το απέκλεισα) και δες live ποια ghosts μένουν — μαζί με το tell και το counter-play του καθενός. Intermediate = 3 evidence διαθέσιμα.</p>
+
+  <div class="panel">
+    <div class="panel-label">Evidence Board</div>
+    <div class="ev-grid" id="evGrid"></div>
+    <div class="mimic-warn" id="mimicWarn">⚠ <strong>The Mimic:</strong> δείχνει <em>πάντα</em> ψεύτικα Ghost Orbs επιπλέον των κανονικών του evidence (Spirit Box, Ultraviolet, Freezing). Με Orbs στο ταμπλό, μην το ξεγράφεις μέχρι να αποκλείσεις κάποιο από αυτά τα τρία.</div>
+    <div class="toolbar">
+      <span class="count">Πιθανά: <b id="cnt">29</b>/29</span>
+      <span class="hint" id="hintTxt"></span>
+      <button class="reset" id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Sanity Tracker &amp; Smudge Timer</div>
+    <div class="tools-grid">
+      <div class="tool-col">
+        <div class="tool-title">Sanity</div>
+        <div class="sanity-top">
+          <div class="sanity-value"><span id="sanVal">50</span>%</div>
+          <div class="sanity-status" id="sanStatus">—</div>
+        </div>
+        <input type="range" id="sanRange" min="0" max="100" step="1" value="50">
+        <div class="presets">
+          <button class="preset" data-v="100">100%</button>
+          <button class="preset" data-v="70">70%</button>
+          <button class="preset" data-v="60">60%</button>
+          <button class="preset" data-v="50">50%</button>
+          <button class="preset" data-v="35">35%</button>
+          <button class="preset" data-v="25">25%</button>
+          <button class="preset" data-v="0">0%</button>
+        </div>
+        <div class="sanity-note" id="sanNote">Σύρε το slider στο τρέχον sanity σου. Τα ghosts που θα μπορούσαν να κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω και στα κάρτες.</div>
+      </div>
+      <div class="tool-col">
+        <div class="tool-title">Smudge Timer</div>
+        <div class="smudge-display" id="smDisplay">1:30</div>
+        <div class="smudge-bar"><div id="smBar"></div></div>
+        <div class="smudge-btns">
+          <button class="btn primary" id="smStart90">Start (90s)</button>
+          <button class="btn ghostvar" id="smStart180">Spirit (180s)</button>
+          <button class="btn" id="smReset">Reset</button>
+        </div>
+        <div class="smudge-note">Standard προστασία: 90s χωρίς hunt. <strong>Spirit</strong> extend: 180s. <strong>Yurei</strong>: αν κάνεις smudge μέσα στο δωμάτιό του, καθηλώνεται εκεί για 90s αντί να roamάρει.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Sanity Threshold Quick-Reference (ταξινομημένα, υψηλότερο πρώτα)</div>
+    <div class="thresh-wrap">
+      <table class="thresh">
+        <thead><tr><th>Ghost</th><th>Hunt threshold</th><th>Λεπτομέρεια</th></tr></thead>
+        <tbody id="threshBody"></tbody>
+      </table>
+    </div>
+    <div class="sanity-note" style="margin-top:10px">Κόκκινη γραμμή = το ghost μπορεί ήδη να κάνει hunt στο sanity που έχεις ορίσει παραπάνω. Θολές γραμμές = ήδη αποκλεισμένο βάσει evidence.</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty">
+    <span class="big">ΚΑΝΕΝΑ ΤΑΙΡΙΑΣΜΑ</span>
+    Κάποιο evidence είναι λάθος καταγεγραμμένο — ξαναδές τα ✓/✗ σου.<br>
+    Συχνός ένοχος: ψεύτικα Orbs από Mimic ή λάθος ανάγνωση EMF.
+  </div>
+  <footer>Evidence data: Phasmophobia Wiki (Ιούλιος 2026, 29 ghosts) · Φτιαγμένο για τον Rayzold, level 14 και ανερχόμενο 👻</footer>
+</div>
+<script>
+const EV = [
+  {k:"EMF", n:"EMF Level 5"},
+  {k:"DOTS",n:"D.O.T.S."},
+  {k:"UV",  n:"Ultraviolet"},
+  {k:"FRZ", n:"Freezing Temps"},
+  {k:"ORB", n:"Ghost Orbs"},
+  {k:"WRT", n:"Ghost Writing"},
+  {k:"SB",  n:"Spirit Box"},
+];
+// thMax = ανώτατο sanity % στο οποίο το ghost μπορεί ακόμα να κάνει hunt (για ταξινόμηση/quick lookup).
+// isAny = μπορεί να κάνει hunt σε ΟΠΟΙΟΔΗΠΟΤΕ sanity μέσω ability.
+// variableTh = threshold που αλλάζει ανάλογα με behavior (π.χ. Mimic μιμείται άλλο ghost).
+const GHOSTS = [
+ {name:"Spirit", ev:["EMF","WRT","SB"], hunt:"50%", thMax:50, tell:"Κανένα φανερό tell — το «βαρετό» ghost. Test: μετά από incense/smudge δεν κάνει hunt για 180s (αντί 90s). Αν μετρήσεις 2-3 λεπτά ησυχίας μετά το smudge → Spirit."},
+ {name:"Wraith", ev:["DOTS","EMF","SB"], hunt:"50%", thMax:50, tell:"Δεν πατάει ΠΟΤΕ salt — κανένα footprint, ποτέ. Ρίξε salt σε πέρασμα: αν όλα τα άλλα δείχνουν activity αλλά το salt μένει ανέγγιχτο, μεγάλο Wraith hint."},
+ {name:"Phantom", ev:["DOTS","UV","SB"], hunt:"50%", thMax:50, tell:"Φωτογράφισέ το σε ghost event: αν ΔΕΝ φαίνεται στη φωτογραφία → Phantom. Σε hunt μένει αόρατο περισσότερη ώρα (αραιό flickering). Μην το κοιτάς — σου ρίχνει sanity."},
+ {name:"Poltergeist", ev:["WRT","UV","SB"], hunt:"50%", thMax:50, tell:"Πετάει πολλά αντικείμενα μαζί και συχνά. Άσε ένα σωρό μικροαντικείμενα σε ένα δωμάτιο — αν τα εκτοξεύσει όλα μαζί (μεγάλο sanity drain), Poltergeist."},
+ {name:"Banshee", ev:["DOTS","ORB","UV"], hunt:"50% του στόχου", thMax:50, tell:"Στοχεύει ΕΝΑΝ παίκτη (solo: εσένα). Χαρακτηριστική κραυγή στο Parabolic Microphone (~1/3 των ήχων). Κάνει «επισκέψεις» στον στόχο του αντί να roamάρει τυχαία."},
+ {name:"Jinn", ev:["EMF","UV","FRZ"], hunt:"50%", thMax:50, tell:"Με breaker ON: γρήγορο από μακριά, κανονικό από κοντά. Δεν κλείνει ΠΟΤΕ το breaker το ίδιο. Ability του δίνει EMF στο breaker. Counter: κλείσε εσύ το breaker και γίνεται κανονικό."},
+ {name:"Mare", ev:["WRT","ORB","SB"], hunt:"60% σκοτάδι / 40% φως", thMax:60, tell:"Σβήνει φώτα αμέσως μόλις τα ανάψεις, δεν ανάβει ΠΟΤΕ φως. Counter: κράτα το ghost room φωτισμένο και «κλειδώνει» στο 40% threshold — πολύ πιο ασφαλές."},
+ {name:"Revenant", ev:["WRT","ORB","FRZ"], hunt:"50%", thMax:50, tell:"Δύο ταχύτητες: σαλιγκάρι (1.0 m/s) όταν δεν σε βλέπει, τέρας (3.0 m/s) όταν σε βλέπει. Counter: κρύψου ΑΜΕΣΩΣ — μόλις χάσει τα ίχνη σου σέρνεται."},
+ {name:"Shade", ev:["WRT","EMF","FRZ"], hunt:"35%", thMax:35, tell:"Ντροπαλό: ελάχιστη δραστηριότητα όσο είσαι κοντά, δεν κάνει hunt αν είσαι στο ίδιο δωμάτιο. Αν το σπίτι είναι «νεκρό» σε activity αλλά υπάρχει ghost, σκέψου Shade."},
+ {name:"Demon", ev:["WRT","UV","FRZ"], hunt:"70% + hunt σε ΟΠΟΙΟΔΗΠΟΤΕ sanity (ability)", thMax:100, isAny:true, tell:"Hunt με full sanity = σχεδόν σίγουρα Demon. Ελάχιστο cooldown μεταξύ hunts (20s αντί 25s). Counter: crucifix — πάνω του έχει μεγαλύτερη εμβέλεια."},
+ {name:"Yurei", ev:["DOTS","ORB","FRZ"], hunt:"50%", thMax:50, tell:"Κλείνει πόρτες ΤΕΡΜΑ με δύναμη (ability που ρίχνει sanity). Counter: smudge ΜΕΣΑ στο δωμάτιό του το καθηλώνει εκεί για 90s — δεν roamάρει."},
+ {name:"Oni", ev:["DOTS","EMF","FRZ"], hunt:"50%", thMax:50, tell:"Υπερδραστήριο όταν είσαι κοντά, πετάει αντικείμενα με μεγάλη δύναμη. Δεν κάνει ΠΟΤΕ το «airball» event. Σε hunt φαίνεται πιο καθαρά (λιγότερο flickering)."},
+ {name:"Yokai", ev:["DOTS","ORB","SB"], hunt:"50% / 80% αν μιλάς κοντά του", thMax:80, tell:"Η φωνή σου το εξαγριώνει — αν τα hunts ξεκινούν όταν μιλάς, ύποπτο. Counter: σε hunt σε ακούει/εντοπίζει μόνο σε ~2.5m. Κρύψου, σώπα, και είσαι σχεδόν άτρωτος."},
+ {name:"Hantu", ev:["ORB","UV","FRZ"], hunt:"50%", thMax:50, tell:"Πιο γρήγορο όσο πιο κρύο το δωμάτιο. Κλείνει το breaker, δεν το ανοίγει ΠΟΤΕ. Σε hunt με breaker off βγάζει παγωμένη ανάσα (100% confirm). Counter: κράτα το σπίτι ζεστό."},
+ {name:"Goryo", ev:["DOTS","EMF","UV"], hunt:"50%", thMax:50, tell:"D.O.T.S. φαίνεται ΜΟΝΟ μέσα από video camera και μόνο όταν δεν είναι κανείς στο δωμάτιο. Δεν απομακρύνεται σχεδόν ποτέ από το ghost room του."},
+ {name:"Myling", ev:["WRT","EMF","UV"], hunt:"50%", thMax:50, tell:"Σε hunt τα βήματα/φωνές του ακούγονται μόνο από πολύ κοντά — «αθόρυβος δολοφόνος». Στο Parabolic δίνει συχνότερους paranormal ήχους. Αν ακούς heartbeat χωρίς να το είχες ακούσει να έρχεται → Myling."},
+ {name:"Onryo", ev:["ORB","FRZ","SB"], hunt:"60%", thMax:60, tell:"Ο δολοφόνος του τελευταίου σου run! Σβήνει φλόγες — κάθε 3η σβησμένη φλόγα = hunt, ανεξαρτήτως sanity. Counter: αναμμένο κερί/firelight δίπλα του δουλεύει σαν crucifix (μέχρι να το σβήσει)."},
+ {name:"The Twins", ev:["EMF","FRZ","SB"], hunt:"50%", thMax:50, tell:"Interactions σε ΔΥΟ διαφορετικά σημεία σχεδόν ταυτόχρονα (το «δίδυμο» αλληλεπιδρά από απόσταση). Hunts με δύο ελαφρώς διαφορετικές ταχύτητες."},
+ {name:"Raiju", ev:["DOTS","EMF","ORB"], hunt:"65% κοντά σε ηλεκτρονικά", thMax:65, tell:"Γρήγορο κοντά σε ΕΝΕΡΓΟ εξοπλισμό και κάνει hunt νωρίτερα δίπλα του. Παρασιτεί ηλεκτρονικά από μεγαλύτερη απόσταση. Counter: κλείσε/μάζεψε τον εξοπλισμό από το ghost room."},
+ {name:"Obake", ev:["EMF","ORB","UV"], hunt:"50%", thMax:50, tell:"Fingerprints με 6 δάχτυλα ή περίεργα σχήματα = instant confirm. Τα prints του ξεθωριάζουν στον μισό χρόνο. Σε hunt αλλάζει στιγμιαία μορφή (shapeshift)."},
+ {name:"The Mimic", ev:["UV","FRZ","SB"], mimic:true, hunt:"μιμείται άλλα", thMax:50, variableTh:true, tell:"Δείχνει ΠΑΝΤΑ ψεύτικα Ghost Orbs ως 4ο evidence. Αλλάζει συμπεριφορά κάθε λίγα λεπτά (τη μία Revenant, την άλλη Shade…). Αν το ghost «αλλάζει προσωπικότητα», Mimic."},
+ {name:"Moroi", ev:["WRT","FRZ","SB"], hunt:"50%", thMax:50, tell:"Σε «καταριέται» μέσω Spirit Box ή Parabolic → το sanity σου πέφτει πιο γρήγορα μετά. Πιο γρήγορο όσο πέφτει το sanity σου. Counter: sanity pills σβήνουν την κατάρα, smudge το τυφλώνει παραπάνω."},
+ {name:"Deogen", ev:["DOTS","WRT","SB"], hunt:"40%", thMax:40, tell:"Βαριά, λαχανιασμένη ανάσα στο Spirit Box από κοντινή απόσταση (unique). Σε hunt ΣΕ ΒΡΙΣΚΕΙ πάντα — μην κρυφτείς! Counter: από κοντά γίνεται πολύ αργό, κάνε loop γύρω από έπιπλα."},
+ {name:"Thaye", ev:["DOTS","WRT","ORB"], hunt:"75% αρχικά → 15% τελικά", thMax:75, tell:"«Γερνάει»: ξεκινά υπερδραστήριο, γρήγορο και επιθετικό, και όσο περνά η ώρα (και είσαι κοντά του) γίνεται αργό και ήσυχο. Αν το ghost «κουράστηκε» → Thaye."},
+ {name:"Dayan", ev:["EMF","ORB","SB"], hunt:"45% ακίνητος / 60% σε κίνηση", thMax:60, tell:"ΠΑΝΤΑ θηλυκό όνομα & μοντέλο (όπως και το Banshee). Κοντά της (<10m): αν μείνεις ακίνητος επιβραδύνει, αν τρέξεις επιταχύνει. Counter: πάγωσε στη θέση σου σε hunt."},
+ {name:"Gallu", ev:["EMF","UV","SB"], hunt:"50% (νωρίτερα όταν enraged)", thMax:50, tell:"Crucifix, incense και salt το ΕΞΑΓΡΙΩΝΟΥΝ → πιο γρήγορο στο επόμενο hunt, μετά «εξαντλείται» και τα defensive items πιάνουν καλύτερα. Enraged δεν πατάει salt (μην το μπερδέψεις με Wraith — το Gallu πάτησε το πρώτο pile)."},
+ {name:"Obambo", ev:["WRT","UV","DOTS"], hunt:"10% calm / 65% aggressive", thMax:65, tell:"Δύο «διαθέσεις» που εναλλάσσονται κάθε 2 λεπτά: calm = αργό και ακίνδυνο, aggressive = hunt από 65% sanity, πιο γρήγορο, αλλά 20% πιο σύντομο hunt. Ghost με mood swings = Obambo."},
+ {name:"Aswang", ev:["DOTS","FRZ","WRT"], hunt:"50%", thMax:50, tell:"Επιταχύνει ΠΟΛΥ γρήγορα με line-of-sight (max speed σε ~9s αντί 13s) και προτιμά να κυνηγά παρά να ψάχνει. Unique: αν σε φτάσει σε ΕΠΙΣΗΜΟ hiding spot (locker/closet), το hunt τελειώνει αμέσως — αλλά στο επόμενο πάει κατευθείαν εκεί. Άλλαξε κρυψώνα!"},
+ {name:"Kormos", ev:["ORB","SB","UV"], hunt:"50% / 70% αν τρέχεις κοντά του", thMax:70, tell:"ΤΥΦΛΟ — σε εντοπίζει από ήχους βημάτων. Counter: σε hunt μείνε τελείως ΑΚΙΝΗΤΟΣ (δεν χρειάζεσαι locker). Προσοχή: σκοτώνει σε 1.5m ακόμα και μέσα από τοίχους/έπιπλα, οπότε όχι ακίνητος δίπλα στο path του. Sprint = θάνατος."},
+];
+const state = {}; // key -> 0 unknown, 1 on, 2 off
+EV.forEach(e=>state[e.k]=0);
+let sanity = 50;
+
+const evGrid = document.getElementById("evGrid");
+EV.forEach(e=>{
+  const b=document.createElement("button");
+  b.className="ev"; b.dataset.k=e.k;
+  b.innerHTML=`<span class="mark"></span><span class="name">${e.n}</span>`;
+  b.onclick=()=>{ state[e.k]=(state[e.k]+1)%3; render(); };
+  evGrid.appendChild(b);
+});
+
+const grid=document.getElementById("grid");
+GHOSTS.forEach((g,i)=>{
+  const c=document.createElement("div");
+  c.className="card"; c.dataset.i=i;
+  c.innerHTML=`
+    <div class="hunt-ribbon" style="display:none">⚠ Μπορεί να κάνει hunt σε αυτό το sanity</div>
+    <h2 class="g-name">${g.name}</h2>
+    <div class="chips">${g.ev.map(k=>`<span class="chip" data-k="${k}">${EV.find(e=>e.k===k).n}</span>`).join("")}${g.mimic?'<span class="chip" data-k="ORB">+ ψεύτικα Orbs</span>':""}</div>
+    <div class="meta"><span>Hunt: <b>${g.hunt}</b></span></div>
+    <div class="tell">${g.tell}</div>`;
+  grid.appendChild(c);
+});
+
+// ---- sorted sanity threshold quick-reference table ----
+const threshBody = document.getElementById("threshBody");
+const sortedGhosts = GHOSTS.map((g,i)=>({...g,i})).sort((a,b)=>b.thMax-a.thMax);
+sortedGhosts.forEach(g=>{
+  const tr=document.createElement("tr");
+  tr.dataset.i=g.i;
+  const badge = g.isAny ? '<span class="any-badge">ANY (ability)</span>' : (g.variableTh ? '<span class="var-badge">variable</span>' : "");
+  tr.innerHTML=`<td class="gname">${g.name}${badge}</td><td class="num">${g.isAny?"70%+":g.thMax+"%"}</td><td>${g.hunt}</td>`;
+  threshBody.appendChild(tr);
+});
+
+function effEv(g){ return g.mimic ? [...g.ev,"ORB"] : g.ev; }
+
+function sanityStatusFor(count){
+  if(count===0) return {cls:"status-safe", txt:"Ασφαλές — κανένα πιθανό ghost δεν κάνει hunt εδώ"};
+  if(count<=4) return {cls:"status-warn", txt: count+" πιθανά ghosts κάνουν ήδη hunt σε αυτό το sanity"};
+  return {cls:"status-danger", txt: count+" πιθανά ghosts κάνουν ήδη hunt σε αυτό το sanity"};
+}
+
+function render(){
+  // toggle button visuals
+  document.querySelectorAll(".ev").forEach(b=>{
+    b.classList.toggle("on", state[b.dataset.k]===1);
+    b.classList.toggle("off", state[b.dataset.k]===2);
+  });
+  const onKeys = EV.filter(e=>state[e.k]===1).map(e=>e.k);
+  const offKeys= EV.filter(e=>state[e.k]===2).map(e=>e.k);
+  let cnt=0;
+  let huntableCnt=0;
+  document.querySelectorAll(".card").forEach(c=>{
+    const g=GHOSTS[c.dataset.i];
+    const ev=effEv(g);
+    const ok = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k));
+    c.classList.toggle("gone",!ok);
+    const canHuntNow = g.thMax >= sanity;
+    const ribbon = c.querySelector(".hunt-ribbon");
+    if(ok){
+      cnt++;
+      if(canHuntNow) huntableCnt++;
+      ribbon.style.display = canHuntNow ? "inline-flex" : "none";
+      c.querySelectorAll(".chip").forEach(ch=>ch.classList.toggle("hit", onKeys.includes(ch.dataset.k)));
+    } else {
+      ribbon.style.display = "none";
+    }
+  });
+  document.getElementById("cnt").textContent=cnt;
+  document.getElementById("empty").classList.toggle("show",cnt===0);
+  // Mimic warning if ORB confirmed and Mimic still possible
+  const mimicOk = onKeys.every(k=>["SB","UV","FRZ","ORB"].includes(k)) && !offKeys.some(k=>["SB","UV","FRZ","ORB"].includes(k));
+  document.getElementById("mimicWarn").classList.toggle("show", onKeys.includes("ORB") && mimicOk);
+  const hint=document.getElementById("hintTxt");
+  if(cnt>1 && cnt<=4 && onKeys.length>=1){
+    hint.textContent="Κοντεύεις — κοίτα τα tells για να ξεχωρίσεις τα τελευταία.";
+  } else { hint.textContent=""; }
+
+  // threshold table: dim rows excluded by evidence, highlight rows at/above current sanity
+  document.querySelectorAll("#threshBody tr").forEach(tr=>{
+    const g=GHOSTS[tr.dataset.i];
+    const ev=effEv(g);
+    const possible = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k));
+    tr.classList.toggle("dim", !possible);
+    tr.classList.toggle("hot", g.thMax>=sanity);
+  });
+
+  // sanity status readout (based on ghosts still possible per evidence)
+  const st = sanityStatusFor(huntableCnt);
+  const statusEl = document.getElementById("sanStatus");
+  statusEl.textContent = st.txt;
+  statusEl.className = "sanity-status " + st.cls;
+}
+
+// ---- sanity tracker wiring ----
+const sanRange = document.getElementById("sanRange");
+const sanVal = document.getElementById("sanVal");
+sanRange.addEventListener("input", ()=>{
+  sanity = Number(sanRange.value);
+  sanVal.textContent = sanity;
+  render();
+});
+document.querySelectorAll(".preset").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    sanity = Number(btn.dataset.v);
+    sanRange.value = sanity;
+    sanVal.textContent = sanity;
+    render();
+  });
+});
+
+// ---- smudge timer wiring ----
+let smInterval=null, smTotal=90, smRemaining=90;
+const smDisplay=document.getElementById("smDisplay");
+const smBar=document.getElementById("smBar");
+function fmt(s){ const m=Math.floor(s/60), r=s%60; return m+":"+String(r).padStart(2,"0"); }
+function paintSmudge(){
+  smDisplay.textContent = fmt(Math.max(smRemaining,0));
+  smDisplay.classList.toggle("done", smRemaining<=0);
+  smBar.style.width = Math.max(0,(smRemaining/smTotal)*100)+"%";
+}
+function startSmudge(seconds){
+  clearInterval(smInterval);
+  smTotal = seconds; smRemaining = seconds;
+  paintSmudge();
+  smInterval = setInterval(()=>{
+    smRemaining--;
+    paintSmudge();
+    if(smRemaining<=0){
+      clearInterval(smInterval);
+      beep();
+    }
+  },1000);
+}
+function beep(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.frequency.value = 660; o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    o.start();
+    o.stop(ctx.currentTime+0.35);
+  }catch(e){/* audio not available, ignore */}
+}
+document.getElementById("smStart90").onclick=()=>startSmudge(90);
+document.getElementById("smStart180").onclick=()=>startSmudge(180);
+document.getElementById("smReset").onclick=()=>{
+  clearInterval(smInterval);
+  smTotal=90; smRemaining=90;
+  paintSmudge();
+};
+document.getElementById("resetBtn").onclick=()=>{ EV.forEach(e=>state[e.k]=0); render(); };
+
+paintSmudge();
+render();
+</script>
+</body>
+</html>
