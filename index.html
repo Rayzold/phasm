@@ -138,6 +138,14 @@
     background:rgba(240,198,116,.05);
   }
   .mimic-warn.show{display:block}
+  .suggest{
+    display:none;margin-top:12px;font-size:13.5px;color:#B9C2CE;
+    border:1px dashed var(--nv-dim);border-radius:8px;padding:9px 12px;line-height:1.6;
+    background:rgba(143,227,136,.04);
+  }
+  .suggest.show{display:block}
+  .suggest b{color:var(--nv)}
+  .suggest .dim{color:var(--muted)}
   /* ---------- sanity tracker + smudge timer ---------- */
   .tools-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}
   @media (max-width:760px){.tools-grid{grid-template-columns:1fr}}
@@ -311,6 +319,7 @@
       <span class="hint" id="hintTxt"></span>
       <button class="reset" id="resetBtn">Reset</button>
     </div>
+    <div class="suggest" id="suggestBox"></div>
   </div>
 
   <div class="panel anchor-target" id="sanity-smudge">
@@ -639,6 +648,46 @@ sortedGhosts.forEach(g=>{
 
 function effEv(g){ return g.mimic ? [...g.ev,"ORB"] : g.ev; }
 
+// ---- «ποιο item να δοκιμάσω μετά;» ----
+// Για κάθε ζευγάρι αδοκίμαστων evidence κοιτάμε τα 4 πιθανά αποτελέσματα (✓✓/✓✗/✗✓/✗✗):
+// νικητής το ζευγάρι που στη ΧΕΙΡΟΤΕΡΗ περίπτωση αφήνει τα λιγότερα ghosts.
+const ITEM_OF={EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Θερμόμετρο",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"};
+function pairScore(pool,a,b){
+  const bins=[0,0,0,0];
+  pool.forEach(g=>{
+    const ev=effEv(g);
+    bins[(ev.includes(a)?2:0)+(ev.includes(b)?1:0)]++;
+  });
+  // exp = αναμενόμενο μέγεθος pool μετά τα δύο τεστ (Σn²/N) — tie-breaker κάτω από ίδιο worst case
+  return {worst:Math.max(...bins), exp:bins.reduce((s,n)=>s+n*n,0)/pool.length};
+}
+function updateSuggestion(pool){
+  const box=document.getElementById("suggestBox");
+  const untested=EV.filter(e=>state[e.k]===0)
+    // κράτα μόνο evidence που όντως χωρίζουν το pool (αλλιώς μηδενική πληροφορία)
+    .filter(e=>{
+      const p=pool.filter(g=>effEv(g).includes(e.k)).length;
+      return p>0 && p<pool.length;
+    });
+  if(pool.length<=1 || untested.length===0){ box.classList.remove("show"); return; }
+  let best=null;
+  if(untested.length===1){
+    const e=untested[0];
+    const p=pool.filter(g=>effEv(g).includes(e.k)).length;
+    box.innerHTML=`🎯 Επόμενο item: <b>${e.ic} ${ITEM_OF[e.k]}</b> <span class="dim">(✓ αφήνει ${p} · ✗ αφήνει ${pool.length-p} από ${pool.length})</span>`;
+    box.classList.add("show");
+    return;
+  }
+  for(let i=0;i<untested.length;i++)
+    for(let j=i+1;j<untested.length;j++){
+      const s=pairScore(pool,untested[i].k,untested[j].k);
+      if(!best || s.worst<best.worst || (s.worst===best.worst && s.exp<best.exp))
+        best={a:untested[i], b:untested[j], worst:s.worst, exp:s.exp};
+    }
+  box.innerHTML=`🎯 Επόμενα items: <b>${best.a.ic} ${ITEM_OF[best.a.k]}</b> + <b>${best.b.ic} ${ITEM_OF[best.b.k]}</b> <span class="dim">— ό,τι κι αν δείξουν, στη χειρότερη μένουν ${best.worst} από ${pool.length} πιθανά</span>`;
+  box.classList.add("show");
+}
+
 // ---- ghost name search ----
 const searchEl=document.getElementById("ghostSearch");
 searchEl.addEventListener("input",render);
@@ -664,6 +713,7 @@ function render(){
   let cnt=0;
   let huntableCnt=0;
   let visCnt=0;
+  const pool=[]; // τα ghosts που μένουν πιθανά (βάσει evidence + behaviors)
   document.querySelectorAll(".card").forEach(c=>{
     const g=GHOSTS[c.dataset.i];
     const ev=effEv(g);
@@ -675,6 +725,7 @@ function render(){
     const ribbon = c.querySelector(".hunt-ribbon");
     if(ok){
       cnt++;
+      pool.push(g);
       if(canHuntNow) huntableCnt++;
       ribbon.style.display = canHuntNow ? "inline-flex" : "none";
       c.querySelectorAll(".chip").forEach(ch=>ch.classList.toggle("hit", onKeys.includes(ch.dataset.k)));
@@ -684,6 +735,7 @@ function render(){
   });
   document.getElementById("cnt").textContent=cnt;
   document.getElementById("empty").classList.toggle("show",visCnt===0);
+  updateSuggestion(pool);
   // Mimic warning if ORB confirmed and Mimic still possible
   const mimicOk = onKeys.every(k=>["SB","UV","FRZ","ORB"].includes(k)) && !offKeys.some(k=>["SB","UV","FRZ","ORB"].includes(k));
   document.getElementById("mimicWarn").classList.toggle("show", onKeys.includes("ORB") && mimicOk);
