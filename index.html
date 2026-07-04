@@ -236,6 +236,8 @@
   <div class="panel">
     <div class="panel-label">Evidence Board</div>
     <div class="ev-grid" id="evGrid"></div>
+    <div class="panel-label" style="margin-top:16px">Behavior — τι είδες; (προαιρετικά φίλτρα)</div>
+    <div class="ev-grid" id="bhGrid"></div>
     <div class="mimic-warn" id="mimicWarn">⚠ <strong>The Mimic:</strong> δείχνει <em>πάντα</em> ψεύτικα Ghost Orbs επιπλέον των κανονικών του evidence (Spirit Box, Ultraviolet, Freezing). Με Orbs στο ταμπλό, μην το ξεγράφεις μέχρι να αποκλείσεις κάποιο από αυτά τα τρία.</div>
     <div class="toolbar">
       <span class="count">Πιθανά: <b id="cnt">29</b>/29</span>
@@ -372,6 +374,27 @@ const state = {}; // key -> 0 unknown, 1 on, 2 off
 EV.forEach(e=>state[e.k]=0);
 let sanity = 50;
 
+// Behavior φίλτρα: exclude = ghosts που ΔΕΝ κάνουν ποτέ αυτό που είδες (αποκλείονται),
+// include = μόνο αυτά τα ghosts το κάνουν. Το Mimic περνάει πάντα τα include (μιμείται τα πάντα).
+const BEHAVIORS = [
+ {id:"salt",      label:"Πάτησε αλάτι (footprints)",      exclude:["Wraith"]},
+ {id:"lightOn",   label:"Άναψε φως",                       exclude:["Mare"]},
+ {id:"breakerOn", label:"Άνοιξε το breaker",               exclude:["Hantu"]},
+ {id:"breakerOff",label:"Έκλεισε το breaker",              exclude:["Jinn"]},
+ {id:"earlyHunt", label:"Hunt ενώ sanity > 70%",           include:["Demon","Yokai","Thaye","Onryo","The Mimic"]},
+ {id:"noPhoto",   label:"Αόρατο σε φωτογραφία event",      include:["Phantom","The Mimic"]},
+ {id:"foundHide", label:"Ήρθε ίσια στην κρυψώνα μου",      include:["Deogen","Aswang","The Mimic"]},
+];
+const bhState = {}; // id -> 0 off, 1 on
+BEHAVIORS.forEach(b=>bhState[b.id]=0);
+function passesBehaviors(g){
+  return BEHAVIORS.every(b=>{
+    if(!bhState[b.id]) return true;
+    if(b.include) return b.include.includes(g.name);
+    return !b.exclude.includes(g.name);
+  });
+}
+
 const evGrid = document.getElementById("evGrid");
 EV.forEach(e=>{
   const b=document.createElement("button");
@@ -379,6 +402,15 @@ EV.forEach(e=>{
   b.innerHTML=`<span class="mark"></span><span class="name">${e.n}</span>`;
   b.onclick=()=>{ state[e.k]=(state[e.k]+1)%3; render(); };
   evGrid.appendChild(b);
+});
+
+const bhGrid = document.getElementById("bhGrid");
+BEHAVIORS.forEach(bh=>{
+  const b=document.createElement("button");
+  b.className="ev"; b.dataset.bh=bh.id;
+  b.innerHTML=`<span class="mark"></span><span class="name">${bh.label}</span>`;
+  b.onclick=()=>{ bhState[bh.id]=bhState[bh.id]?0:1; render(); };
+  bhGrid.appendChild(b);
 });
 
 const grid=document.getElementById("grid");
@@ -415,9 +447,12 @@ function sanityStatusFor(count){
 
 function render(){
   // toggle button visuals
-  document.querySelectorAll(".ev").forEach(b=>{
+  document.querySelectorAll(".ev[data-k]").forEach(b=>{
     b.classList.toggle("on", state[b.dataset.k]===1);
     b.classList.toggle("off", state[b.dataset.k]===2);
+  });
+  document.querySelectorAll(".ev[data-bh]").forEach(b=>{
+    b.classList.toggle("on", bhState[b.dataset.bh]===1);
   });
   const onKeys = EV.filter(e=>state[e.k]===1).map(e=>e.k);
   const offKeys= EV.filter(e=>state[e.k]===2).map(e=>e.k);
@@ -426,7 +461,7 @@ function render(){
   document.querySelectorAll(".card").forEach(c=>{
     const g=GHOSTS[c.dataset.i];
     const ev=effEv(g);
-    const ok = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k));
+    const ok = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g);
     c.classList.toggle("gone",!ok);
     const canHuntNow = g.thMax >= sanity;
     const ribbon = c.querySelector(".hunt-ribbon");
@@ -453,7 +488,7 @@ function render(){
   document.querySelectorAll("#threshBody tr").forEach(tr=>{
     const g=GHOSTS[tr.dataset.i];
     const ev=effEv(g);
-    const possible = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k));
+    const possible = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g);
     tr.classList.toggle("dim", !possible);
     tr.classList.toggle("hot", g.thMax>=sanity);
   });
@@ -603,20 +638,25 @@ document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.rem
 // ---- persistence (refresh-proof evidence board & sanity) ----
 const LS_KEY="phasmo-journal-v1";
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,sanity})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity})); }catch(e){/* ignore */}
 }
 (function loadState(){
   try{
     const d=JSON.parse(localStorage.getItem(LS_KEY)||"null");
     if(!d) return;
     EV.forEach(e=>{ const v=d.ev && d.ev[e.k]; if(v===1||v===2) state[e.k]=v; });
+    BEHAVIORS.forEach(b=>{ if(d.bh && d.bh[b.id]===1) bhState[b.id]=1; });
     if(typeof d.sanity==="number" && d.sanity>=0 && d.sanity<=100){
       sanity=Math.round(d.sanity); sanRange.value=sanity; sanVal.textContent=sanity;
     }
   }catch(e){/* corrupt state, start fresh */}
 })();
 
-document.getElementById("resetBtn").onclick=()=>{ EV.forEach(e=>state[e.k]=0); render(); };
+document.getElementById("resetBtn").onclick=()=>{
+  EV.forEach(e=>state[e.k]=0);
+  BEHAVIORS.forEach(b=>bhState[b.id]=0);
+  render();
+};
 
 smudgeTimer.reset();
 huntTimer.reset();
