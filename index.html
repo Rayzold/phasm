@@ -221,6 +221,13 @@
   .any-badge{font-size:10.5px;background:rgba(225,91,91,.18);color:var(--danger);border:1px solid var(--danger);border-radius:10px;padding:1px 7px;margin-left:6px}
   .var-badge{font-size:10.5px;background:rgba(240,198,116,.15);color:var(--warn);border:1px solid #6b5a2a;border-radius:10px;padding:1px 7px;margin-left:6px}
   /* ---------- ghost cards ---------- */
+  .ghost-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+  .search{
+    flex:1;min-width:220px;max-width:340px;
+    background:#0c1118;border:1px solid var(--line);color:#D7DCE4;
+    border-radius:8px;padding:9px 13px;font-family:inherit;font-size:14px;outline:none;
+  }
+  .search:focus{border-color:var(--nv);box-shadow:0 0 10px rgba(143,227,136,.12)}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
   .card{
     background:var(--paper);
@@ -281,7 +288,8 @@
     <a href="#hunt-toolkit">Hunt Toolkit</a>
     <a href="#cursed">Cursed Items</a>
     <a href="#thresholds">Thresholds</a>
-    <a href="#grid">Ghosts</a>
+    <a href="#photos">Photos</a>
+    <a href="#ghosts">Ghosts</a>
   </nav>
 
   <div class="panel anchor-target" id="evidence">
@@ -432,7 +440,41 @@
     <div class="sanity-note" style="margin-top:10px">Κόκκινη γραμμή = το ghost μπορεί ήδη να κάνει hunt στο sanity που έχεις ορίσει παραπάνω. Θολές γραμμές = ήδη αποκλεισμένο βάσει evidence.</div>
   </div>
 
-  <div class="grid anchor-target" id="grid"></div>
+  <div class="panel anchor-target" id="photos">
+    <div class="panel-label">Photo Quick-Ref — τι βγάζει λεφτά 📸</div>
+    <div class="cp-grid">
+      <div class="cp">
+        <h3>📸 Τι να φωτογραφίσεις</h3>
+        <ul>
+          <li>👻 <strong>Ghost</strong> — η ακριβότερη· σε event/hunt, ή εγγυημένα με Music Box / Summoning Circle</li>
+          <li>🦴 <strong>Bone</strong> — υπάρχει πάντα κάπου· φωτογράφισέ το <span class="danger">ΠΡΙΝ</span> το μαζέψεις</li>
+          <li>🔮 <strong>Cursed Possession</strong> — εύκολα λεφτά, το βρίσκεις όσο ψάχνεις</li>
+          <li>🖐️ <strong>Fingerprints</strong> — φώτισέ τα με UV πρώτα και μετά κλικ</li>
+          <li>👣 <strong>Footprints</strong> — πατημένο αλάτι + UV</li>
+          <li>📖 <strong>Ghost Writing</strong> — το βιβλίο με το γράψιμο</li>
+          <li>🚰 <strong>Dirty Water</strong> — βρύσες/νεροχύτες σε events</li>
+          <li>📳 <strong>Interaction</strong> — πόρτα, τηλέφωνο ή αντικείμενο που κούνησε</li>
+          <li>💀 <strong>Dead Body</strong> — …ας ελπίσουμε όχι το δικό σου</li>
+        </ul>
+      </div>
+      <div class="cp">
+        <h3>⭐ Πώς παίρνεις 3 αστέρια</h3>
+        <ul>
+          <li>Κοντινή, καθαρή λήψη χωρίς εμπόδια στο κάδρο = περισσότερα ⭐ (3★ = full reward)</li>
+          <li>Κάθε subject πληρώνει <strong>ΜΙΑ</strong> φορά — μην καις λήψεις σε duplicates</li>
+          <li>Ghost photo μετράει μόνο αν το ghost <em>φαίνεται</em> — <span class="danger">Phantom: βγαίνει αόρατο!</span></li>
+          <li>Καλύτερο tier κάμερας = περισσότερες λήψεις ανά συμβόλαιο</li>
+          <li>Bone &amp; cursed possession νωρίς = σίγουρα λεφτά πριν ζορίσει το πράγμα</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="ghost-head anchor-target" id="ghosts">
+    <div class="panel-label" style="margin:0">Ghost Journal</div>
+    <input id="ghostSearch" class="search" type="search" placeholder="🔍 Ψάξε ghost με όνομα…" autocomplete="off">
+  </div>
+  <div class="grid" id="grid"></div>
   <div class="empty" id="empty">
     <span class="big">ΚΑΝΕΝΑ ΤΑΙΡΙΑΣΜΑ</span>
     Κάποιο evidence είναι λάθος καταγεγραμμένο — ξαναδές τα ✓/✗ σου.<br>
@@ -554,6 +596,10 @@ sortedGhosts.forEach(g=>{
 
 function effEv(g){ return g.mimic ? [...g.ev,"ORB"] : g.ev; }
 
+// ---- ghost name search ----
+const searchEl=document.getElementById("ghostSearch");
+searchEl.addEventListener("input",render);
+
 function sanityStatusFor(count){
   if(count===0) return {cls:"status-safe", txt:"Ασφαλές — κανένα πιθανό ghost δεν κάνει hunt εδώ"};
   if(count<=4) return {cls:"status-warn", txt: count+" πιθανά ghosts κάνουν ήδη hunt σε αυτό το sanity"};
@@ -571,13 +617,17 @@ function render(){
   });
   const onKeys = EV.filter(e=>state[e.k]===1).map(e=>e.k);
   const offKeys= EV.filter(e=>state[e.k]===2).map(e=>e.k);
+  const q=searchEl.value.trim().toLowerCase();
   let cnt=0;
   let huntableCnt=0;
+  let visCnt=0;
   document.querySelectorAll(".card").forEach(c=>{
     const g=GHOSTS[c.dataset.i];
     const ev=effEv(g);
     const ok = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g);
-    c.classList.toggle("gone",!ok);
+    const visible = ok && (!q || g.name.toLowerCase().includes(q));
+    c.classList.toggle("gone",!visible);
+    if(visible) visCnt++;
     const canHuntNow = g.thMax >= sanity;
     const ribbon = c.querySelector(".hunt-ribbon");
     if(ok){
@@ -590,7 +640,7 @@ function render(){
     }
   });
   document.getElementById("cnt").textContent=cnt;
-  document.getElementById("empty").classList.toggle("show",cnt===0);
+  document.getElementById("empty").classList.toggle("show",visCnt===0);
   // Mimic warning if ORB confirmed and Mimic still possible
   const mimicOk = onKeys.every(k=>["SB","UV","FRZ","ORB"].includes(k)) && !offKeys.some(k=>["SB","UV","FRZ","ORB"].includes(k));
   document.getElementById("mimicWarn").classList.toggle("show", onKeys.includes("ORB") && mimicOk);
@@ -779,6 +829,7 @@ function tap(){
 const tapBtn=document.getElementById("tapBtn");
 tapBtn.onclick=tap;
 document.addEventListener("keydown",e=>{
+  if(/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return; // μην κλέβεις το Space από πεδία
   if(e.code==="Space" && !e.repeat){ e.preventDefault(); tap(); tapBtn.classList.add("pressed"); }
 });
 document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.remove("pressed"); });
