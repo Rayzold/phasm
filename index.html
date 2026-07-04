@@ -64,6 +64,11 @@
   .jumpnav a:hover{border-color:var(--nv);color:var(--nv);box-shadow:0 0 12px rgba(143,227,136,.12)}
   .jumpnav a.active{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.08);box-shadow:0 0 10px rgba(143,227,136,.10)}
   .anchor-target{scroll-margin-top:64px}
+  /* ---------- language switch ---------- */
+  html[lang=en] .l-el{display:none!important}
+  html:not([lang=en]) .l-en{display:none!important}
+  #langBtn{cursor:pointer}
+  #langBtn:hover{border-color:var(--nv);color:var(--nv)}
   /* ---------- back to top ---------- */
   .toTop{
     position:fixed;right:18px;bottom:18px;z-index:60;
@@ -304,7 +309,7 @@
     <h1>PHASMO JOURNAL</h1>
     <span class="rec">REC · NIGHT VISION</span>
   </header>
-  <p class="sub">Τσέκαρε τα evidence που βρίσκεις (1 κλικ = ✓ το έχω, 2 κλικ = ✗ το απέκλεισα) και δες live ποια ghosts μένουν — μαζί με το tell και το counter-play του καθενός. Intermediate = 3 evidence διαθέσιμα.</p>
+  <p class="sub"><span class="l-el">Τσέκαρε τα evidence που βρίσκεις (1 κλικ = ✓ το έχω, 2 κλικ = ✗ το απέκλεισα) και δες live ποια ghosts μένουν — μαζί με το tell και το counter-play του καθενός. Intermediate = 3 evidence διαθέσιμα.</span><span class="l-en">Tick the evidence you find (1 click = ✓ got it, 2 clicks = ✗ ruled out) and watch live which ghosts remain — along with each one's tell and counter-play. Intermediate = 3 evidence available.</span></p>
 
   <nav class="jumpnav">
     <a href="#evidence">Evidence</a>
@@ -315,7 +320,8 @@
     <a href="#thresholds">Thresholds</a>
     <a href="#photos">Photos</a>
     <a href="#ghosts">Ghosts</a>
-    <select id="diffSel" class="sel" style="margin-left:auto" title="Difficulty — προσαρμόζει drain, διάρκειες hunt και grace period">
+    <button id="langBtn" class="sel" style="margin-left:auto" title="Ελληνικά / English">EN</button>
+    <select id="diffSel" class="sel" title="Difficulty">
       <option value="amateur">Amateur</option>
       <option value="intermediate" selected>Intermediate</option>
       <option value="professional">Professional</option>
@@ -326,18 +332,18 @@
   <div class="panel anchor-target" id="evidence">
     <div class="panel-label">Evidence Board</div>
     <div class="ev-grid" id="evGrid"></div>
-    <div class="mimic-warn" id="evidNote">⚠ <strong>Nightmare:</strong> δίνονται μόνο 2 evidence — το 3ο υπάρχει αλλά μένει κρυφό. Μη βάζεις ✗ σε evidence που απλώς δεν βρήκες ακόμα.</div>
-    <div class="panel-label" style="margin-top:16px">Behavior — τι είδες; (προαιρετικά φίλτρα)</div>
+    <div class="mimic-warn" id="evidNote"><span class="l-el">⚠ <strong>Nightmare:</strong> δίνονται μόνο 2 evidence — το 3ο υπάρχει αλλά μένει κρυφό. Μη βάζεις ✗ σε evidence που απλώς δεν βρήκες ακόμα.</span><span class="l-en">⚠ <strong>Nightmare:</strong> only 2 evidence are given — the 3rd exists but stays hidden. Don't ✗ evidence you simply haven't found yet.</span></div>
+    <div class="panel-label" style="margin-top:16px"><span class="l-el">Behavior — τι είδες; (προαιρετικά φίλτρα)</span><span class="l-en">Behavior — what did you see? (optional filters)</span></div>
     <div class="ev-grid" id="bhGrid"></div>
-    <div class="mimic-warn" id="mimicWarn">⚠ <strong>The Mimic:</strong> δείχνει <em>πάντα</em> ψεύτικα Ghost Orbs επιπλέον των κανονικών του evidence (Spirit Box, Ultraviolet, Freezing). Με Orbs στο ταμπλό, μην το ξεγράφεις μέχρι να αποκλείσεις κάποιο από αυτά τα τρία.</div>
+    <div class="mimic-warn" id="mimicWarn"><span class="l-el">⚠ <strong>The Mimic:</strong> δείχνει <em>πάντα</em> ψεύτικα Ghost Orbs επιπλέον των κανονικών του evidence (Spirit Box, Ultraviolet, Freezing). Με Orbs στο ταμπλό, μην το ξεγράφεις μέχρι να αποκλείσεις κάποιο από αυτά τα τρία.</span><span class="l-en">⚠ <strong>The Mimic:</strong> <em>always</em> shows fake Ghost Orbs on top of its real evidence (Spirit Box, Ultraviolet, Freezing). With Orbs on the board, don't write it off until you've excluded one of those three.</span></div>
     <div class="toolbar">
-      <span class="count">Πιθανά: <b id="cnt">29</b>/29</span>
+      <span class="count"><span class="l-el">Πιθανά</span><span class="l-en">Possible</span>: <b id="cnt">29</b>/29</span>
       <span class="hint" id="hintTxt"></span>
       <button class="reset" id="resetBtn">Reset</button>
     </div>
     <div class="suggest" id="suggestBox"></div>
     <div class="verdict" id="verdictBox">
-      <div class="v-label">ΤΑΥΤΟΠΟΙΗΘΗΚΕ</div>
+      <div class="v-label"><span class="l-el">ΤΑΥΤΟΠΟΙΗΘΗΚΕ</span><span class="l-en">IDENTIFIED</span></div>
       <div class="v-name" id="verdictName"></div>
       <div class="v-warn" id="verdictWarn"></div>
     </div>
@@ -369,11 +375,11 @@
             <option value="medium">Medium</option>
             <option value="large">Large</option>
           </select>
-          <label class="chk"><input type="checkbox" id="drainDark" checked> Σκοτάδι</label>
+          <label class="chk"><input type="checkbox" id="drainDark" checked> <span class="l-el">Σκοτάδι</span><span class="l-en">Darkness</span></label>
           <label class="chk"><input type="checkbox" id="drainSolo" checked> Solo</label>
           <button class="preset" id="pillBtn">💊 Pills +35%</button>
         </div>
-        <div class="sanity-note" id="sanNote">Σύρε το slider στο τρέχον sanity σου — ή άναψε το <strong>Auto-drain</strong> για να πέφτει μόνο του (small 0.12 / medium 0.08 / large 0.05 %/s στο σκοτάδι, <span id="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — το difficulty αλλάζει από το μενού πάνω δεξιά). Στο φως δεν πέφτει — ξετίκαρε το «Σκοτάδι». Τα ghosts που κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω.</div>
+        <div class="sanity-note" id="sanNote"><span class="l-el">Σύρε το slider στο τρέχον sanity σου — ή άναψε το <strong>Auto-drain</strong> για να πέφτει μόνο του (small 0.12 / medium 0.08 / large 0.05 %/s στο σκοτάδι, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — το difficulty αλλάζει από το μενού πάνω δεξιά). Στο φως δεν πέφτει — ξετίκαρε το «Σκοτάδι». Τα ghosts που κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω.</span><span class="l-en">Drag the slider to your current sanity — or switch on <strong>Auto-drain</strong> to let it fall on its own (small 0.12 / medium 0.08 / large 0.05 %/s in darkness, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — change difficulty from the menu top right). It doesn't drop in the light — untick "Darkness". Ghosts that can hunt at this level are highlighted below.</span></div>
       </div>
       <div class="tool-col">
         <div class="tool-title">Smudge Timer</div>
@@ -384,7 +390,7 @@
           <button class="btn ghostvar" id="smStart180">Spirit (180s)</button>
           <button class="btn" id="smReset">Reset</button>
         </div>
-        <div class="smudge-note">Standard προστασία: 90s χωρίς hunt. <strong>Spirit</strong> extend: 180s. <strong>Yurei</strong>: αν κάνεις smudge μέσα στο δωμάτιό του, καθηλώνεται εκεί για 90s αντί να roamάρει.</div>
+        <div class="smudge-note"><span class="l-el">Standard προστασία: 90s χωρίς hunt. <strong>Spirit</strong> extend: 180s. <strong>Yurei</strong>: αν κάνεις smudge μέσα στο δωμάτιό του, καθηλώνεται εκεί για 90s αντί να roamάρει.</span><span class="l-en">Standard protection: 90s without a hunt. <strong>Spirit</strong> extend: 180s. <strong>Yurei</strong>: smudge inside its room and it's pinned there for 90s instead of roaming.</span></div>
       </div>
     </div>
   </div>
@@ -394,10 +400,10 @@
     <div class="tools-grid">
       <div class="tool-col">
         <div class="tool-title">Footstep Speed Tapper</div>
-        <button class="tap-btn" id="tapBtn">TAP<small>ή πάτα Space</small></button>
+        <button class="tap-btn" id="tapBtn">TAP<small><span class="l-el">ή πάτα Space</span><span class="l-en">or press Space</span></small></button>
         <div class="tap-readout"><span id="tapBpm">–</span><span class="dim"> bpm · </span><span id="tapMs">–</span><span class="dim"> m/s</span></div>
         <div class="speed-rows" id="speedRows"></div>
-        <div class="smudge-note">Χτύπα ρυθμικά μαζί με τα βήματα του ghost στο hunt (5+ taps για ακρίβεια — παύση 5s μηδενίζει). Οι γραμμές που ταιριάζουν με τη μετρημένη ταχύτητα ανάβουν πράσινες.</div>
+        <div class="smudge-note"><span class="l-el">Χτύπα ρυθμικά μαζί με τα βήματα του ghost στο hunt (5+ taps για ακρίβεια — παύση 5s μηδενίζει). Οι γραμμές που ταιριάζουν με τη μετρημένη ταχύτητα ανάβουν πράσινες.</span><span class="l-en">Tap along with the ghost's footsteps during a hunt (5+ taps for accuracy — a 5s pause resets). Rows matching the measured speed light up green.</span></div>
       </div>
       <div class="tool-col">
         <div class="tool-title">Hunt Countdown</div>
@@ -410,15 +416,16 @@
           <button class="btn ghostvar" data-hunt="25">Cooldown (25s)</button>
           <button class="btn" id="huntReset">Reset</button>
         </div>
-        <div class="smudge-note">Διάρκειες hunt για <strong id="diffNameTxt">Intermediate</strong>. Grace period <span id="graceTxt">4s</span> στην αρχή (το ghost δεν σκοτώνει ακόμα). Cursed hunts: +20s. Cooldown μεταξύ hunts: 25s (<strong>Demon</strong>: 20s).</div>
+        <div class="smudge-note"><span class="l-el">Διάρκειες hunt για <strong class="diffNameTxt">Intermediate</strong>. Grace period <span class="graceTxt">4s</span> στην αρχή (το ghost δεν σκοτώνει ακόμα). Cursed hunts: +20s. Cooldown μεταξύ hunts: 25s (<strong>Demon</strong>: 20s).</span><span class="l-en">Hunt durations for <strong class="diffNameTxt">Intermediate</strong>. Grace period <span class="graceTxt">4s</span> at the start (the ghost can't kill yet). Cursed hunts: +20s. Cooldown between hunts: 25s (<strong>Demon</strong>: 20s).</span></div>
       </div>
     </div>
   </div>
 
   <div class="panel anchor-target" id="survival">
-    <div class="panel-label">Survival — Κρύψιμο &amp; Equipment</div>
+    <div class="panel-label"><span class="l-el">Survival — Κρύψιμο &amp; Equipment</span><span class="l-en">Survival — Hiding &amp; Equipment</span></div>
     <div class="cp-grid">
       <div class="cp">
+        <div class="l-el">
         <h3>🤫 Κανόνες κρυψίματος (hunt)</h3>
         <ul>
           <li>🔦 Σβήσε flashlight &amp; video cam <strong>πριν</strong> κρυφτείς — τα ενεργά electronics στο χέρι σου σε προδίδουν</li>
@@ -427,8 +434,20 @@
           <li>🚪 Κλείσε πόρτα/locker πίσω σου και μη βγεις νωρίς — μέτρα με το Hunt Countdown παραπάνω</li>
           <li>🔁 <strong>Aswang</strong>: άλλαξε κρυψώνα κάθε hunt · <strong>Kormos</strong>: μείνε ακίνητος αντί για locker · <strong>Deogen</strong>: μην κρυφτείς — loop γύρω από έπιπλα</li>
         </ul>
+        </div>
+        <div class="l-en">
+        <h3>🤫 Hiding rules (hunt)</h3>
+        <ul>
+          <li>🔦 Turn off flashlight &amp; video cam <strong>before</strong> hiding — active electronics in your hand give you away</li>
+          <li>🎙️ Stay silent for the whole hunt — it hears your mic (<strong>Yokai</strong>: only within ~2.5m)</li>
+          <li>👀 Break line-of-sight before you tuck in — it remembers where it last saw you</li>
+          <li>🚪 Close the door/locker behind you and don't leave early — time it with the Hunt Countdown above</li>
+          <li>🔁 <strong>Aswang</strong>: change spots every hunt · <strong>Kormos</strong>: stand still instead of a locker · <strong>Deogen</strong>: don't hide — loop around furniture</li>
+        </ul>
+        </div>
       </div>
       <div class="cp">
+        <div class="l-el">
         <h3>🎒 Equipment cheat lines</h3>
         <ul>
           <li>✝️ <strong>Crucifix</strong>: μπλοκάρει hunt μόνο αν είναι κάτω <em>πριν</em> ξεκινήσει — άσ' το στο ghost room, όχι πάνω σου. Καίγεται όταν εξαντληθούν οι χρήσεις του (<span class="danger">δεν πιάνει σε cursed hunts</span>)</li>
@@ -437,15 +456,27 @@
           <li>🕯️ <strong>Firelight</strong>: «φορητό crucifix» για το Onryo, και κρατά τη θερμοκρασία πάνω vs Hantu</li>
           <li>📟 <strong>Motion/Sound sensors</strong>: παθητικό tracking για objectives χωρίς να εκτίθεσαι</li>
         </ul>
+        </div>
+        <div class="l-en">
+        <h3>🎒 Equipment cheat lines</h3>
+        <ul>
+          <li>✝️ <strong>Crucifix</strong>: blocks a hunt only if it's down <em>before</em> it starts — leave it in the ghost room, not on you. Burns out when its uses run dry (<span class="danger">doesn't work on cursed hunts</span>)</li>
+          <li>📹 <strong>Video cam + tripod</strong> on the D.O.T.S.: the only way to catch a Goryo — and Ghost Orbs only show through a camera in the dark</li>
+          <li>🎤 <strong>Parabolic mic</strong>: Banshee scream, extra Myling sounds, Moroi curse — three IDs with one tool</li>
+          <li>🕯️ <strong>Firelight</strong>: a "portable crucifix" for the Onryo, and keeps the temperature up vs Hantu</li>
+          <li>📟 <strong>Motion/Sound sensors</strong>: passive tracking for objectives without exposing yourself</li>
+        </ul>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="panel anchor-target" id="cursed">
-    <div class="panel-label">Cursed Possessions Quick-Ref (1 ανά συμβόλαιο, τυχαίο)</div>
+    <div class="panel-label"><span class="l-el">Cursed Possessions Quick-Ref (1 ανά συμβόλαιο, τυχαίο)</span><span class="l-en">Cursed Possessions Quick-Ref (1 per contract, random)</span></div>
     <div class="cp-grid">
       <div class="cp">
         <h3>🃏 Tarot Cards</h3>
+        <div class="l-el">
         Τράβα κάρτα → τυχαίο εφέ. Σε hunt ΟΛΕΣ βγαίνουν The Fool.
         <ul>
           <li><strong>The Tower</strong> — προκαλεί interaction <span class="freq">(συχνή)</span></li>
@@ -459,55 +490,107 @@
           <li><strong>High Priestess</strong> — ανασταίνει νεκρό συμπαίκτη <span class="freq">(~2%)</span></li>
           <li><strong>The Hanged Man</strong> — <span class="danger">σε σκοτώνει ακαριαία</span> <span class="freq">(~1%)</span></li>
         </ul>
+        </div>
+        <div class="l-en">
+        Draw a card → random effect. During a hunt ALL cards come out The Fool.
+        <ul>
+          <li><strong>The Tower</strong> — forces an interaction <span class="freq">(common)</span></li>
+          <li><strong>Wheel of Fortune</strong> — green flame +25% sanity, red −25% <span class="freq">(common)</span></li>
+          <li><strong>The Fool</strong> — looks like another card, no effect <span class="freq">(common)</span></li>
+          <li><strong>Death</strong> — <span class="danger">cursed hunt</span>, can't be blocked by crucifix <span class="freq">(medium)</span></li>
+          <li><strong>The Hermit</strong> — locks the ghost in its room for a while <span class="freq">(medium)</span></li>
+          <li><strong>The Devil</strong> — ghost event <span class="freq">(medium)</span></li>
+          <li><strong>The Sun</strong> — sanity 100% <span class="freq">(~5%)</span></li>
+          <li><strong>The Moon</strong> — <span class="danger">sanity 0%</span> <span class="freq">(~5%)</span></li>
+          <li><strong>High Priestess</strong> — revives a dead teammate <span class="freq">(~2%)</span></li>
+          <li><strong>The Hanged Man</strong> — <span class="danger">kills you instantly</span> <span class="freq">(~1%)</span></li>
+        </ul>
+        </div>
       </div>
       <div class="cp">
         <h3>🎵 Music Box</h3>
+        <div class="l-el">
         Το ghost αρχίζει να τραγουδά → ακολούθησε τη φωνή για να βρεις τη θέση του (εύκολο ghost photo).
         <br><span class="danger">Προσοχή:</span> αν το κρατάς πολύ κοντά του ή το τραγούδι τελειώσει ενώ είναι κοντά → cursed hunt.
+        </div>
+        <div class="l-en">
+        The ghost starts singing → follow the voice to find it (easy ghost photo).
+        <br><span class="danger">Careful:</span> hold it too close, or let the song end while it's near → cursed hunt.
+        </div>
       </div>
       <div class="cp">
         <h3>🔮 Ouija Board</h3>
+        <div class="l-el">
         Κάνε ερωτήσεις (θέση, bone, ηλικία…) — κάθε απάντηση κοστίζει sanity.
         <br><span class="danger">ΠΑΝΤΑ πες «Goodbye»</span> στο τέλος, αλλιώς cursed hunt. Η ερώτηση «hide and seek» ξεκινά cursed hunt αμέσως.
+        </div>
+        <div class="l-en">
+        Ask questions (location, bone, age…) — every answer costs sanity.
+        <br><span class="danger">ALWAYS say "Goodbye"</span> at the end, or it's a cursed hunt. Asking "hide and seek" starts a cursed hunt immediately.
+        </div>
       </div>
       <div class="cp">
         <h3>🪞 Haunted Mirror</h3>
+        <div class="l-el">
         Κοίτα μέσα → βλέπεις live το ghost room. Στραγγίζει sanity γρήγορα όσο το κοιτάς.
         <br><span class="danger">Αν σπάσει</span> (το παράκανες) → cursed hunt.
+        </div>
+        <div class="l-en">
+        Look in → a live view of the ghost room. Drains sanity fast while you watch.
+        <br><span class="danger">If it shatters</span> (you overdid it) → cursed hunt.
+        </div>
       </div>
       <div class="cp">
         <h3>🕯️ Summoning Circle</h3>
+        <div class="l-el">
         Άναψε και τα 5 κεριά (~16% sanity το καθένα) → το ghost εμφανίζεται καρφωμένο στον κύκλο για λίγα δευτερόλεπτα — ιδανικό για φωτογραφία/στοιχεία.
         <br><span class="danger">Μετά ξεκινά cursed hunt</span> — έχε έτοιμη διαφυγή πριν ανάψεις το 5ο.
+        </div>
+        <div class="l-en">
+        Light all 5 candles (~16% sanity each) → the ghost appears pinned in the circle for a few seconds — ideal for a photo/evidence.
+        <br><span class="danger">A cursed hunt starts right after</span> — have an escape ready before lighting the 5th.
+        </div>
       </div>
       <div class="cp">
         <h3>🪆 Voodoo Doll</h3>
+        <div class="l-el">
         Σπρώξε καρφίτσα → αναγκαστικό interaction (κοστίζει sanity) — χρήσιμο για EMF/UV όταν το ghost τεμπελιάζει.
         <br><span class="danger">Η καρφίτσα της καρδιάς</span> → cursed hunt.
+        </div>
+        <div class="l-en">
+        Push a pin → forced interaction (costs sanity) — useful for EMF/UV when the ghost is lazy.
+        <br><span class="danger">The heart pin</span> → cursed hunt.
+        </div>
       </div>
       <div class="cp">
         <h3>🐒 Monkey Paw</h3>
+        <div class="l-el">
         Περιορισμένες ευχές («να βρω το κόκαλο», «να δω το ghost», «να παγιδευτεί»…) — κάθε ευχή έχει <span class="danger">αρνητικό τίμημα</span> (σβήνει φώτα, σε κλειδώνει, ρίχνει sanity κ.λπ.). Διάβασε πριν ευχηθείς.
+        </div>
+        <div class="l-en">
+        Limited wishes ("find the bone", "see the ghost", "trap it"…) — every wish has a <span class="danger">negative price</span> (kills lights, locks you in, drains sanity etc.). Read up before you wish.
+        </div>
       </div>
     </div>
-    <div class="sanity-note" style="margin-top:10px">Όλα τα cursed hunts: +20s διάρκεια από το κανονικό, δεν μπλοκάρονται με crucifix/smudge στο ξεκίνημά τους.</div>
+    <div class="sanity-note" style="margin-top:10px"><span class="l-el">Όλα τα cursed hunts: +20s διάρκεια από το κανονικό, δεν μπλοκάρονται με crucifix/smudge στο ξεκίνημά τους.</span><span class="l-en">All cursed hunts: +20s over the normal duration, can't be blocked with crucifix/smudge at their start.</span></div>
   </div>
 
   <div class="panel anchor-target" id="thresholds">
-    <div class="panel-label">Sanity Threshold Quick-Reference (ταξινομημένα, υψηλότερο πρώτα)</div>
+    <div class="panel-label"><span class="l-el">Sanity Threshold Quick-Reference (ταξινομημένα, υψηλότερο πρώτα)</span><span class="l-en">Sanity Threshold Quick-Reference (sorted, highest first)</span></div>
     <div class="thresh-wrap">
       <table class="thresh">
-        <thead><tr><th>Ghost</th><th>Hunt threshold</th><th>Λεπτομέρεια</th></tr></thead>
+        <thead><tr><th>Ghost</th><th>Hunt threshold</th><th><span class="l-el">Λεπτομέρεια</span><span class="l-en">Detail</span></th></tr></thead>
         <tbody id="threshBody"></tbody>
       </table>
     </div>
-    <div class="sanity-note" style="margin-top:10px">Κόκκινη γραμμή = το ghost μπορεί ήδη να κάνει hunt στο sanity που έχεις ορίσει παραπάνω. Θολές γραμμές = ήδη αποκλεισμένο βάσει evidence.</div>
+    <div class="sanity-note" style="margin-top:10px"><span class="l-el">Κόκκινη γραμμή = το ghost μπορεί ήδη να κάνει hunt στο sanity που έχεις ορίσει παραπάνω. Θολές γραμμές = ήδη αποκλεισμένο βάσει evidence.</span><span class="l-en">Red row = the ghost can already hunt at the sanity you've set above. Dimmed rows = already excluded by evidence.</span></div>
   </div>
 
   <div class="panel anchor-target" id="photos">
-    <div class="panel-label">Photo Quick-Ref — τι βγάζει λεφτά 📸</div>
+    <div class="panel-label"><span class="l-el">Photo Quick-Ref — τι βγάζει λεφτά 📸</span><span class="l-en">Photo Quick-Ref — what makes money 📸</span></div>
     <div class="cp-grid">
       <div class="cp">
+        <div class="l-el">
         <h3>📸 Τι να φωτογραφίσεις</h3>
         <ul>
           <li>👻 <strong>Ghost</strong> — η ακριβότερη· σε event/hunt, ή εγγυημένα με Music Box / Summoning Circle</li>
@@ -520,8 +603,24 @@
           <li>📳 <strong>Interaction</strong> — πόρτα, τηλέφωνο ή αντικείμενο που κούνησε</li>
           <li>💀 <strong>Dead Body</strong> — …ας ελπίσουμε όχι το δικό σου</li>
         </ul>
+        </div>
+        <div class="l-en">
+        <h3>📸 What to photograph</h3>
+        <ul>
+          <li>👻 <strong>Ghost</strong> — the priciest; during an event/hunt, or guaranteed with Music Box / Summoning Circle</li>
+          <li>🦴 <strong>Bone</strong> — always spawns somewhere; photo it <span class="danger">BEFORE</span> picking it up</li>
+          <li>🔮 <strong>Cursed Possession</strong> — easy money, you'll find it while searching</li>
+          <li>🖐️ <strong>Fingerprints</strong> — light them with UV first, then snap</li>
+          <li>👣 <strong>Footprints</strong> — stepped-in salt + UV</li>
+          <li>📖 <strong>Ghost Writing</strong> — the book with the writing</li>
+          <li>🚰 <strong>Dirty Water</strong> — taps/sinks during events</li>
+          <li>📳 <strong>Interaction</strong> — a door, phone or object it moved</li>
+          <li>💀 <strong>Dead Body</strong> — …let's hope not yours</li>
+        </ul>
+        </div>
       </div>
       <div class="cp">
+        <div class="l-el">
         <h3>⭐ Πώς παίρνεις 3 αστέρια</h3>
         <ul>
           <li>Κοντινή, καθαρή λήψη χωρίς εμπόδια στο κάδρο = περισσότερα ⭐ (3★ = full reward)</li>
@@ -530,6 +629,17 @@
           <li>Καλύτερο tier κάμερας = περισσότερες λήψεις ανά συμβόλαιο</li>
           <li>Bone &amp; cursed possession νωρίς = σίγουρα λεφτά πριν ζορίσει το πράγμα</li>
         </ul>
+        </div>
+        <div class="l-en">
+        <h3>⭐ How to get 3 stars</h3>
+        <ul>
+          <li>Close, clear shot with nothing blocking the frame = more ⭐ (3★ = full reward)</li>
+          <li>Each subject pays <strong>ONCE</strong> — don't burn shots on duplicates</li>
+          <li>A ghost photo only counts if the ghost is <em>visible</em> — <span class="danger">Phantom: comes out invisible!</span></li>
+          <li>Better camera tier = more shots per contract</li>
+          <li>Bone &amp; cursed possession early = guaranteed money before things get rough</li>
+        </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -540,11 +650,14 @@
   </div>
   <div class="grid" id="grid"></div>
   <div class="empty" id="empty">
-    <span class="big">ΚΑΝΕΝΑ ΤΑΙΡΙΑΣΜΑ</span>
+    <span class="l-el"><span class="big">ΚΑΝΕΝΑ ΤΑΙΡΙΑΣΜΑ</span>
     Κάποιο evidence είναι λάθος καταγεγραμμένο — ξαναδές τα ✓/✗ σου.<br>
-    Συχνός ένοχος: ψεύτικα Orbs από Mimic ή λάθος ανάγνωση EMF.
+    Συχνός ένοχος: ψεύτικα Orbs από Mimic ή λάθος ανάγνωση EMF.</span>
+    <span class="l-en"><span class="big">NO MATCHES</span>
+    Some evidence is logged wrong — recheck your ✓/✗.<br>
+    Usual suspect: fake Orbs from a Mimic or a misread EMF.</span>
   </div>
-  <footer>Evidence data: Phasmophobia Wiki (Ιούλιος 2026, 29 ghosts) · Φτιαγμένο για τον Rayzold, level 14 και ανερχόμενο 👻</footer>
+  <footer><span class="l-el">Evidence data: Phasmophobia Wiki (Ιούλιος 2026, 29 ghosts)</span><span class="l-en">Evidence data: Phasmophobia Wiki (July 2026, 29 ghosts)</span></footer>
   <button class="toTop" id="toTop" title="Πάνω" aria-label="Επιστροφή στην κορυφή">↑</button>
 </div>
 <script>
@@ -591,9 +704,95 @@ const GHOSTS = [
  {name:"Aswang", ev:["DOTS","FRZ","WRT"], hunt:"50%", thMax:50, tell:"Επιταχύνει ΠΟΛΥ γρήγορα με line-of-sight (max speed σε ~9s αντί 13s) και προτιμά να κυνηγά παρά να ψάχνει. Unique: αν σε φτάσει σε ΕΠΙΣΗΜΟ hiding spot (locker/closet), το hunt τελειώνει αμέσως — αλλά στο επόμενο πάει κατευθείαν εκεί. Άλλαξε κρυψώνα!"},
  {name:"Kormos", ev:["ORB","SB","UV"], hunt:"50% / 70% αν τρέχεις κοντά του", thMax:70, tell:"ΤΥΦΛΟ — σε εντοπίζει από ήχους βημάτων. Counter: σε hunt μείνε τελείως ΑΚΙΝΗΤΟΣ (δεν χρειάζεσαι locker). Προσοχή: σκοτώνει σε 1.5m ακόμα και μέσα από τοίχους/έπιπλα, οπότε όχι ακίνητος δίπλα στο path του. Sprint = θάνατος."},
 ];
+// Αγγλικές μεταφράσεις για tells & hunt strings (ό,τι λείπει πέφτει πίσω στα ελληνικά).
+const TELL_EN = {
+ "Spirit":"No obvious tell — the 'boring' ghost. Test: after incense/smudge it won't hunt for 180s (instead of 90s). If you count 2-3 quiet minutes after smudging → Spirit.",
+ "Wraith":"NEVER steps in salt — no footprints, ever. Drop salt in a doorway: if everything else shows activity but the salt stays untouched, big Wraith hint.",
+ "Phantom":"Photograph it during a ghost event: if it does NOT appear in the photo → Phantom. Stays invisible longer during hunts (sparse flickering). Don't look at it — it drains your sanity.",
+ "Poltergeist":"Throws many objects at once, and often. Leave a pile of small items in one room — if it launches them all together (big sanity drain), Poltergeist.",
+ "Banshee":"Targets ONE player (solo: you). Distinctive scream on the Parabolic Microphone (~1/3 of its sounds). 'Visits' its target instead of roaming randomly.",
+ "Jinn":"With the breaker ON: fast from afar, normal up close. NEVER turns the breaker off itself. Its ability gives EMF at the breaker. Counter: turn the breaker off yourself and it goes back to normal.",
+ "Mare":"Turns lights off the moment you switch them on, NEVER turns one on. Counter: keep the ghost room lit and it 'locks' at the 40% threshold — much safer.",
+ "Revenant":"Two speeds: snail (1.0 m/s) when it can't see you, monster (3.0 m/s) when it can. Counter: hide IMMEDIATELY — once it loses your trail it crawls.",
+ "Shade":"Shy: minimal activity while you're nearby, and it won't hunt if you're in the same room. If the house is 'dead' but there's a ghost, think Shade.",
+ "Demon":"A hunt at full sanity = almost certainly Demon. Shortest cooldown between hunts (20s instead of 25s). Counter: crucifix — it has a bigger range on Demons.",
+ "Yurei":"Slams doors FULLY shut with force (an ability that drains sanity). Counter: smudge INSIDE its room and it's pinned there for 90s — no roaming.",
+ "Oni":"Hyperactive when you're close, throws objects hard. NEVER does the 'airball' event. More clearly visible during hunts (less flickering).",
+ "Yokai":"Your voice enrages it — if hunts start while you're talking, suspicious. Counter: during a hunt it only hears/detects you within ~2.5m. Hide, shut up, and you're nearly untouchable.",
+ "Hantu":"Faster the colder the room. Turns the breaker off, NEVER on. In a hunt with the breaker off it shows freezing breath (100% confirm). Counter: keep the house warm.",
+ "Goryo":"D.O.T.S. shows ONLY through a video camera, and only when nobody is in the room. Almost never wanders far from its ghost room.",
+ "Myling":"During hunts its footsteps/voice are audible only from very close — a 'silent killer'. More frequent paranormal sounds on the Parabolic. Heartbeat with no warning it was coming → Myling.",
+ "Onryo":"Your last run's killer! Blows out flames — every 3rd extinguished flame = hunt, regardless of sanity. Counter: a lit candle/firelight next to it works like a crucifix (until it blows it out).",
+ "The Twins":"Interactions in TWO different spots almost simultaneously (the 'twin' interacts from a distance). Hunts at two slightly different speeds.",
+ "Raiju":"Fast near ACTIVE equipment and hunts earlier next to it. Interferes with electronics from a longer range. Counter: turn off/collect your gear from the ghost room.",
+ "Obake":"Fingerprints with 6 fingers or weird shapes = instant confirm. Its prints fade in half the time. Briefly shapeshifts during hunts.",
+ "The Mimic":"ALWAYS shows fake Ghost Orbs as a 4th evidence. Changes behavior every few minutes (Revenant one moment, Shade the next…). If the ghost 'changes personality', Mimic.",
+ "Moroi":"Curses you through the Spirit Box or Parabolic → your sanity drains faster afterwards. Gets faster as your sanity drops. Counter: sanity pills clear the curse, smudge blinds it for longer.",
+ "Deogen":"Heavy, wheezing breath on the Spirit Box from up close (unique). It ALWAYS finds you in hunts — don't hide! Counter: it gets very slow up close, loop around furniture.",
+ "Thaye":"It 'ages': starts hyperactive, fast and aggressive, and as time passes (with you nearby) becomes slow and quiet. If the ghost 'got tired' → Thaye.",
+ "Dayan":"ALWAYS a female name & model (like the Banshee). Near it (<10m): stand still and it slows down, run and it speeds up. Counter: freeze in place during hunts.",
+ "Gallu":"Crucifix, incense and salt ENRAGE it → faster on the next hunt, then it 'exhausts' and defensive items work better. Enraged it won't step in salt (don't confuse with Wraith — the Gallu stepped in the first pile).",
+ "Obambo":"Two 'moods' alternating every 2 minutes: calm = slow and harmless, aggressive = hunts from 65% sanity, faster, but 20% shorter hunts. A ghost with mood swings = Obambo.",
+ "Aswang":"Accelerates VERY fast with line-of-sight (max speed in ~9s instead of 13s) and prefers chasing over searching. Unique: if it reaches you in an OFFICIAL hiding spot (locker/closet), the hunt ends instantly — but next hunt it goes straight there. Change spots!",
+ "Kormos":"BLIND — it tracks you by footstep sounds. Counter: stand COMPLETELY still during hunts (no locker needed). Careful: it kills within 1.5m even through walls/furniture, so don't freeze next to its path. Sprinting = death.",
+};
+const HUNT_EN = {
+ "Banshee":"50% of its target",
+ "Mare":"60% dark / 40% light",
+ "Demon":"70% + hunts at ANY sanity (ability)",
+ "Yokai":"50% / 80% if you talk near it",
+ "Raiju":"65% near electronics",
+ "The Mimic":"mimics others",
+ "Thaye":"75% fresh → 15% aged",
+ "Dayan":"45% still / 60% moving",
+ "Gallu":"50% (earlier when enraged)",
+ "Kormos":"50% / 70% if you sprint near it",
+};
+
 const state = {}; // key -> 0 unknown, 1 on, 2 off
 EV.forEach(e=>state[e.k]=0);
 let sanity = 50;
+let lang = "el";
+const STR = {
+ el:{
+  searchPh:"🔍 Ψάξε ghost με όνομα…",
+  ribbon:"⚠ Μπορεί να κάνει hunt σε αυτό το sanity",
+  fakeOrbs:"+ ψεύτικα Orbs",
+  statusSafe:"Ασφαλές — κανένα πιθανό ghost δεν κάνει hunt εδώ",
+  statusHunt:n=>n+" πιθανά ghosts κάνουν ήδη hunt σε αυτό το sanity",
+  hintClose:"Κοντεύεις — κοίτα τα tells για να ξεχωρίσεις τα τελευταία.",
+  items:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Θερμόμετρο",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
+  sugNext:(a,c,n)=>`🎯 Επόμενο item: ${a} — <span class="dim">ό,τι κι αν δείξει, κόβει τουλάχιστον ${c} από τα ${n} πιθανά.</span>`,
+  sugEither:(a,b,c,n)=>`🎯 Πάρε είτε ${a} είτε ${b} — <span class="dim">όποιο από τα δύο κι αν δοκιμάσεις, κόβει τουλάχιστον ${c} από τα ${n} πιθανά.</span>`,
+  sugFirst:(a,c,n,b,c2)=>`🎯 Πάρε πρώτα ${a} — <span class="dim">ό,τι κι αν δείξει, κόβει τουλάχιστον ${c} από τα ${n} πιθανά.</span> Μετά αξίζει το ${b} <span class="dim">(κόβει τουλάχιστον ${c2})</span>.`,
+  mimicSelf:"Θυμήσου: τα Ghost Orbs του Mimic είναι <strong>ψεύτικα</strong> — τα πραγματικά του evidence είναι Spirit Box, Ultraviolet και Freezing. Επιβεβαίωσε τουλάχιστον ένα από αυτά.",
+  trick:{
+   "The Mimic":"Έκοψες τα <strong>Ghost Orbs</strong> με ✗, αλλά το <strong>Mimic</strong> δείχνει πάντα ψεύτικα Orbs — αν η κάμερα δεν κοίταζε σωστά το δωμάτιο ή είχε φως, μπορεί απλώς να τα έχασες. Ξαναστήσε την πριν κλειδώσεις.",
+   "Obake":"Έκοψες το <strong>Ultraviolet</strong> με ✗, αλλά το <strong>Obake</strong> με το ability του αφήνει λιγότερα fingerprints και ξεθωριάζουν στον μισό χρόνο. Ξαναδές για prints (ή 6 δάχτυλα!) πριν κλειδώσεις.",
+   "Goryo":"Έκοψες το <strong>D.O.T.S.</strong> με ✗, αλλά το <strong>Goryo</strong> το δείχνει ΜΟΝΟ μέσα από video camera και μόνο με άδειο δωμάτιο. Στήσε κάμερα στο projector και βγες από το δωμάτιο πριν κλειδώσεις.",
+  },
+ },
+ en:{
+  searchPh:"🔍 Search ghost by name…",
+  ribbon:"⚠ Can hunt at this sanity",
+  fakeOrbs:"+ fake Orbs",
+  statusSafe:"Safe — no possible ghost can hunt here",
+  statusHunt:n=>n+" possible ghosts can already hunt at this sanity",
+  hintClose:"Getting close — check the tells to split the last few.",
+  items:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Thermometer",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
+  sugNext:(a,c,n)=>`🎯 Next item: ${a} — <span class="dim">whatever it shows, it cuts at least ${c} of the ${n} possible.</span>`,
+  sugEither:(a,b,c,n)=>`🎯 Grab either ${a} or ${b} — <span class="dim">whichever you test, it cuts at least ${c} of the ${n} possible.</span>`,
+  sugFirst:(a,c,n,b,c2)=>`🎯 Grab ${a} first — <span class="dim">whatever it shows, it cuts at least ${c} of the ${n} possible.</span> Then ${b} is worth it <span class="dim">(cuts at least ${c2})</span>.`,
+  mimicSelf:"Remember: the Mimic's Ghost Orbs are <strong>fake</strong> — its real evidence is Spirit Box, Ultraviolet and Freezing. Confirm at least one of those.",
+  trick:{
+   "The Mimic":"You ✗'ed <strong>Ghost Orbs</strong>, but the <strong>Mimic</strong> always shows fake Orbs — if the camera wasn't covering the room properly or the lights were on, you may simply have missed them. Set it up again before you lock in.",
+   "Obake":"You ✗'ed <strong>Ultraviolet</strong>, but the <strong>Obake</strong>'s ability leaves fewer fingerprints and they fade in half the time. Look again for prints (or 6 fingers!) before you lock in.",
+   "Goryo":"You ✗'ed <strong>D.O.T.S.</strong>, but the <strong>Goryo</strong> only shows it through a video camera with an empty room. Set a camera on the projector and leave the room before you lock in.",
+  },
+ },
+};
+function tellOf(g){ return lang==="en" ? (TELL_EN[g.name]||g.tell) : g.tell; }
+function huntOf(g){ return lang==="en" ? (HUNT_EN[g.name]||g.hunt) : g.hunt; }
 
 // Difficulty: drain multiplier, διάρκειες hunt ανά μέγεθος χάρτη, grace period, πόσα evidence δίνονται.
 const DIFF = {
@@ -607,13 +806,13 @@ let diff = "intermediate";
 // Behavior φίλτρα: exclude = ghosts που ΔΕΝ κάνουν ποτέ αυτό που είδες (αποκλείονται),
 // include = μόνο αυτά τα ghosts το κάνουν. Το Mimic περνάει πάντα τα include (μιμείται τα πάντα).
 const BEHAVIORS = [
- {id:"salt",      label:"Πάτησε αλάτι (footprints)",      ic:"🧂", exclude:["Wraith"]},
- {id:"lightOn",   label:"Άναψε φως",                       ic:"💡", exclude:["Mare"]},
- {id:"breakerOn", label:"Άνοιξε το breaker",               ic:"🔋", exclude:["Hantu"]},
- {id:"breakerOff",label:"Έκλεισε το breaker",              ic:"🪫", exclude:["Jinn"]},
- {id:"earlyHunt", label:"Hunt ενώ sanity > 70%",           ic:"😱", include:["Demon","Yokai","Thaye","Onryo","The Mimic"]},
- {id:"noPhoto",   label:"Αόρατο σε φωτογραφία event",      ic:"📸", include:["Phantom","The Mimic"]},
- {id:"foundHide", label:"Ήρθε ίσια στην κρυψώνα μου",      ic:"🙈", include:["Deogen","Aswang","The Mimic"]},
+ {id:"salt",      label:"Πάτησε αλάτι (footprints)",      en:"Stepped in salt (footprints)",    ic:"🧂", exclude:["Wraith"]},
+ {id:"lightOn",   label:"Άναψε φως",                       en:"Turned a light on",               ic:"💡", exclude:["Mare"]},
+ {id:"breakerOn", label:"Άνοιξε το breaker",               en:"Turned the breaker on",           ic:"🔋", exclude:["Hantu"]},
+ {id:"breakerOff",label:"Έκλεισε το breaker",              en:"Turned the breaker off",          ic:"🪫", exclude:["Jinn"]},
+ {id:"earlyHunt", label:"Hunt ενώ sanity > 70%",           en:"Hunted at sanity > 70%",          ic:"😱", include:["Demon","Yokai","Thaye","Onryo","The Mimic"]},
+ {id:"noPhoto",   label:"Αόρατο σε φωτογραφία event",      en:"Invisible in event photo",        ic:"📸", include:["Phantom","The Mimic"]},
+ {id:"foundHide", label:"Ήρθε ίσια στην κρυψώνα μου",      en:"Came straight to my hiding spot", ic:"🙈", include:["Deogen","Aswang","The Mimic"]},
 ];
 const bhState = {}; // id -> 0 off, 1 on
 BEHAVIORS.forEach(b=>bhState[b.id]=0);
@@ -626,46 +825,58 @@ function passesBehaviors(g){
 }
 
 const evGrid = document.getElementById("evGrid");
-EV.forEach(e=>{
-  const b=document.createElement("button");
-  b.className="ev"; b.dataset.k=e.k;
-  b.innerHTML=`<span class="mark"></span><span class="ic">${e.ic}</span><span class="name">${e.n}</span>`;
-  b.onclick=()=>{ state[e.k]=(state[e.k]+1)%3; render(); };
-  evGrid.appendChild(b);
-});
+function buildEvBoard(){
+  evGrid.innerHTML="";
+  EV.forEach(e=>{
+    const b=document.createElement("button");
+    b.className="ev"; b.dataset.k=e.k;
+    b.innerHTML=`<span class="mark"></span><span class="ic">${e.ic}</span><span class="name">${e.n}</span>`;
+    b.onclick=()=>{ state[e.k]=(state[e.k]+1)%3; render(); };
+    evGrid.appendChild(b);
+  });
+}
 
 const bhGrid = document.getElementById("bhGrid");
-BEHAVIORS.forEach(bh=>{
-  const b=document.createElement("button");
-  b.className="ev"; b.dataset.bh=bh.id;
-  b.innerHTML=`<span class="mark"></span><span class="ic">${bh.ic}</span><span class="name">${bh.label}</span>`;
-  b.onclick=()=>{ bhState[bh.id]=bhState[bh.id]?0:1; render(); };
-  bhGrid.appendChild(b);
-});
+function buildBhBoard(){
+  bhGrid.innerHTML="";
+  BEHAVIORS.forEach(bh=>{
+    const b=document.createElement("button");
+    b.className="ev"; b.dataset.bh=bh.id;
+    b.innerHTML=`<span class="mark"></span><span class="ic">${bh.ic}</span><span class="name">${lang==="en"?bh.en:bh.label}</span>`;
+    b.onclick=()=>{ bhState[bh.id]=bhState[bh.id]?0:1; render(); };
+    bhGrid.appendChild(b);
+  });
+}
 
 const grid=document.getElementById("grid");
-GHOSTS.forEach((g,i)=>{
-  const c=document.createElement("div");
-  c.className="card"; c.dataset.i=i;
-  c.innerHTML=`
-    <div class="hunt-ribbon" style="display:none">⚠ Μπορεί να κάνει hunt σε αυτό το sanity</div>
-    <h2 class="g-name">${g.name}</h2>
-    <div class="chips">${g.ev.map(k=>`<span class="chip" data-k="${k}">${EV.find(e=>e.k===k).n}</span>`).join("")}${g.mimic?'<span class="chip" data-k="ORB">+ ψεύτικα Orbs</span>':""}</div>
-    <div class="meta"><span>Hunt: <b>${g.hunt}</b></span></div>
-    <div class="tell">${g.tell}</div>`;
-  grid.appendChild(c);
-});
+function buildCards(){
+  grid.innerHTML="";
+  GHOSTS.forEach((g,i)=>{
+    const c=document.createElement("div");
+    c.className="card"; c.dataset.i=i;
+    c.innerHTML=`
+      <div class="hunt-ribbon" style="display:none">${STR[lang].ribbon}</div>
+      <h2 class="g-name">${g.name}</h2>
+      <div class="chips">${g.ev.map(k=>`<span class="chip" data-k="${k}">${EV.find(e=>e.k===k).n}</span>`).join("")}${g.mimic?`<span class="chip" data-k="ORB">${STR[lang].fakeOrbs}</span>`:""}</div>
+      <div class="meta"><span>Hunt: <b>${huntOf(g)}</b></span></div>
+      <div class="tell">${tellOf(g)}</div>`;
+    grid.appendChild(c);
+  });
+}
 
 // ---- sorted sanity threshold quick-reference table ----
 const threshBody = document.getElementById("threshBody");
 const sortedGhosts = GHOSTS.map((g,i)=>({...g,i})).sort((a,b)=>b.thMax-a.thMax);
-sortedGhosts.forEach(g=>{
-  const tr=document.createElement("tr");
-  tr.dataset.i=g.i;
-  const badge = g.isAny ? '<span class="any-badge">ANY (ability)</span>' : (g.variableTh ? '<span class="var-badge">variable</span>' : "");
-  tr.innerHTML=`<td class="gname">${g.name}${badge}</td><td class="num">${g.isAny?"70%+":g.thMax+"%"}</td><td>${g.hunt}</td>`;
-  threshBody.appendChild(tr);
-});
+function buildThresh(){
+  threshBody.innerHTML="";
+  sortedGhosts.forEach(g=>{
+    const tr=document.createElement("tr");
+    tr.dataset.i=g.i;
+    const badge = g.isAny ? '<span class="any-badge">ANY (ability)</span>' : (g.variableTh ? '<span class="var-badge">variable</span>' : "");
+    tr.innerHTML=`<td class="gname">${g.name}${badge}</td><td class="num">${g.isAny?"70%+":g.thMax+"%"}</td><td>${huntOf(g)}</td>`;
+    threshBody.appendChild(tr);
+  });
+}
 
 function effEv(g){ return g.mimic ? [...g.ev,"ORB"] : g.ev; }
 
@@ -673,15 +884,14 @@ function effEv(g){ return g.mimic ? [...g.ev,"ORB"] : g.ev; }
 // Κάθε αδοκίμαστο evidence βαθμολογείται με το πόσα ghosts κόβει ΕΓΓΥΗΜΕΝΑ,
 // ό,τι κι αν δείξει: ✓ κόβει όσα δεν το έχουν, ✗ όσα το έχουν → εγγύηση = min από τα δύο.
 // Tie-breaker το αναμενόμενο κόψιμο (2pq/N). Εμφανίζεται μόνο αφού μαρκαριστεί κάτι.
-const ITEM_OF={EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Θερμόμετρο",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"};
 // ---- verdict: ένα μόνο πιθανό ghost ----
 // Απατεώνες: ο καθένας μπορεί να «κρύψει» ΕΝΑ συγκεκριμένο evidence. Προειδοποιούμε
 // μόνο αν ακριβώς αυτό το evidence έχει ✗ και ο απατεώνας ταιριάζει σε όλα τα ✓/behaviors —
 // τότε (και μόνο τότε) το ✗ μπορεί να είναι ψεύτικο και να μας ξεγελά.
 const TRICKSTERS=[
- {name:"The Mimic", key:"ORB", msg:"Έκοψες τα <strong>Ghost Orbs</strong> με ✗, αλλά το <strong>Mimic</strong> δείχνει πάντα ψεύτικα Orbs — αν η κάμερα δεν κοίταζε σωστά το δωμάτιο ή είχε φως, μπορεί απλώς να τα έχασες. Ξαναστήσε την πριν κλειδώσεις."},
- {name:"Obake", key:"UV", msg:"Έκοψες το <strong>Ultraviolet</strong> με ✗, αλλά το <strong>Obake</strong> με το ability του αφήνει λιγότερα fingerprints και ξεθωριάζουν στον μισό χρόνο. Ξαναδές για prints (ή 6 δάχτυλα!) πριν κλειδώσεις."},
- {name:"Goryo", key:"DOTS", msg:"Έκοψες το <strong>D.O.T.S.</strong> με ✗, αλλά το <strong>Goryo</strong> το δείχνει ΜΟΝΟ μέσα από video camera και μόνο με άδειο δωμάτιο. Στήσε κάμερα στο projector και βγες από το δωμάτιο πριν κλειδώσεις."},
+ {name:"The Mimic", key:"ORB"},
+ {name:"Obake", key:"UV"},
+ {name:"Goryo", key:"DOTS"},
 ];
 function updateVerdict(pool,onKeys,offKeys){
   const box=document.getElementById("verdictBox");
@@ -690,13 +900,13 @@ function updateVerdict(pool,onKeys,offKeys){
   document.getElementById("verdictName").textContent=g.name;
   const warns=[];
   if(g.mimic){
-    warns.push("Θυμήσου: τα Ghost Orbs του Mimic είναι <strong>ψεύτικα</strong> — τα πραγματικά του evidence είναι Spirit Box, Ultraviolet και Freezing. Επιβεβαίωσε τουλάχιστον ένα από αυτά.");
+    warns.push(STR[lang].mimicSelf);
   }
   TRICKSTERS.forEach(t=>{
     if(t.name===g.name || !offKeys.includes(t.key)) return;
     const tg=GHOSTS.find(x=>x.name===t.name);
     const ev=effEv(tg);
-    if(onKeys.every(k=>ev.includes(k)) && passesBehaviors(tg)) warns.push("⚠ "+t.msg);
+    if(onKeys.every(k=>ev.includes(k)) && passesBehaviors(tg)) warns.push("⚠ "+STR[lang].trick[t.name]);
   });
   document.getElementById("verdictWarn").innerHTML=warns.join("<br><br>");
   box.classList.add("show");
@@ -711,15 +921,16 @@ function updateSuggestion(pool){
     return {e, cut:Math.min(p,q), exp:2*p*q/pool.length};
   }).filter(c=>c.cut>0).sort((a,b)=>b.cut-a.cut||b.exp-a.exp);
   if(!cands.length){ box.classList.remove("show"); return; }
-  const nameOf=c=>`<b>${c.e.ic} ${ITEM_OF[c.e.k]}</b>`;
+  const s=STR[lang];
+  const nameOf=c=>`<b>${c.e.ic} ${s.items[c.e.k]}</b>`;
   const one=cands[0], two=cands[1];
   let html;
   if(!two){
-    html=`🎯 Επόμενο item: ${nameOf(one)} — <span class="dim">ό,τι κι αν δείξει, κόβει τουλάχιστον ${one.cut} από τα ${pool.length} πιθανά.</span>`;
+    html=s.sugNext(nameOf(one), one.cut, pool.length);
   } else if(two.cut===one.cut){
-    html=`🎯 Πάρε είτε ${nameOf(one)} είτε ${nameOf(two)} — <span class="dim">όποιο από τα δύο κι αν δοκιμάσεις, κόβει τουλάχιστον ${one.cut} από τα ${pool.length} πιθανά.</span>`;
+    html=s.sugEither(nameOf(one), nameOf(two), one.cut, pool.length);
   } else {
-    html=`🎯 Πάρε πρώτα ${nameOf(one)} — <span class="dim">ό,τι κι αν δείξει, κόβει τουλάχιστον ${one.cut} από τα ${pool.length} πιθανά.</span> Μετά αξίζει το ${nameOf(two)} <span class="dim">(κόβει τουλάχιστον ${two.cut})</span>.`;
+    html=s.sugFirst(nameOf(one), one.cut, pool.length, nameOf(two), two.cut);
   }
   box.innerHTML=html;
   box.classList.add("show");
@@ -730,9 +941,8 @@ const searchEl=document.getElementById("ghostSearch");
 searchEl.addEventListener("input",render);
 
 function sanityStatusFor(count){
-  if(count===0) return {cls:"status-safe", txt:"Ασφαλές — κανένα πιθανό ghost δεν κάνει hunt εδώ"};
-  if(count<=4) return {cls:"status-warn", txt: count+" πιθανά ghosts κάνουν ήδη hunt σε αυτό το sanity"};
-  return {cls:"status-danger", txt: count+" πιθανά ghosts κάνουν ήδη hunt σε αυτό το sanity"};
+  if(count===0) return {cls:"status-safe", txt:STR[lang].statusSafe};
+  return {cls: count<=4 ? "status-warn" : "status-danger", txt:STR[lang].statusHunt(count)};
 }
 
 function render(){
@@ -779,7 +989,7 @@ function render(){
   document.getElementById("mimicWarn").classList.toggle("show", onKeys.includes("ORB") && mimicOk);
   const hint=document.getElementById("hintTxt");
   if(cnt>1 && cnt<=4 && onKeys.length>=1){
-    hint.textContent="Κοντεύεις — κοίτα τα tells για να ξεχωρίσεις τα τελευταία.";
+    hint.textContent=STR[lang].hintClose;
   } else { hint.textContent=""; }
 
   // threshold table: dim rows excluded by evidence, highlight rows at/above current sanity
@@ -913,23 +1123,28 @@ document.getElementById("huntReset").onclick=()=>huntTimer.reset();
 // ---- footstep speed tapper ----
 // Σχέση της κοινότητας (tybayn cheat sheet): βήμα κάθε (1/v − 0.075)s ⇒ v = bpm / (60 + 0.075·bpm)
 const SPEED_REF=[
- {min:0.40,max:3.00,label:"Deogen",note:"0.4 κοντά σου → 3.0 μακριά"},
- {min:1.00,max:1.00,label:"Revenant (δεν σε βλέπει) / Thaye (γερασμένο)",note:"σταθερό"},
- {min:1.40,max:2.70,label:"Hantu",note:"πιο γρήγορο στο κρύο, χωρίς LoS accel"},
- {min:1.50,max:2.25,label:"Moroi",note:"πιο γρήγορο όσο πέφτει το sanity σου"},
- {min:1.53,max:1.87,label:"The Twins",note:"δύο σταθερές ταχύτητες"},
- {min:1.70,max:1.70,label:"Βασική ταχύτητα (τα περισσότερα ghosts)",note:"με line-of-sight ως ×1.65 → ~2.8"},
- {min:2.50,max:2.50,label:"Raiju (ενεργά ηλεκτρονικά) / Jinn (ρεύμα ON, από μακριά)",note:""},
- {min:2.75,max:2.75,label:"Thaye (φρέσκο)",note:""},
- {min:3.00,max:3.00,label:"Revenant (σε βλέπει)",note:""},
+ {min:0.40,max:3.00,label:"Deogen",note:"0.4 κοντά σου → 3.0 μακριά",noteEn:"0.4 near you → 3.0 far away"},
+ {min:1.00,max:1.00,label:"Revenant (δεν σε βλέπει) / Thaye (γερασμένο)",labelEn:"Revenant (doesn't see you) / Thaye (aged)",note:"σταθερό",noteEn:"constant"},
+ {min:1.40,max:2.70,label:"Hantu",note:"πιο γρήγορο στο κρύο, χωρίς LoS accel",noteEn:"faster in the cold, no LoS accel"},
+ {min:1.50,max:2.25,label:"Moroi",note:"πιο γρήγορο όσο πέφτει το sanity σου",noteEn:"faster as your sanity drops"},
+ {min:1.53,max:1.87,label:"The Twins",note:"δύο σταθερές ταχύτητες",noteEn:"two fixed speeds"},
+ {min:1.70,max:1.70,label:"Βασική ταχύτητα (τα περισσότερα ghosts)",labelEn:"Base speed (most ghosts)",note:"με line-of-sight ως ×1.65 → ~2.8",noteEn:"with line-of-sight up to ×1.65 → ~2.8"},
+ {min:2.50,max:2.50,label:"Raiju (ενεργά ηλεκτρονικά) / Jinn (ρεύμα ON, από μακριά)",labelEn:"Raiju (active electronics) / Jinn (power ON, from afar)",note:""},
+ {min:2.75,max:2.75,label:"Thaye (φρέσκο)",labelEn:"Thaye (fresh)",note:""},
+ {min:3.00,max:3.00,label:"Revenant (σε βλέπει)",labelEn:"Revenant (sees you)",note:""},
 ];
 const speedRows=document.getElementById("speedRows");
-SPEED_REF.forEach((s,i)=>{
-  const d=document.createElement("div");
-  d.className="speed-row"; d.dataset.i=i;
-  d.innerHTML=`<span class="sp">${s.min===s.max?s.min.toFixed(2):s.min.toFixed(2)+"–"+s.max.toFixed(2)}</span><span>${s.label}${s.note?" — "+s.note:""}</span>`;
-  speedRows.appendChild(d);
-});
+function buildSpeedRows(){
+  speedRows.innerHTML="";
+  SPEED_REF.forEach((s,i)=>{
+    const d=document.createElement("div");
+    d.className="speed-row"; d.dataset.i=i;
+    const label = lang==="en" ? (s.labelEn||s.label) : s.label;
+    const note  = lang==="en" ? (s.noteEn||"") : s.note;
+    d.innerHTML=`<span class="sp">${s.min===s.max?s.min.toFixed(2):s.min.toFixed(2)+"–"+s.max.toFixed(2)}</span><span>${label}${note?" — "+note:""}</span>`;
+    speedRows.appendChild(d);
+  });
+}
 let tapTimes=[];
 const tapBpmEl=document.getElementById("tapBpm"), tapMsEl=document.getElementById("tapMs");
 function bpmToSpeed(bpm){ return bpm/(60+0.075*bpm); }
@@ -970,7 +1185,7 @@ document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.rem
 // ---- persistence (refresh-proof evidence board & sanity) ----
 const LS_KEY="phasmo-journal-v1";
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang})); }catch(e){/* ignore */}
 }
 (function loadState(){
   try{
@@ -982,6 +1197,7 @@ function saveState(){
       sanity=Math.round(d.sanity); sanFloat=sanity; sanRange.value=sanity; sanVal.textContent=sanity;
     }
     if(d.diff && DIFF[d.diff]) diff=d.diff;
+    if(d.lang==="en" || d.lang==="el") lang=d.lang;
   }catch(e){/* corrupt state, start fresh */}
 })();
 
@@ -1001,9 +1217,9 @@ function applyDiff(){
     b.dataset.hunt=secs;
     b.textContent=b.dataset.map.charAt(0).toUpperCase()+b.dataset.map.slice(1)+" ("+secs+"s)";
   });
-  document.getElementById("diffNameTxt").textContent=d.label;
-  document.getElementById("graceTxt").textContent=d.grace+"s";
-  document.getElementById("drainMultTxt").textContent="×"+d.mult;
+  document.querySelectorAll(".diffNameTxt").forEach(el=>el.textContent=d.label);
+  document.querySelectorAll(".graceTxt").forEach(el=>el.textContent=d.grace+"s");
+  document.querySelectorAll(".drainMultTxt").forEach(el=>el.textContent="×"+d.mult);
   document.getElementById("evidNote").style.display = d.evid<3 ? "block" : "none";
   saveState();
 }
@@ -1023,10 +1239,22 @@ function spy(){
 addEventListener("scroll",spy,{passive:true});
 toTopBtn.onclick=()=>scrollTo({top:0,behavior:"smooth"});
 
+// ---- language switch ----
+const langBtn=document.getElementById("langBtn");
+function setLang(l){
+  lang=l;
+  document.documentElement.setAttribute("lang",l);
+  langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
+  searchEl.placeholder = STR[l].searchPh;
+  buildEvBoard(); buildBhBoard(); buildCards(); buildThresh(); buildSpeedRows();
+  applyDiff();
+  render();
+}
+langBtn.onclick=()=>setLang(lang==="el" ? "en" : "el");
+
 smudgeTimer.reset();
 huntTimer.reset();
-applyDiff();
-render();
+setLang(lang);
 spy();
 </script>
 </body>
