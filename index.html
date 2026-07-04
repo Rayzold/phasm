@@ -128,6 +128,18 @@
   }
   .preset:hover{border-color:var(--nv);color:var(--nv)}
   .sanity-note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .drain-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 2px;font-size:12.5px;color:var(--muted)}
+  .chk{display:inline-flex;gap:5px;align-items:center;cursor:pointer;user-select:none}
+  .chk input{accent-color:var(--nv);margin:0}
+  .sel{background:#0c1118;border:1px solid var(--line);color:#B9C2CE;border-radius:8px;padding:5px 8px;font-family:inherit;font-size:12.5px}
+  /* ---------- cursed possessions ---------- */
+  .cp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+  .cp{border:1px solid var(--line);border-radius:8px;padding:12px 13px;background:#0c1119;font-size:13px;line-height:1.5;color:#C7CEDA}
+  .cp h3{font-family:"Special Elite",monospace;font-size:14px;color:var(--nv);margin:0 0 6px;letter-spacing:1px}
+  .cp .danger{color:var(--danger)}
+  .cp ul{margin:6px 0 0;padding-left:18px}
+  .cp li{margin-bottom:3px}
+  .cp .freq{color:var(--muted);font-size:11.5px}
   /* smudge */
   .smudge-display{
     font-family:"Special Elite",monospace;font-size:40px;color:var(--nv);text-align:center;
@@ -265,7 +277,18 @@
           <button class="preset" data-v="25">25%</button>
           <button class="preset" data-v="0">0%</button>
         </div>
-        <div class="sanity-note" id="sanNote">Σύρε το slider στο τρέχον sanity σου. Τα ghosts που θα μπορούσαν να κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω και στα κάρτες.</div>
+        <div class="drain-row">
+          <label class="chk"><input type="checkbox" id="drainOn"> Auto-drain</label>
+          <select id="drainMap" class="sel">
+            <option value="small">Small map</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+          <label class="chk"><input type="checkbox" id="drainDark" checked> Σκοτάδι</label>
+          <label class="chk"><input type="checkbox" id="drainSolo" checked> Solo</label>
+          <button class="preset" id="pillBtn">💊 Pills +35%</button>
+        </div>
+        <div class="sanity-note" id="sanNote">Σύρε το slider στο τρέχον sanity σου — ή άναψε το <strong>Auto-drain</strong> για να πέφτει μόνο του με τους ρυθμούς Intermediate (small 0.12 / medium 0.08 / large 0.05 %/s στο σκοτάδι, ×1.5 difficulty, ×0.5 solo). Στο φως δεν πέφτει — ξετίκαρε το «Σκοτάδι». Τα ghosts που κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω.</div>
       </div>
       <div class="tool-col">
         <div class="tool-title">Smudge Timer</div>
@@ -305,6 +328,58 @@
         <div class="smudge-note">Διάρκειες hunt για <strong>Intermediate</strong>. Grace period 4s στην αρχή (το ghost δεν σκοτώνει ακόμα). Cursed hunts: +20s. Cooldown μεταξύ hunts: 25s (<strong>Demon</strong>: 20s).</div>
       </div>
     </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Cursed Possessions Quick-Ref (1 ανά συμβόλαιο, τυχαίο)</div>
+    <div class="cp-grid">
+      <div class="cp">
+        <h3>🃏 Tarot Cards</h3>
+        Τράβα κάρτα → τυχαίο εφέ. Σε hunt ΟΛΕΣ βγαίνουν The Fool.
+        <ul>
+          <li><strong>The Tower</strong> — προκαλεί interaction <span class="freq">(συχνή)</span></li>
+          <li><strong>Wheel of Fortune</strong> — πράσινη φλόγα +25% sanity, κόκκινη −25% <span class="freq">(συχνή)</span></li>
+          <li><strong>The Fool</strong> — μοιάζει με άλλη κάρτα, κανένα εφέ <span class="freq">(συχνή)</span></li>
+          <li><strong>Death</strong> — <span class="danger">cursed hunt</span>, δεν κόβεται με crucifix <span class="freq">(μέτρια)</span></li>
+          <li><strong>The Hermit</strong> — κλειδώνει το ghost στο δωμάτιό του για λίγο <span class="freq">(μέτρια)</span></li>
+          <li><strong>The Devil</strong> — ghost event <span class="freq">(μέτρια)</span></li>
+          <li><strong>The Sun</strong> — sanity 100% <span class="freq">(~5%)</span></li>
+          <li><strong>The Moon</strong> — <span class="danger">sanity 0%</span> <span class="freq">(~5%)</span></li>
+          <li><strong>High Priestess</strong> — ανασταίνει νεκρό συμπαίκτη <span class="freq">(~2%)</span></li>
+          <li><strong>The Hanged Man</strong> — <span class="danger">σε σκοτώνει ακαριαία</span> <span class="freq">(~1%)</span></li>
+        </ul>
+      </div>
+      <div class="cp">
+        <h3>🎵 Music Box</h3>
+        Το ghost αρχίζει να τραγουδά → ακολούθησε τη φωνή για να βρεις τη θέση του (εύκολο ghost photo).
+        <br><span class="danger">Προσοχή:</span> αν το κρατάς πολύ κοντά του ή το τραγούδι τελειώσει ενώ είναι κοντά → cursed hunt.
+      </div>
+      <div class="cp">
+        <h3>🔮 Ouija Board</h3>
+        Κάνε ερωτήσεις (θέση, bone, ηλικία…) — κάθε απάντηση κοστίζει sanity.
+        <br><span class="danger">ΠΑΝΤΑ πες «Goodbye»</span> στο τέλος, αλλιώς cursed hunt. Η ερώτηση «hide and seek» ξεκινά cursed hunt αμέσως.
+      </div>
+      <div class="cp">
+        <h3>🪞 Haunted Mirror</h3>
+        Κοίτα μέσα → βλέπεις live το ghost room. Στραγγίζει sanity γρήγορα όσο το κοιτάς.
+        <br><span class="danger">Αν σπάσει</span> (το παράκανες) → cursed hunt.
+      </div>
+      <div class="cp">
+        <h3>🕯️ Summoning Circle</h3>
+        Άναψε και τα 5 κεριά (~16% sanity το καθένα) → το ghost εμφανίζεται καρφωμένο στον κύκλο για λίγα δευτερόλεπτα — ιδανικό για φωτογραφία/στοιχεία.
+        <br><span class="danger">Μετά ξεκινά cursed hunt</span> — έχε έτοιμη διαφυγή πριν ανάψεις το 5ο.
+      </div>
+      <div class="cp">
+        <h3>🪆 Voodoo Doll</h3>
+        Σπρώξε καρφίτσα → αναγκαστικό interaction (κοστίζει sanity) — χρήσιμο για EMF/UV όταν το ghost τεμπελιάζει.
+        <br><span class="danger">Η καρφίτσα της καρδιάς</span> → cursed hunt.
+      </div>
+      <div class="cp">
+        <h3>🐒 Monkey Paw</h3>
+        Περιορισμένες ευχές («να βρω το κόκαλο», «να δω το ghost», «να παγιδευτεί»…) — κάθε ευχή έχει <span class="danger">αρνητικό τίμημα</span> (σβήνει φώτα, σε κλειδώνει, ρίχνει sanity κ.λπ.). Διάβασε πριν ευχηθείς.
+      </div>
+    </div>
+    <div class="sanity-note" style="margin-top:10px">Όλα τα cursed hunts: +20s διάρκεια από το κανονικό, δεν μπλοκάρονται με crucifix/smudge στο ξεκίνημά τους.</div>
   </div>
 
   <div class="panel">
@@ -505,19 +580,52 @@ function render(){
 // ---- sanity tracker wiring ----
 const sanRange = document.getElementById("sanRange");
 const sanVal = document.getElementById("sanVal");
+let sanFloat = sanity; // ακριβής τιμή για το auto-drain· το sanity μένει ο στρογγυλεμένος «επίσημος» αριθμός
 sanRange.addEventListener("input", ()=>{
   sanity = Number(sanRange.value);
+  sanFloat = sanity;
   sanVal.textContent = sanity;
   render();
 });
-document.querySelectorAll(".preset").forEach(btn=>{
+document.querySelectorAll(".preset[data-v]").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     sanity = Number(btn.dataset.v);
+    sanFloat = sanity;
     sanRange.value = sanity;
     sanVal.textContent = sanity;
     render();
   });
 });
+
+// ---- passive sanity auto-drain (Intermediate) ----
+// Ρυθμοί σκότους ανά μέγεθος χάρτη (%/s, μετά το setup) × 1.5 Intermediate × 0.5 solo.
+// Date.now()-based dt ώστε να μετρά σωστά και σε background tab.
+const DRAIN_BASE = {small:0.12, medium:0.08, large:0.05};
+const drainOn=document.getElementById("drainOn"),
+      drainMap=document.getElementById("drainMap"),
+      drainDark=document.getElementById("drainDark"),
+      drainSolo=document.getElementById("drainSolo");
+let drainLast=0, drainTimer=null;
+function setSanity(v){
+  sanFloat = Math.min(100, Math.max(0, v));
+  const r = Math.round(sanFloat);
+  sanRange.value = r; sanVal.textContent = r;
+  if(r !== sanity){ sanity = r; render(); }
+}
+function drainTick(){
+  const now = Date.now();
+  const dt = (now - drainLast)/1000;
+  drainLast = now;
+  if(!drainDark.checked) return;
+  let rate = DRAIN_BASE[drainMap.value] * 1.5;
+  if(drainSolo.checked) rate *= 0.5;
+  setSanity(sanFloat - rate*dt);
+}
+drainOn.addEventListener("change", ()=>{
+  clearInterval(drainTimer); drainTimer=null;
+  if(drainOn.checked){ drainLast = Date.now(); drainTimer = setInterval(drainTick, 500); }
+});
+document.getElementById("pillBtn").addEventListener("click", ()=>setSanity(sanFloat + 35));
 
 // ---- shared audio ----
 // Το AudioContext δημιουργείται/γίνεται resume μέσα σε user gesture (κλικ στα Start/TAP),
@@ -647,7 +755,7 @@ function saveState(){
     EV.forEach(e=>{ const v=d.ev && d.ev[e.k]; if(v===1||v===2) state[e.k]=v; });
     BEHAVIORS.forEach(b=>{ if(d.bh && d.bh[b.id]===1) bhState[b.id]=1; });
     if(typeof d.sanity==="number" && d.sanity>=0 && d.sanity<=100){
-      sanity=Math.round(d.sanity); sanRange.value=sanity; sanVal.textContent=sanity;
+      sanity=Math.round(d.sanity); sanFloat=sanity; sanRange.value=sanity; sanVal.textContent=sanity;
     }
   }catch(e){/* corrupt state, start fresh */}
 })();
