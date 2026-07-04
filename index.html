@@ -146,6 +146,22 @@
   .suggest.show{display:block}
   .suggest b{color:var(--nv)}
   .suggest .dim{color:var(--muted)}
+  /* ---------- verdict (μοναδικό πιθανό ghost) ---------- */
+  .verdict{
+    display:none;margin-top:14px;text-align:center;
+    border:1px solid var(--nv-dim);border-radius:10px;
+    padding:18px 14px 14px;background:rgba(143,227,136,.05);
+  }
+  .verdict.show{display:block}
+  .v-label{font-family:"Special Elite",monospace;font-size:12px;letter-spacing:4px;color:var(--nv-dim);margin-bottom:6px}
+  .v-name{
+    font-family:"Special Elite",monospace;
+    font-size:clamp(34px,7vw,56px);color:var(--nv);
+    letter-spacing:3px;line-height:1.1;text-transform:uppercase;
+    text-shadow:0 0 24px rgba(143,227,136,.35);
+  }
+  .v-warn{margin-top:10px;font-size:13.5px;color:var(--warn);line-height:1.55;text-align:left;max-width:640px;margin-left:auto;margin-right:auto}
+  .v-warn:empty{display:none}
   /* ---------- sanity tracker + smudge timer ---------- */
   .tools-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}
   @media (max-width:760px){.tools-grid{grid-template-columns:1fr}}
@@ -320,6 +336,11 @@
       <button class="reset" id="resetBtn">Reset</button>
     </div>
     <div class="suggest" id="suggestBox"></div>
+    <div class="verdict" id="verdictBox">
+      <div class="v-label">ΤΑΥΤΟΠΟΙΗΘΗΚΕ</div>
+      <div class="v-name" id="verdictName"></div>
+      <div class="v-warn" id="verdictWarn"></div>
+    </div>
   </div>
 
   <div class="panel anchor-target" id="sanity-smudge">
@@ -661,6 +682,35 @@ function pairScore(pool,a,b){
   // exp = αναμενόμενο μέγεθος pool μετά τα δύο τεστ (Σn²/N) — tie-breaker κάτω από ίδιο worst case
   return {worst:Math.max(...bins), exp:bins.reduce((s,n)=>s+n*n,0)/pool.length};
 }
+// ---- verdict: ένα μόνο πιθανό ghost ----
+// Απατεώνες που βγαίνουν με ΛΑΘΟΣ ✗: αν ταιριάζουν σε όλα τα ✓/behaviors και κόπηκαν
+// μόνο από ✗, ένα βιαστικό ✗ μπορεί να μας ξεγελά — γι' αυτό το σχόλιο.
+const TRICKSTERS={
+ "The Mimic":"Το <strong>Mimic</strong> κόπηκε μόνο από ✗ — δείχνει ψεύτικα Orbs και μιμείται συμπεριφορές. Αν κάποιο ✗ σου ήταν βιαστικό (Spirit Box που «δεν μίλησε», UV/Freezing που δεν έψαξες καλά), ξανατσέκαρε πριν κλειδώσεις την απάντηση.",
+ "Obake":"Το <strong>Obake</strong> κόπηκε μόνο από ✗ — με το ability του αφήνει λιγότερα fingerprints και ξεθωριάζουν στον μισό χρόνο. Ένα ✗ στο Ultraviolet δεν το αποκλείει 100%: ξαναδές για prints (ή 6 δάχτυλα!).",
+ "Goryo":"Το <strong>Goryo</strong> κόπηκε μόνο από ✗ — δείχνει D.O.T.S. ΜΟΝΟ μέσα από video camera και μόνο με άδειο δωμάτιο. Το false ✗ εδώ είναι κλασικό: στήσε κάμερα στο D.O.T.S. και βγες από το δωμάτιο.",
+};
+function updateVerdict(pool,onKeys,offKeys){
+  const box=document.getElementById("verdictBox");
+  if(pool.length!==1){ box.classList.remove("show"); return; }
+  const g=pool[0];
+  document.getElementById("verdictName").textContent=g.name;
+  const warns=[];
+  if(g.mimic){
+    warns.push("Θυμήσου: τα Ghost Orbs του Mimic είναι <strong>ψεύτικα</strong> — τα πραγματικά του evidence είναι Spirit Box, Ultraviolet και Freezing. Επιβεβαίωσε τουλάχιστον ένα από αυτά.");
+  }
+  Object.keys(TRICKSTERS).forEach(name=>{
+    if(name===g.name) return;
+    const t=GHOSTS.find(x=>x.name===name);
+    const ev=effEv(t);
+    const matchesChecks = onKeys.every(k=>ev.includes(k)) && passesBehaviors(t);
+    const cutOnlyByX = offKeys.some(k=>ev.includes(k));
+    if(matchesChecks && cutOnlyByX) warns.push("⚠ "+TRICKSTERS[name]);
+  });
+  document.getElementById("verdictWarn").innerHTML=warns.join("<br><br>");
+  box.classList.add("show");
+}
+
 function updateSuggestion(pool){
   const box=document.getElementById("suggestBox");
   const untested=EV.filter(e=>state[e.k]===0)
@@ -736,6 +786,7 @@ function render(){
   document.getElementById("cnt").textContent=cnt;
   document.getElementById("empty").classList.toggle("show",visCnt===0);
   updateSuggestion(pool);
+  updateVerdict(pool,onKeys,offKeys);
   // Mimic warning if ORB confirmed and Mimic still possible
   const mimicOk = onKeys.every(k=>["SB","UV","FRZ","ORB"].includes(k)) && !offKeys.some(k=>["SB","UV","FRZ","ORB"].includes(k));
   document.getElementById("mimicWarn").classList.toggle("show", onKeys.includes("ORB") && mimicOk);
