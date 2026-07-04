@@ -286,15 +286,23 @@
     <a href="#evidence">Evidence</a>
     <a href="#sanity-smudge">Sanity &amp; Smudge</a>
     <a href="#hunt-toolkit">Hunt Toolkit</a>
+    <a href="#survival">Survival</a>
     <a href="#cursed">Cursed Items</a>
     <a href="#thresholds">Thresholds</a>
     <a href="#photos">Photos</a>
     <a href="#ghosts">Ghosts</a>
+    <select id="diffSel" class="sel" style="margin-left:auto" title="Difficulty — προσαρμόζει drain, διάρκειες hunt και grace period">
+      <option value="amateur">Amateur</option>
+      <option value="intermediate" selected>Intermediate</option>
+      <option value="professional">Professional</option>
+      <option value="nightmare">Nightmare</option>
+    </select>
   </nav>
 
   <div class="panel anchor-target" id="evidence">
     <div class="panel-label">Evidence Board</div>
     <div class="ev-grid" id="evGrid"></div>
+    <div class="mimic-warn" id="evidNote">⚠ <strong>Nightmare:</strong> δίνονται μόνο 2 evidence — το 3ο υπάρχει αλλά μένει κρυφό. Μη βάζεις ✗ σε evidence που απλώς δεν βρήκες ακόμα.</div>
     <div class="panel-label" style="margin-top:16px">Behavior — τι είδες; (προαιρετικά φίλτρα)</div>
     <div class="ev-grid" id="bhGrid"></div>
     <div class="mimic-warn" id="mimicWarn">⚠ <strong>The Mimic:</strong> δείχνει <em>πάντα</em> ψεύτικα Ghost Orbs επιπλέον των κανονικών του evidence (Spirit Box, Ultraviolet, Freezing). Με Orbs στο ταμπλό, μην το ξεγράφεις μέχρι να αποκλείσεις κάποιο από αυτά τα τρία.</div>
@@ -335,7 +343,7 @@
           <label class="chk"><input type="checkbox" id="drainSolo" checked> Solo</label>
           <button class="preset" id="pillBtn">💊 Pills +35%</button>
         </div>
-        <div class="sanity-note" id="sanNote">Σύρε το slider στο τρέχον sanity σου — ή άναψε το <strong>Auto-drain</strong> για να πέφτει μόνο του με τους ρυθμούς Intermediate (small 0.12 / medium 0.08 / large 0.05 %/s στο σκοτάδι, ×1.5 difficulty, ×0.5 solo). Στο φως δεν πέφτει — ξετίκαρε το «Σκοτάδι». Τα ghosts που κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω.</div>
+        <div class="sanity-note" id="sanNote">Σύρε το slider στο τρέχον sanity σου — ή άναψε το <strong>Auto-drain</strong> για να πέφτει μόνο του (small 0.12 / medium 0.08 / large 0.05 %/s στο σκοτάδι, <span id="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — το difficulty αλλάζει από το μενού πάνω δεξιά). Στο φως δεν πέφτει — ξετίκαρε το «Σκοτάδι». Τα ghosts που κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω.</div>
       </div>
       <div class="tool-col">
         <div class="tool-title">Smudge Timer</div>
@@ -366,13 +374,39 @@
         <div class="smudge-display" id="huntDisplay">0:20</div>
         <div class="smudge-bar"><div id="huntBar"></div></div>
         <div class="smudge-btns">
-          <button class="btn primary" data-hunt="20">Small (20s)</button>
-          <button class="btn primary" data-hunt="40">Medium (40s)</button>
-          <button class="btn primary" data-hunt="50">Large (50s)</button>
+          <button class="btn primary" data-hunt="20" data-map="small">Small (20s)</button>
+          <button class="btn primary" data-hunt="40" data-map="medium">Medium (40s)</button>
+          <button class="btn primary" data-hunt="50" data-map="large">Large (50s)</button>
           <button class="btn ghostvar" data-hunt="25">Cooldown (25s)</button>
           <button class="btn" id="huntReset">Reset</button>
         </div>
-        <div class="smudge-note">Διάρκειες hunt για <strong>Intermediate</strong>. Grace period 4s στην αρχή (το ghost δεν σκοτώνει ακόμα). Cursed hunts: +20s. Cooldown μεταξύ hunts: 25s (<strong>Demon</strong>: 20s).</div>
+        <div class="smudge-note">Διάρκειες hunt για <strong id="diffNameTxt">Intermediate</strong>. Grace period <span id="graceTxt">4s</span> στην αρχή (το ghost δεν σκοτώνει ακόμα). Cursed hunts: +20s. Cooldown μεταξύ hunts: 25s (<strong>Demon</strong>: 20s).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel anchor-target" id="survival">
+    <div class="panel-label">Survival — Κρύψιμο &amp; Equipment</div>
+    <div class="cp-grid">
+      <div class="cp">
+        <h3>🤫 Κανόνες κρυψίματος (hunt)</h3>
+        <ul>
+          <li>🔦 Σβήσε flashlight &amp; video cam <strong>πριν</strong> κρυφτείς — τα ενεργά electronics στο χέρι σου σε προδίδουν</li>
+          <li>🎙️ Βουβός σε όλο το hunt — σε ακούει από το mic (<strong>Yokai</strong>: μόνο από ~2.5m)</li>
+          <li>👀 Σπάσε το line-of-sight πριν τρυπώσεις — θυμάται το τελευταίο σημείο που σε είδε</li>
+          <li>🚪 Κλείσε πόρτα/locker πίσω σου και μη βγεις νωρίς — μέτρα με το Hunt Countdown παραπάνω</li>
+          <li>🔁 <strong>Aswang</strong>: άλλαξε κρυψώνα κάθε hunt · <strong>Kormos</strong>: μείνε ακίνητος αντί για locker · <strong>Deogen</strong>: μην κρυφτείς — loop γύρω από έπιπλα</li>
+        </ul>
+      </div>
+      <div class="cp">
+        <h3>🎒 Equipment cheat lines</h3>
+        <ul>
+          <li>✝️ <strong>Crucifix</strong>: μπλοκάρει hunt μόνο αν είναι κάτω <em>πριν</em> ξεκινήσει — άσ' το στο ghost room, όχι πάνω σου. Καίγεται όταν εξαντληθούν οι χρήσεις του (<span class="danger">δεν πιάνει σε cursed hunts</span>)</li>
+          <li>📹 <strong>Video cam + tripod</strong> στο D.O.T.S.: ο μόνος τρόπος για Goryo — και τα Ghost Orbs φαίνονται μόνο μέσω κάμερας στο σκοτάδι</li>
+          <li>🎤 <strong>Parabolic mic</strong>: κραυγή Banshee, έξτρα ήχοι Myling, κατάρα Moroi — τρία IDs με ένα εργαλείο</li>
+          <li>🕯️ <strong>Firelight</strong>: «φορητό crucifix» για το Onryo, και κρατά τη θερμοκρασία πάνω vs Hantu</li>
+          <li>📟 <strong>Motion/Sound sensors</strong>: παθητικό tracking για objectives χωρίς να εκτίθεσαι</li>
+        </ul>
       </div>
     </div>
   </div>
@@ -530,6 +564,15 @@ const GHOSTS = [
 const state = {}; // key -> 0 unknown, 1 on, 2 off
 EV.forEach(e=>state[e.k]=0);
 let sanity = 50;
+
+// Difficulty: drain multiplier, διάρκειες hunt ανά μέγεθος χάρτη, grace period, πόσα evidence δίνονται.
+const DIFF = {
+ amateur:      {label:"Amateur",      mult:1.0, hunts:{small:15,medium:30,large:40}, grace:5, evid:3},
+ intermediate: {label:"Intermediate", mult:1.5, hunts:{small:20,medium:40,large:50}, grace:4, evid:3},
+ professional: {label:"Professional", mult:2.0, hunts:{small:30,medium:50,large:60}, grace:3, evid:3},
+ nightmare:    {label:"Nightmare",    mult:2.0, hunts:{small:40,medium:60,large:70}, grace:2, evid:2},
+};
+let diff = "intermediate";
 
 // Behavior φίλτρα: exclude = ghosts που ΔΕΝ κάνουν ποτέ αυτό που είδες (αποκλείονται),
 // include = μόνο αυτά τα ghosts το κάνουν. Το Mimic περνάει πάντα τα include (μιμείται τα πάντα).
@@ -707,7 +750,7 @@ function drainTick(){
   const dt = (now - drainLast)/1000;
   drainLast = now;
   if(!drainDark.checked) return;
-  let rate = DRAIN_BASE[drainMap.value] * 1.5;
+  let rate = DRAIN_BASE[drainMap.value] * DIFF[diff].mult;
   if(drainSolo.checked) rate *= 0.5;
   setSanity(sanFloat - rate*dt);
 }
@@ -837,7 +880,7 @@ document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.rem
 // ---- persistence (refresh-proof evidence board & sanity) ----
 const LS_KEY="phasmo-journal-v1";
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff})); }catch(e){/* ignore */}
 }
 (function loadState(){
   try{
@@ -848,6 +891,7 @@ function saveState(){
     if(typeof d.sanity==="number" && d.sanity>=0 && d.sanity<=100){
       sanity=Math.round(d.sanity); sanFloat=sanity; sanRange.value=sanity; sanVal.textContent=sanity;
     }
+    if(d.diff && DIFF[d.diff]) diff=d.diff;
   }catch(e){/* corrupt state, start fresh */}
 })();
 
@@ -856,6 +900,24 @@ document.getElementById("resetBtn").onclick=()=>{
   BEHAVIORS.forEach(b=>bhState[b.id]=0);
   render();
 };
+
+// ---- difficulty selector ----
+const diffSel=document.getElementById("diffSel");
+function applyDiff(){
+  const d=DIFF[diff];
+  diffSel.value=diff;
+  document.querySelectorAll("[data-map]").forEach(b=>{
+    const secs=d.hunts[b.dataset.map];
+    b.dataset.hunt=secs;
+    b.textContent=b.dataset.map.charAt(0).toUpperCase()+b.dataset.map.slice(1)+" ("+secs+"s)";
+  });
+  document.getElementById("diffNameTxt").textContent=d.label;
+  document.getElementById("graceTxt").textContent=d.grace+"s";
+  document.getElementById("drainMultTxt").textContent="×"+d.mult;
+  document.getElementById("evidNote").style.display = d.evid<3 ? "block" : "none";
+  saveState();
+}
+diffSel.addEventListener("change",()=>{ diff=diffSel.value; applyDiff(); });
 
 // ---- scroll-spy nav + back-to-top ----
 const navLinks=[...document.querySelectorAll(".jumpnav a")];
@@ -873,6 +935,7 @@ toTopBtn.onclick=()=>scrollTo({top:0,behavior:"smooth"});
 
 smudgeTimer.reset();
 huntTimer.reset();
+applyDiff();
 render();
 spy();
 </script>
