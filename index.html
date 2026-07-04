@@ -670,18 +670,10 @@ sortedGhosts.forEach(g=>{
 function effEv(g){ return g.mimic ? [...g.ev,"ORB"] : g.ev; }
 
 // ---- «ποιο item να δοκιμάσω μετά;» ----
-// Για κάθε ζευγάρι αδοκίμαστων evidence κοιτάμε τα 4 πιθανά αποτελέσματα (✓✓/✓✗/✗✓/✗✗):
-// νικητής το ζευγάρι που στη ΧΕΙΡΟΤΕΡΗ περίπτωση αφήνει τα λιγότερα ghosts.
+// Κάθε αδοκίμαστο evidence βαθμολογείται με το πόσα ghosts κόβει ΕΓΓΥΗΜΕΝΑ,
+// ό,τι κι αν δείξει: ✓ κόβει όσα δεν το έχουν, ✗ όσα το έχουν → εγγύηση = min από τα δύο.
+// Tie-breaker το αναμενόμενο κόψιμο (2pq/N). Εμφανίζεται μόνο αφού μαρκαριστεί κάτι.
 const ITEM_OF={EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Θερμόμετρο",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"};
-function pairScore(pool,a,b){
-  const bins=[0,0,0,0];
-  pool.forEach(g=>{
-    const ev=effEv(g);
-    bins[(ev.includes(a)?2:0)+(ev.includes(b)?1:0)]++;
-  });
-  // exp = αναμενόμενο μέγεθος pool μετά τα δύο τεστ (Σn²/N) — tie-breaker κάτω από ίδιο worst case
-  return {worst:Math.max(...bins), exp:bins.reduce((s,n)=>s+n*n,0)/pool.length};
-}
 // ---- verdict: ένα μόνο πιθανό ghost ----
 // Απατεώνες: ο καθένας μπορεί να «κρύψει» ΕΝΑ συγκεκριμένο evidence. Προειδοποιούμε
 // μόνο αν ακριβώς αυτό το evidence έχει ✗ και ο απατεώνας ταιριάζει σε όλα τα ✓/behaviors —
@@ -712,28 +704,24 @@ function updateVerdict(pool,onKeys,offKeys){
 
 function updateSuggestion(pool){
   const box=document.getElementById("suggestBox");
-  const untested=EV.filter(e=>state[e.k]===0)
-    // κράτα μόνο evidence που όντως χωρίζουν το pool (αλλιώς μηδενική πληροφορία)
-    .filter(e=>{
-      const p=pool.filter(g=>effEv(g).includes(e.k)).length;
-      return p>0 && p<pool.length;
-    });
-  if(pool.length<=1 || untested.length===0){ box.classList.remove("show"); return; }
-  let best=null;
-  if(untested.length===1){
-    const e=untested[0];
-    const p=pool.filter(g=>effEv(g).includes(e.k)).length;
-    box.innerHTML=`🎯 Επόμενο item: <b>${e.ic} ${ITEM_OF[e.k]}</b> <span class="dim">(✓ αφήνει ${p} · ✗ αφήνει ${pool.length-p} από ${pool.length})</span>`;
-    box.classList.add("show");
-    return;
+  const anyMarked=EV.some(e=>state[e.k]!==0);
+  if(!anyMarked || pool.length<=1){ box.classList.remove("show"); return; }
+  const cands=EV.filter(e=>state[e.k]===0).map(e=>{
+    const p=pool.filter(g=>effEv(g).includes(e.k)).length, q=pool.length-p;
+    return {e, cut:Math.min(p,q), exp:2*p*q/pool.length};
+  }).filter(c=>c.cut>0).sort((a,b)=>b.cut-a.cut||b.exp-a.exp);
+  if(!cands.length){ box.classList.remove("show"); return; }
+  const nameOf=c=>`<b>${c.e.ic} ${ITEM_OF[c.e.k]}</b>`;
+  const one=cands[0], two=cands[1];
+  let html;
+  if(!two){
+    html=`🎯 Επόμενο item: ${nameOf(one)} — <span class="dim">ό,τι κι αν δείξει, κόβει τουλάχιστον ${one.cut} από τα ${pool.length} πιθανά.</span>`;
+  } else if(two.cut===one.cut){
+    html=`🎯 Πάρε είτε ${nameOf(one)} είτε ${nameOf(two)} — <span class="dim">όποιο από τα δύο κι αν δοκιμάσεις, κόβει τουλάχιστον ${one.cut} από τα ${pool.length} πιθανά.</span>`;
+  } else {
+    html=`🎯 Πάρε πρώτα ${nameOf(one)} — <span class="dim">ό,τι κι αν δείξει, κόβει τουλάχιστον ${one.cut} από τα ${pool.length} πιθανά.</span> Μετά αξίζει το ${nameOf(two)} <span class="dim">(κόβει τουλάχιστον ${two.cut})</span>.`;
   }
-  for(let i=0;i<untested.length;i++)
-    for(let j=i+1;j<untested.length;j++){
-      const s=pairScore(pool,untested[i].k,untested[j].k);
-      if(!best || s.worst<best.worst || (s.worst===best.worst && s.exp<best.exp))
-        best={a:untested[i], b:untested[j], worst:s.worst, exp:s.exp};
-    }
-  box.innerHTML=`🎯 Επόμενα items: <b>${best.a.ic} ${ITEM_OF[best.a.k]}</b> + <b>${best.b.ic} ${ITEM_OF[best.b.k]}</b> <span class="dim">— ό,τι κι αν δείξουν, στη χειρότερη μένουν ${best.worst} από ${pool.length} πιθανά</span>`;
+  box.innerHTML=html;
   box.classList.add("show");
 }
 
