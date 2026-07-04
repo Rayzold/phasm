@@ -21,6 +21,7 @@
     --line:#232b38;
   }
   *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
   html,body{margin:0;padding:0}
   body{
     background:var(--bg);
@@ -45,6 +46,23 @@
   .rec::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--danger);animation:blink 1.4s steps(1) infinite}
   @keyframes blink{50%{opacity:.15}}
   .sub{color:var(--muted);font-size:14px;margin:2px 0 22px;max-width:640px;line-height:1.5}
+  /* ---------- section jump nav ---------- */
+  .jumpnav{
+    position:sticky;top:0;z-index:50;
+    display:flex;flex-wrap:wrap;gap:7px;
+    padding:10px 0 12px;margin-bottom:14px;
+    background:linear-gradient(180deg,var(--bg) 78%,transparent);
+  }
+  .jumpnav a{
+    font-family:"Special Elite",monospace;
+    font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--nv-dim);text-decoration:none;
+    border:1px solid var(--line);border-radius:20px;
+    padding:6px 12px;background:#0c1118;white-space:nowrap;
+    transition:all .12s ease;
+  }
+  .jumpnav a:hover{border-color:var(--nv);color:var(--nv);box-shadow:0 0 12px rgba(143,227,136,.12)}
+  .anchor-target{scroll-margin-top:64px}
   /* ---------- section labels ---------- */
   .panel{
     border:1px solid var(--line);
@@ -245,7 +263,16 @@
   </header>
   <p class="sub">Τσέκαρε τα evidence που βρίσκεις (1 κλικ = ✓ το έχω, 2 κλικ = ✗ το απέκλεισα) και δες live ποια ghosts μένουν — μαζί με το tell και το counter-play του καθενός. Intermediate = 3 evidence διαθέσιμα.</p>
 
-  <div class="panel">
+  <nav class="jumpnav">
+    <a href="#evidence">Evidence</a>
+    <a href="#sanity-smudge">Sanity &amp; Smudge</a>
+    <a href="#hunt-toolkit">Hunt Toolkit</a>
+    <a href="#cursed">Cursed Items</a>
+    <a href="#thresholds">Thresholds</a>
+    <a href="#grid">Ghosts</a>
+  </nav>
+
+  <div class="panel anchor-target" id="evidence">
     <div class="panel-label">Evidence Board</div>
     <div class="ev-grid" id="evGrid"></div>
     <div class="panel-label" style="margin-top:16px">Behavior — τι είδες; (προαιρετικά φίλτρα)</div>
@@ -258,7 +285,7 @@
     </div>
   </div>
 
-  <div class="panel">
+  <div class="panel anchor-target" id="sanity-smudge">
     <div class="panel-label">Sanity Tracker &amp; Smudge Timer</div>
     <div class="tools-grid">
       <div class="tool-col">
@@ -304,7 +331,7 @@
     </div>
   </div>
 
-  <div class="panel">
+  <div class="panel anchor-target" id="hunt-toolkit">
     <div class="panel-label">Hunt Toolkit — Footstep Tapper &amp; Countdown</div>
     <div class="tools-grid">
       <div class="tool-col">
@@ -330,7 +357,7 @@
     </div>
   </div>
 
-  <div class="panel">
+  <div class="panel anchor-target" id="cursed">
     <div class="panel-label">Cursed Possessions Quick-Ref (1 ανά συμβόλαιο, τυχαίο)</div>
     <div class="cp-grid">
       <div class="cp">
@@ -382,7 +409,7 @@
     <div class="sanity-note" style="margin-top:10px">Όλα τα cursed hunts: +20s διάρκεια από το κανονικό, δεν μπλοκάρονται με crucifix/smudge στο ξεκίνημά τους.</div>
   </div>
 
-  <div class="panel">
+  <div class="panel anchor-target" id="thresholds">
     <div class="panel-label">Sanity Threshold Quick-Reference (ταξινομημένα, υψηλότερο πρώτα)</div>
     <div class="thresh-wrap">
       <table class="thresh">
@@ -393,7 +420,7 @@
     <div class="sanity-note" style="margin-top:10px">Κόκκινη γραμμή = το ghost μπορεί ήδη να κάνει hunt στο sanity που έχεις ορίσει παραπάνω. Θολές γραμμές = ήδη αποκλεισμένο βάσει evidence.</div>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <div class="grid anchor-target" id="grid"></div>
   <div class="empty" id="empty">
     <span class="big">ΚΑΝΕΝΑ ΤΑΙΡΙΑΣΜΑ</span>
     Κάποιο evidence είναι λάθος καταγεγραμμένο — ξαναδές τα ✓/✗ σου.<br>
