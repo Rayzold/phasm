@@ -147,6 +147,22 @@
   .btn:hover{border-color:#3a465a}
   .btn:disabled{opacity:.4;cursor:default}
   .smudge-note{font-size:12px;color:var(--muted);line-height:1.5}
+  /* ---------- footstep tapper ---------- */
+  .tap-btn{
+    width:100%;padding:16px 10px;border-radius:10px;border:1px solid var(--nv-dim);
+    background:rgba(143,227,136,.06);color:var(--nv);
+    font-family:"Special Elite",monospace;font-size:22px;letter-spacing:3px;
+    cursor:pointer;margin-bottom:10px;user-select:none;transition:background .08s;
+  }
+  .tap-btn:active,.tap-btn.pressed{background:rgba(143,227,136,.22)}
+  .tap-btn small{display:block;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:11px;color:var(--muted);letter-spacing:normal;margin-top:4px}
+  .tap-readout{font-family:"Special Elite",monospace;font-size:24px;color:var(--nv);text-align:center;margin-bottom:10px}
+  .tap-readout .dim{color:var(--muted);font-size:13px}
+  .speed-rows{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+  .speed-row{display:flex;gap:8px;align-items:baseline;font-size:12.5px;color:var(--muted);border:1px solid transparent;border-radius:6px;padding:3px 8px}
+  .speed-row .sp{font-family:"Special Elite",monospace;color:#B9C2CE;white-space:nowrap;min-width:86px;font-variant-numeric:tabular-nums}
+  .speed-row.hit{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.06)}
+  .speed-row.hit .sp{color:var(--nv)}
   /* ---------- threshold quick-reference ---------- */
   .thresh-wrap{overflow-x:auto}
   table.thresh{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
@@ -259,6 +275,32 @@
           <button class="btn" id="smReset">Reset</button>
         </div>
         <div class="smudge-note">Standard προστασία: 90s χωρίς hunt. <strong>Spirit</strong> extend: 180s. <strong>Yurei</strong>: αν κάνεις smudge μέσα στο δωμάτιό του, καθηλώνεται εκεί για 90s αντί να roamάρει.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Hunt Toolkit — Footstep Tapper &amp; Countdown</div>
+    <div class="tools-grid">
+      <div class="tool-col">
+        <div class="tool-title">Footstep Speed Tapper</div>
+        <button class="tap-btn" id="tapBtn">TAP<small>ή πάτα Space</small></button>
+        <div class="tap-readout"><span id="tapBpm">–</span><span class="dim"> bpm · </span><span id="tapMs">–</span><span class="dim"> m/s</span></div>
+        <div class="speed-rows" id="speedRows"></div>
+        <div class="smudge-note">Χτύπα ρυθμικά μαζί με τα βήματα του ghost στο hunt (5+ taps για ακρίβεια — παύση 5s μηδενίζει). Οι γραμμές που ταιριάζουν με τη μετρημένη ταχύτητα ανάβουν πράσινες.</div>
+      </div>
+      <div class="tool-col">
+        <div class="tool-title">Hunt Countdown</div>
+        <div class="smudge-display" id="huntDisplay">0:20</div>
+        <div class="smudge-bar"><div id="huntBar"></div></div>
+        <div class="smudge-btns">
+          <button class="btn primary" data-hunt="20">Small (20s)</button>
+          <button class="btn primary" data-hunt="40">Medium (40s)</button>
+          <button class="btn primary" data-hunt="50">Large (50s)</button>
+          <button class="btn ghostvar" data-hunt="25">Cooldown (25s)</button>
+          <button class="btn" id="huntReset">Reset</button>
+        </div>
+        <div class="smudge-note">Διάρκειες hunt για <strong>Intermediate</strong>. Grace period 4s στην αρχή (το ghost δεν σκοτώνει ακόμα). Cursed hunts: +20s. Cooldown μεταξύ hunts: 25s (<strong>Demon</strong>: 20s).</div>
       </div>
     </div>
   </div>
@@ -421,6 +463,8 @@ function render(){
   const statusEl = document.getElementById("sanStatus");
   statusEl.textContent = st.txt;
   statusEl.className = "sanity-status " + st.cls;
+
+  saveState();
 }
 
 // ---- sanity tracker wiring ----
@@ -440,49 +484,142 @@ document.querySelectorAll(".preset").forEach(btn=>{
   });
 });
 
-// ---- smudge timer wiring ----
-let smInterval=null, smTotal=90, smRemaining=90;
-const smDisplay=document.getElementById("smDisplay");
-const smBar=document.getElementById("smBar");
-function fmt(s){ const m=Math.floor(s/60), r=s%60; return m+":"+String(r).padStart(2,"0"); }
-function paintSmudge(){
-  smDisplay.textContent = fmt(Math.max(smRemaining,0));
-  smDisplay.classList.toggle("done", smRemaining<=0);
-  smBar.style.width = Math.max(0,(smRemaining/smTotal)*100)+"%";
-}
-function startSmudge(seconds){
-  clearInterval(smInterval);
-  smTotal = seconds; smRemaining = seconds;
-  paintSmudge();
-  smInterval = setInterval(()=>{
-    smRemaining--;
-    paintSmudge();
-    if(smRemaining<=0){
-      clearInterval(smInterval);
-      beep();
-    }
-  },1000);
-}
-function beep(){
+// ---- shared audio ----
+// Το AudioContext δημιουργείται/γίνεται resume μέσα σε user gesture (κλικ στα Start/TAP),
+// αλλιώς το Chrome το αφήνει suspended και το beep στο τέλος του timer βγαίνει βουβό.
+let audioCtx=null;
+function ensureAudio(){
   try{
-    const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    const o = ctx.createOscillator(); const g = ctx.createGain();
-    o.frequency.value = 660; o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.15, ctx.currentTime);
-    o.start();
-    o.stop(ctx.currentTime+0.35);
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
   }catch(e){/* audio not available, ignore */}
 }
-document.getElementById("smStart90").onclick=()=>startSmudge(90);
-document.getElementById("smStart180").onclick=()=>startSmudge(180);
-document.getElementById("smReset").onclick=()=>{
-  clearInterval(smInterval);
-  smTotal=90; smRemaining=90;
-  paintSmudge();
-};
+function beep(freq,times){
+  if(!audioCtx) return;
+  try{
+    for(let i=0;i<times;i++){
+      const t=audioCtx.currentTime+i*0.5;
+      const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0.15,t);
+      o.start(t); o.stop(t+0.35);
+    }
+  }catch(e){/* ignore */}
+}
+
+// ---- timers ----
+// Βασισμένοι σε Date.now() deadline αντί για μέτρημα ticks: τα setInterval στραγγαλίζονται
+// σε background tabs (και αυτό το tab ΘΑ είναι background όσο παίζεις), οπότε το υπόλοιπο
+// υπολογίζεται πάντα από το ρολόι.
+function fmt(s){ const m=Math.floor(s/60), r=s%60; return m+":"+String(r).padStart(2,"0"); }
+function makeTimer(displayId,barId,defaultSecs,onDone){
+  const display=document.getElementById(displayId), bar=document.getElementById(barId);
+  let deadline=0, total=defaultSecs, interval=null;
+  function paint(rem,idle){
+    display.textContent = fmt(Math.max(rem,0));
+    display.classList.toggle("done", !idle && rem<=0);
+    bar.style.width = (idle ? 100 : Math.max(0,(rem/total)*100))+"%";
+  }
+  function tick(){
+    const rem = Math.ceil((deadline-Date.now())/1000);
+    paint(rem,false);
+    if(rem<=0){ clearInterval(interval); interval=null; onDone(); }
+  }
+  return {
+    start(seconds){
+      ensureAudio();
+      total=seconds; deadline=Date.now()+seconds*1000;
+      clearInterval(interval);
+      paint(seconds,false);
+      interval=setInterval(tick,250);
+    },
+    reset(){ clearInterval(interval); interval=null; deadline=0; paint(defaultSecs,true); }
+  };
+}
+const smudgeTimer = makeTimer("smDisplay","smBar",90,()=>beep(660,1));
+const huntTimer   = makeTimer("huntDisplay","huntBar",20,()=>beep(880,2));
+document.getElementById("smStart90").onclick=()=>smudgeTimer.start(90);
+document.getElementById("smStart180").onclick=()=>smudgeTimer.start(180);
+document.getElementById("smReset").onclick=()=>smudgeTimer.reset();
+document.querySelectorAll("[data-hunt]").forEach(b=>b.onclick=()=>huntTimer.start(Number(b.dataset.hunt)));
+document.getElementById("huntReset").onclick=()=>huntTimer.reset();
+
+// ---- footstep speed tapper ----
+// Σχέση της κοινότητας (tybayn cheat sheet): βήμα κάθε (1/v − 0.075)s ⇒ v = bpm / (60 + 0.075·bpm)
+const SPEED_REF=[
+ {min:0.40,max:3.00,label:"Deogen",note:"0.4 κοντά σου → 3.0 μακριά"},
+ {min:1.00,max:1.00,label:"Revenant (δεν σε βλέπει) / Thaye (γερασμένο)",note:"σταθερό"},
+ {min:1.40,max:2.70,label:"Hantu",note:"πιο γρήγορο στο κρύο, χωρίς LoS accel"},
+ {min:1.50,max:2.25,label:"Moroi",note:"πιο γρήγορο όσο πέφτει το sanity σου"},
+ {min:1.53,max:1.87,label:"The Twins",note:"δύο σταθερές ταχύτητες"},
+ {min:1.70,max:1.70,label:"Βασική ταχύτητα (τα περισσότερα ghosts)",note:"με line-of-sight ως ×1.65 → ~2.8"},
+ {min:2.50,max:2.50,label:"Raiju (ενεργά ηλεκτρονικά) / Jinn (ρεύμα ON, από μακριά)",note:""},
+ {min:2.75,max:2.75,label:"Thaye (φρέσκο)",note:""},
+ {min:3.00,max:3.00,label:"Revenant (σε βλέπει)",note:""},
+];
+const speedRows=document.getElementById("speedRows");
+SPEED_REF.forEach((s,i)=>{
+  const d=document.createElement("div");
+  d.className="speed-row"; d.dataset.i=i;
+  d.innerHTML=`<span class="sp">${s.min===s.max?s.min.toFixed(2):s.min.toFixed(2)+"–"+s.max.toFixed(2)}</span><span>${s.label}${s.note?" — "+s.note:""}</span>`;
+  speedRows.appendChild(d);
+});
+let tapTimes=[];
+const tapBpmEl=document.getElementById("tapBpm"), tapMsEl=document.getElementById("tapMs");
+function bpmToSpeed(bpm){ return bpm/(60+0.075*bpm); }
+function paintTaps(){
+  if(tapTimes.length<2){
+    tapBpmEl.textContent="–"; tapMsEl.textContent="–";
+    speedRows.querySelectorAll(".speed-row").forEach(r=>r.classList.remove("hit"));
+    return;
+  }
+  const ints=[];
+  for(let i=1;i<tapTimes.length;i++) ints.push(tapTimes[i]-tapTimes[i-1]);
+  const use=ints.slice(-5);
+  const avg=use.reduce((a,b)=>a+b,0)/use.length;
+  const bpm=60000/avg, v=bpmToSpeed(bpm);
+  tapBpmEl.textContent=Math.round(bpm);
+  tapMsEl.textContent=v.toFixed(2);
+  speedRows.querySelectorAll(".speed-row").forEach(r=>{
+    const s=SPEED_REF[r.dataset.i];
+    r.classList.toggle("hit", v>=s.min-0.08 && v<=s.max+0.08);
+  });
+}
+function tap(){
+  ensureAudio();
+  const now=Date.now();
+  if(tapTimes.length && now-tapTimes[tapTimes.length-1]>5000) tapTimes=[];
+  tapTimes.push(now);
+  if(tapTimes.length>13) tapTimes.shift();
+  paintTaps();
+}
+const tapBtn=document.getElementById("tapBtn");
+tapBtn.onclick=tap;
+document.addEventListener("keydown",e=>{
+  if(e.code==="Space" && !e.repeat){ e.preventDefault(); tap(); tapBtn.classList.add("pressed"); }
+});
+document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.remove("pressed"); });
+
+// ---- persistence (refresh-proof evidence board & sanity) ----
+const LS_KEY="phasmo-journal-v1";
+function saveState(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,sanity})); }catch(e){/* ignore */}
+}
+(function loadState(){
+  try{
+    const d=JSON.parse(localStorage.getItem(LS_KEY)||"null");
+    if(!d) return;
+    EV.forEach(e=>{ const v=d.ev && d.ev[e.k]; if(v===1||v===2) state[e.k]=v; });
+    if(typeof d.sanity==="number" && d.sanity>=0 && d.sanity<=100){
+      sanity=Math.round(d.sanity); sanRange.value=sanity; sanVal.textContent=sanity;
+    }
+  }catch(e){/* corrupt state, start fresh */}
+})();
+
 document.getElementById("resetBtn").onclick=()=>{ EV.forEach(e=>state[e.k]=0); render(); };
 
-paintSmudge();
+smudgeTimer.reset();
+huntTimer.reset();
 render();
 </script>
 </body>
