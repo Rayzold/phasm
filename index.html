@@ -335,9 +335,8 @@
     <div class="mimic-warn" id="evidNote"><span class="l-el">⚠ <strong>Nightmare:</strong> δίνονται μόνο 2 evidence — το 3ο υπάρχει αλλά μένει κρυφό. Μη βάζεις ✗ σε evidence που απλώς δεν βρήκες ακόμα.</span><span class="l-en">⚠ <strong>Nightmare:</strong> only 2 evidence are given — the 3rd exists but stays hidden. Don't ✗ evidence you simply haven't found yet.</span></div>
     <div class="panel-label" style="margin-top:16px"><span class="l-el">Behavior — τι είδες; (προαιρετικά φίλτρα)</span><span class="l-en">Behavior — what did you see? (optional filters)</span></div>
     <div class="ev-grid" id="bhGrid"></div>
-    <div class="panel-label" style="margin-top:16px"><span class="l-el">Other — όνομα &amp; μοντέλο</span><span class="l-en">Other — name &amp; model</span></div>
+    <div class="panel-label" style="margin-top:16px"><span class="l-el">Other — ό,τι άλλο πρόσεξες</span><span class="l-en">Other — anything else you noticed</span></div>
     <div class="ev-grid" id="otGrid"></div>
-    <div class="mimic-warn" id="genderNote"><span class="l-el">♀ Το θηλυκό όνομα δεν αποκλείει τίποτα — κάθε ghost μπορεί να είναι θηλυκό. Θυμήσου όμως: <strong>Banshee</strong> &amp; <strong>Dayan</strong> είναι ΠΑΝΤΑ θηλυκές, οπότε το <em>αρσενικό</em> όνομα είναι που τις κόβει.</span><span class="l-en">♀ A female name rules nothing out — any ghost can be female. Remember though: <strong>Banshee</strong> &amp; <strong>Dayan</strong> are ALWAYS female, so it's a <em>male</em> name that cuts them.</span></div>
     <div class="mimic-warn" id="mimicWarn"><span class="l-el">⚠ <strong>The Mimic:</strong> δείχνει <em>πάντα</em> ψεύτικα Ghost Orbs επιπλέον των κανονικών του evidence (Spirit Box, Ultraviolet, Freezing). Με Orbs στο ταμπλό, μην το ξεγράφεις μέχρι να αποκλείσεις κάποιο από αυτά τα τρία.</span><span class="l-en">⚠ <strong>The Mimic:</strong> <em>always</em> shows fake Ghost Orbs on top of its real evidence (Spirit Box, Ultraviolet, Freezing). With Orbs on the board, don't write it off until you've excluded one of those three.</span></div>
     <div class="toolbar">
       <span class="count"><span class="l-el">Πιθανά</span><span class="l-en">Possible</span>: <b id="cnt">29</b>/29</span>
@@ -816,10 +815,15 @@ const BEHAVIORS = [
  {id:"earlyHunt", label:"Hunt ενώ sanity > 70%",           en:"Hunted at sanity > 70%",          ic:"😱", include:["Demon","Yokai","Thaye","Onryo","The Mimic"]},
  {id:"noPhoto",   label:"Αόρατο σε φωτογραφία event",      en:"Invisible in event photo",        ic:"📸", include:["Phantom","The Mimic"]},
  {id:"foundHide", label:"Ήρθε ίσια στην κρυψώνα μου",      en:"Came straight to my hiding spot", ic:"🙈", include:["Deogen","Aswang","The Mimic"]},
- // "Other": φύλο από όνομα/μοντέλο. Banshee & Dayan είναι πάντα θηλυκές — το αρσενικό τις κόβει.
- // Το θηλυκό δεν κόβει κανένα (όλα μπορεί να είναι θηλυκά) — δείχνει μόνο το genderNote.
- {id:"male",   label:"Αρσενικό όνομα/μοντέλο", en:"Male name/model",   ic:"♂️", exclude:["Banshee","Dayan"], group:"other", mutex:"female"},
- {id:"female", label:"Θηλυκό όνομα/μοντέλο",   en:"Female name/model", ic:"♀️", exclude:[],                  group:"other", mutex:"male"},
+ // "Other": παρατηρήσεις εκτός behavior. Banshee & Dayan είναι πάντα θηλυκές — το αρσενικό όνομα τις κόβει
+ // (το θηλυκό δεν κόβει κανένα, γι' αυτό δεν υπάρχει). Η ανάσα του Deogen και τα 6δάχτυλα prints του Obake
+ // είναι unique — ούτε το Mimic τα αναπαράγει.
+ {id:"male",     label:"Αρσενικό όνομα/μοντέλο",        en:"Male name/model",              ic:"♂️", exclude:["Banshee","Dayan"], group:"other"},
+ {id:"airball",  label:"Είδα «airball» event",           en:"Saw an 'airball' event",       ic:"🌀", exclude:["Oni"], group:"other"},
+ {id:"sbBreath", label:"Βαριά ανάσα στο Spirit Box",     en:"Heavy breathing on Spirit Box",ic:"🌬️", include:["Deogen"], group:"other"},
+ {id:"sixFinger",label:"Fingerprints με 6 δάχτυλα",      en:"Six-fingered fingerprints",    ic:"🖖", include:["Obake"], group:"other"},
+ {id:"twinTouch",label:"Interactions σε 2 σημεία μαζί",  en:"Interactions in 2 spots at once",ic:"👯", include:["The Twins","The Mimic"], group:"other"},
+ {id:"doorSlam", label:"Πόρτα έκλεισε τέρμα με δύναμη",  en:"Door slammed fully shut",      ic:"🚪", include:["Yurei","The Mimic"], group:"other"},
 ];
 const bhState = {}; // id -> 0 off, 1 on
 BEHAVIORS.forEach(b=>bhState[b.id]=0);
@@ -851,11 +855,7 @@ function buildBhBoard(){
     const b=document.createElement("button");
     b.className="ev"; b.dataset.bh=bh.id;
     b.innerHTML=`<span class="mark"></span><span class="ic">${bh.ic}</span><span class="name">${lang==="en"?bh.en:bh.label}</span>`;
-    b.onclick=()=>{
-      bhState[bh.id]=bhState[bh.id]?0:1;
-      if(bhState[bh.id] && bh.mutex) bhState[bh.mutex]=0; // αρσενικό/θηλυκό αλληλοαποκλείονται
-      render();
-    };
+    b.onclick=()=>{ bhState[bh.id]=bhState[bh.id]?0:1; render(); };
     (bh.group==="other" ? otGrid : bhGrid).appendChild(b);
   });
 }
@@ -999,7 +999,6 @@ function render(){
   // Mimic warning if ORB confirmed and Mimic still possible
   const mimicOk = onKeys.every(k=>["SB","UV","FRZ","ORB"].includes(k)) && !offKeys.some(k=>["SB","UV","FRZ","ORB"].includes(k));
   document.getElementById("mimicWarn").classList.toggle("show", onKeys.includes("ORB") && mimicOk);
-  document.getElementById("genderNote").classList.toggle("show", bhState.female===1);
   const hint=document.getElementById("hintTxt");
   if(cnt>1 && cnt<=4 && onKeys.length>=1){
     hint.textContent=STR[lang].hintClose;
