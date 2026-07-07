@@ -70,6 +70,12 @@
   #langBtn{cursor:pointer}
   #langBtn:hover{border-color:var(--nv);color:var(--nv)}
   /* ---------- ability index ---------- */
+  .ab-cat{margin-bottom:16px}
+  .ab-cat-h{
+    font-family:"Special Elite",monospace;font-size:12px;letter-spacing:2px;
+    color:var(--nv-dim);text-transform:uppercase;margin:4px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:5px;
+  }
   .ab-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:2px 18px}
   .ab-row{
     display:flex;gap:12px;align-items:baseline;justify-content:space-between;
@@ -671,7 +677,7 @@
 
   <div class="panel anchor-target" id="abilities" style="margin-top:22px">
     <div class="panel-label"><span class="l-el">Ability Index — τι είδες → ποιο ghost το κάνει</span><span class="l-en">Ability Index — what you saw → which ghost does it</span></div>
-    <div class="ab-list" id="abilGrid"></div>
+    <div id="abilGrid"></div>
   </div>
   <footer><span class="l-el">Evidence data: Phasmophobia Wiki (Ιούλιος 2026, 29 ghosts)</span><span class="l-en">Evidence data: Phasmophobia Wiki (July 2026, 29 ghosts)</span></footer>
   <button class="toTop" id="toTop" title="Πάνω" aria-label="Επιστροφή στην κορυφή">↑</button>
@@ -810,56 +816,101 @@ const STR = {
 function tellOf(g){ return lang==="en" ? (TELL_EN[g.name]||g.tell) : g.tell; }
 function huntOf(g){ return lang==="en" ? (HUNT_EN[g.name]||g.hunt) : g.hunt; }
 
-// ---- ability index: παρατήρηση → ποιο ghost το κάνει (reverse lookup) ----
-const ABILITY_INDEX = [
- {el:"Πόρτα έκλεισε ΤΕΡΜΑ με δύναμη (όχι απλό τρέμουλο)", en:"A door slammed FULLY shut (not just a nudge)", g:"Yurei"},
- {el:"Interactions σε δύο σημεία σχεδόν ταυτόχρονα", en:"Interactions in two spots almost simultaneously", g:"The Twins"},
- {el:"Το αλάτι μένει ανέγγιχτο ενώ υπάρχει activity", en:"Salt stays untouched despite activity", g:"Wraith"},
- {el:"EMF μακριά από το ghost room χωρίς λόγο (τηλεμεταφορά σε παίκτη)", en:"EMF far from the ghost room for no reason (teleport to a player)", g:"Wraith"},
- {el:"Δεν βγήκε στη φωτογραφία ενώ ήταν μπροστά σου", en:"Missing from the photo though it was right in front of you", g:"Phantom"},
- {el:"Πολλά αντικείμενα εκτοξεύτηκαν μαζί", en:"Many objects hurled at once", g:"Poltergeist"},
- {el:"Κραυγή/ουρλιαχτό στο parabolic mic", en:"Scream/wail on the parabolic mic", g:"Banshee"},
- {el:"Αγνοεί τους άλλους και κυνηγά πάντα τον ίδιο παίκτη", en:"Ignores everyone and always chases the same player", g:"Banshee"},
- {el:"Απότομο sanity drop κοντά του με ρεύμα ON / EMF στο breaker", en:"Sudden sanity drop near it with the power ON / EMF at the breaker", g:"Jinn"},
- {el:"Το φως σβήνει την ώρα που το ανάβεις", en:"The light goes off the moment you flip it on", g:"Mare"},
- {el:"Από σαλιγκάρι σε πύραυλο μόλις σε δει", en:"From snail to rocket the moment it sees you", g:"Revenant"},
- {el:"Σχεδόν μηδενική δραστηριότητα όσο είστε μέσα", en:"Near-zero activity while you're inside", g:"Shade"},
- {el:"Hunt με sanity ακόμα στο 90–100%", en:"A hunt with sanity still at 90–100%", g:"Demon"},
- {el:"Δεύτερο hunt σχεδόν αμέσως μετά το πρώτο (20s)", en:"A second hunt almost right after the first (20s)", g:"Demon"},
- {el:"Δεν κάνει ΠΟΤΕ το «airball» event", en:"NEVER does the 'airball' event", g:"Oni"},
- {el:"Τα hunts ξεκινούν όταν μιλάτε στο voice", en:"Hunts start when you talk on voice", g:"Yokai"},
- {el:"Σε hunt σε προσπερνά ενώ ψιθυρίζεις δίπλα του", en:"Walks right past you in a hunt while you whisper nearby", g:"Yokai"},
- {el:"Ταχύτερο στα κρύα δωμάτια, παγωμένη ανάσα σε hunt", en:"Faster in cold rooms, freezing breath during hunts", g:"Hantu"},
- {el:"D.O.T.S. μόνο μέσα από την κάμερα, ποτέ με γυμνό μάτι", en:"D.O.T.S. only through the camera, never with the naked eye", g:"Goryo"},
- {el:"Heartbeat χωρίς να το ακούσεις να έρχεται", en:"Heartbeat with no footsteps heard coming", g:"Myling"},
- {el:"Κεριά/φλόγες σβήνουν συνέχεια — hunt στην 3η", en:"Candles/flames keep going out — hunt on the 3rd", g:"Onryo"},
- {el:"Επιταχύνει δίπλα σε αναμμένο εξοπλισμό", en:"Speeds up next to switched-on equipment", g:"Raiju"},
- {el:"Fingerprints με 6 δάχτυλα ή περίεργα σχήματα", en:"Fingerprints with 6 fingers or odd shapes", g:"Obake"},
- {el:"Prints που σβήνουν στον μισό χρόνο (ή λείπουν τελείως)", en:"Prints that fade in half the time (or are missing entirely)", g:"Obake"},
- {el:"Το ghost «αλλάζει προσωπικότητα» κάθε λίγα λεπτά", en:"The ghost 'changes personality' every few minutes", g:"The Mimic"},
- {el:"Ghost Orbs που δεν κολλάνε με τα υπόλοιπα evidence", en:"Ghost Orbs that don't line up with the rest of the evidence", g:"The Mimic"},
- {el:"Το sanity σου στραγγίζει αφύσικα γρήγορα (κατάρα)", en:"Your sanity drains unnaturally fast (curse)", g:"Moroi"},
- {el:"Βαριά, λαχανιασμένη ανάσα στο Spirit Box", en:"Heavy, wheezing breathing on the Spirit Box", g:"Deogen"},
- {el:"Έρχεται κατευθείαν πάνω σου όσο καλά κι αν κρύφτηκες", en:"Comes straight to you no matter how well you hid", g:"Deogen"},
- {el:"Ξεκίνησε τούρμπο και «κουράστηκε» με την ώρα", en:"Started turbo and 'got tired' over time", g:"Thaye"},
- {el:"Θηλυκό όνομα &amp; μοντέλο — πάντα", en:"Female name &amp; model — always", g:"Banshee · Dayan"},
- {el:"Κόβει ταχύτητα όταν παγώνεις, ανεβάζει όταν τρέχεις", en:"Slows when you freeze, speeds up when you run", g:"Dayan"},
- {el:"Crucifix/incense/salt το κάνουν πιο επιθετικό", en:"Crucifix/incense/salt make it more aggressive", g:"Gallu"},
- {el:"Ήρεμο–επιθετικό εναλλάξ, σαν ρολόι κάθε ~2 λεπτά", en:"Calm–aggressive swings, like clockwork every ~2 minutes", g:"Obambo"},
- {el:"Το hunt κόπηκε απότομα μόλις άνοιξε το locker σου", en:"The hunt cut off abruptly the moment it opened your locker", g:"Aswang"},
- {el:"Στο επόμενο hunt πήγε κατευθείαν στην παλιά σου κρυψώνα", en:"Next hunt it went straight to your previous hiding spot", g:"Aswang"},
- {el:"Αδιαφορεί για ό,τι βλέπει — αντιδρά μόνο σε ήχο βημάτων", en:"Ignores what it sees — reacts only to footstep sounds", g:"Kormos"},
- {el:"Σκότωσε μέσα από τοίχο ή έπιπλο", en:"Killed through a wall or furniture", g:"Kormos"},
- {el:"Μετά από smudge: 3 λεπτά απόλυτη ησυχία", en:"After a smudge: 3 minutes of total quiet", g:"Spirit"},
+// ---- ability index: παρατήρηση → ποιο ghost το κάνει, ανά κατηγορία ----
+// Όσα ανήκουν σε δύο κατηγορίες εμφανίζονται και στις δύο.
+const ABILITY_CATS = [
+ {ic:"🏃", el:"Ταχύτητα & Κίνηση", en:"Speed & Movement", rows:[
+  {el:"Από σαλιγκάρι σε πύραυλο μόλις σε δει", en:"From snail to rocket the moment it sees you", g:"Revenant"},
+  {el:"Ταχύτερο στα κρύα δωμάτια", en:"Faster in cold rooms", g:"Hantu"},
+  {el:"Επιταχύνει δίπλα σε αναμμένο εξοπλισμό", en:"Speeds up next to switched-on equipment", g:"Raiju"},
+  {el:"Ξεκίνησε τούρμπο και «κουράστηκε» με την ώρα", en:"Started turbo and 'got tired' over time", g:"Thaye"},
+  {el:"Κόβει ταχύτητα όταν παγώνεις, ανεβάζει όταν τρέχεις", en:"Slows when you freeze, speeds up when you run", g:"Dayan"},
+  {el:"Αργό σαν χελώνα από κοντά, γρήγορο από μακριά", en:"Turtle-slow up close, fast from afar", g:"Deogen"},
+  {el:"Πιάνει max ταχύτητα με line-of-sight σχεδόν αμέσως (~9s)", en:"Hits max line-of-sight speed almost instantly (~9s)", g:"Aswang"},
+  {el:"EMF μακριά από το ghost room χωρίς λόγο (τηλεμεταφορά σε παίκτη)", en:"EMF far from the ghost room for no reason (teleport to a player)", g:"Wraith"},
+  {el:"Ταχύτερο όσο πέφτει το sanity σου", en:"Faster as your sanity drops", g:"Moroi"},
+ ]},
+ {ic:"👹", el:"Hunts", en:"Hunts", rows:[
+  {el:"Hunt με sanity ακόμα στο 90–100%", en:"A hunt with sanity still at 90–100%", g:"Demon"},
+  {el:"Δεύτερο hunt σχεδόν αμέσως μετά το πρώτο (20s)", en:"A second hunt almost right after the first (20s)", g:"Demon"},
+  {el:"Τα hunts ξεκινούν όταν μιλάτε στο voice", en:"Hunts start when you talk on voice", g:"Yokai"},
+  {el:"Heartbeat χωρίς να το ακούσεις να έρχεται", en:"Heartbeat with no footsteps heard coming", g:"Myling"},
+  {el:"Κεριά/φλόγες σβήνουν συνέχεια — hunt στην 3η", en:"Candles/flames keep going out — hunt on the 3rd", g:"Onryo"},
+  {el:"Παγωμένη ανάσα σε hunt με τον breaker OFF", en:"Freezing breath in hunts with the breaker OFF", g:"Hantu"},
+  {el:"Έρχεται κατευθείαν πάνω σου όσο καλά κι αν κρύφτηκες", en:"Comes straight to you no matter how well you hid", g:"Deogen"},
+  {el:"Το hunt κόπηκε απότομα μόλις άνοιξε το locker σου", en:"The hunt cut off abruptly the moment it opened your locker", g:"Aswang"},
+  {el:"Στο επόμενο hunt πήγε κατευθείαν στην παλιά σου κρυψώνα", en:"Next hunt it went straight to your previous hiding spot", g:"Aswang"},
+  {el:"Σκότωσε μέσα από τοίχο ή έπιπλο", en:"Killed through a wall or furniture", g:"Kormos"},
+ ]},
+ {ic:"🎯", el:"Στόχευση & Αισθήσεις", en:"Targeting & Senses", rows:[
+  {el:"Αγνοεί τους άλλους και κυνηγά πάντα τον ίδιο παίκτη", en:"Ignores everyone and always chases the same player", g:"Banshee"},
+  {el:"Σε hunt σε προσπερνά ενώ ψιθυρίζεις δίπλα του", en:"Walks right past you in a hunt while you whisper nearby", g:"Yokai"},
+  {el:"Τα hunts ξεκινούν όταν μιλάτε στο voice", en:"Hunts start when you talk on voice", g:"Yokai"},
+  {el:"Αδιαφορεί για ό,τι βλέπει — αντιδρά μόνο σε ήχο βημάτων", en:"Ignores what it sees — reacts only to footstep sounds", g:"Kormos"},
+  {el:"Κόβει ταχύτητα όταν παγώνεις, ανεβάζει όταν τρέχεις", en:"Slows when you freeze, speeds up when you run", g:"Dayan"},
+  {el:"Έρχεται κατευθείαν πάνω σου όσο καλά κι αν κρύφτηκες", en:"Comes straight to you no matter how well you hid", g:"Deogen"},
+ ]},
+ {ic:"🔍", el:"Evidence & Ήχοι", en:"Evidence & Sounds", rows:[
+  {el:"Το αλάτι μένει ανέγγιχτο ενώ υπάρχει activity", en:"Salt stays untouched despite activity", g:"Wraith"},
+  {el:"Δεν βγήκε στη φωτογραφία ενώ ήταν μπροστά σου", en:"Missing from the photo though it was right in front of you", g:"Phantom"},
+  {el:"D.O.T.S. μόνο μέσα από την κάμερα, ποτέ με γυμνό μάτι", en:"D.O.T.S. only through the camera, never with the naked eye", g:"Goryo"},
+  {el:"Fingerprints με 6 δάχτυλα ή περίεργα σχήματα", en:"Fingerprints with 6 fingers or odd shapes", g:"Obake"},
+  {el:"Prints που σβήνουν στον μισό χρόνο (ή λείπουν τελείως)", en:"Prints that fade in half the time (or are missing entirely)", g:"Obake"},
+  {el:"Ghost Orbs που δεν κολλάνε με τα υπόλοιπα evidence", en:"Ghost Orbs that don't line up with the rest of the evidence", g:"The Mimic"},
+  {el:"Βαριά, λαχανιασμένη ανάσα στο Spirit Box", en:"Heavy, wheezing breathing on the Spirit Box", g:"Deogen"},
+  {el:"Κραυγή/ουρλιαχτό στο parabolic mic", en:"Scream/wail on the parabolic mic", g:"Banshee"},
+  {el:"Συχνοί paranormal ήχοι στο parabolic", en:"Frequent paranormal sounds on the parabolic", g:"Myling"},
+ ]},
+ {ic:"🧠", el:"Sanity", en:"Sanity", rows:[
+  {el:"Απότομο sanity drop κοντά του με ρεύμα ON / EMF στο breaker", en:"Sudden sanity drop near it with the power ON / EMF at the breaker", g:"Jinn"},
+  {el:"Το sanity σου στραγγίζει αφύσικα γρήγορα (κατάρα)", en:"Your sanity drains unnaturally fast (curse)", g:"Moroi"},
+  {el:"Χάνεις sanity όσο το κοιτάς", en:"You lose sanity while looking at it", g:"Phantom"},
+  {el:"Έκρηξη πολλών αντικειμένων = μαζικό sanity drop", en:"A multi-object burst = big sanity drop", g:"Poltergeist"},
+  {el:"Το τράνταγμα της πόρτας ρίχνει sanity στους κοντινούς", en:"Its door slam drains nearby players' sanity", g:"Yurei"},
+ ]},
+ {ic:"⚡", el:"Ρεύμα & Ηλεκτρονικά", en:"Power & Electronics", rows:[
+  {el:"Το φως σβήνει την ώρα που το ανάβεις", en:"The light goes off the moment you flip it on", g:"Mare"},
+  {el:"Απότομο sanity drop κοντά του με ρεύμα ON / EMF στο breaker", en:"Sudden sanity drop near it with the power ON / EMF at the breaker", g:"Jinn"},
+  {el:"Επιταχύνει δίπλα σε αναμμένο εξοπλισμό", en:"Speeds up next to switched-on equipment", g:"Raiju"},
+  {el:"Ο breaker βρίσκεται συνέχεια κλειστός — δεν τον ανάβει ποτέ", en:"The breaker keeps turning up OFF — it never switches it on", g:"Hantu"},
+ ]},
+ {ic:"🔥", el:"Φωτιά & Φλόγες", en:"Fire & Flames", rows:[
+  {el:"Κεριά/φλόγες σβήνουν συνέχεια — hunt στην 3η", en:"Candles/flames keep going out — hunt on the 3rd", g:"Onryo"},
+  {el:"Αναμμένη φλόγα δίπλα του δουλεύει σαν crucifix", en:"A lit flame next to it works like a crucifix", g:"Onryo"},
+ ]},
+ {ic:"🚪", el:"Δωμάτιο & Αντικείμενα", en:"Room & Objects", rows:[
+  {el:"Πόρτα έκλεισε ΤΕΡΜΑ με δύναμη (όχι απλό τρέμουλο)", en:"A door slammed FULLY shut (not just a nudge)", g:"Yurei"},
+  {el:"Interactions σε δύο σημεία σχεδόν ταυτόχρονα", en:"Interactions in two spots almost simultaneously", g:"The Twins"},
+  {el:"Πολλά αντικείμενα εκτοξεύτηκαν μαζί", en:"Many objects hurled at once", g:"Poltergeist"},
+  {el:"Πετάει αντικείμενα με υπερβολική δύναμη", en:"Throws objects with excessive force", g:"Oni"},
+  {el:"Δεν φεύγει σχεδόν ποτέ από το ghost room του", en:"Almost never leaves its ghost room", g:"Goryo"},
+ ]},
+ {ic:"🎭", el:"Χαρακτήρας & Ταυτότητα", en:"Temperament & Identity", rows:[
+  {el:"Σχεδόν μηδενική δραστηριότητα όσο είστε μέσα", en:"Near-zero activity while you're inside", g:"Shade"},
+  {el:"Δεν κάνει ΠΟΤΕ το «airball» event", en:"NEVER does the 'airball' event", g:"Oni"},
+  {el:"Το ghost «αλλάζει προσωπικότητα» κάθε λίγα λεπτά", en:"The ghost 'changes personality' every few minutes", g:"The Mimic"},
+  {el:"Ξεκίνησε τούρμπο και «κουράστηκε» με την ώρα", en:"Started turbo and 'got tired' over time", g:"Thaye"},
+  {el:"Ήρεμο–επιθετικό εναλλάξ, σαν ρολόι κάθε ~2 λεπτά", en:"Calm–aggressive swings, like clockwork every ~2 minutes", g:"Obambo"},
+  {el:"Θηλυκό όνομα &amp; μοντέλο — πάντα", en:"Female name &amp; model — always", g:"Banshee · Dayan"},
+ ]},
+ {ic:"🛡️", el:"Crucifix, Smudge & Salt", en:"Crucifix, Smudge & Salt", rows:[
+  {el:"Crucifix/incense/salt το κάνουν πιο επιθετικό", en:"Crucifix/incense/salt make it more aggressive", g:"Gallu"},
+  {el:"Μετά από smudge: 3 λεπτά απόλυτη ησυχία", en:"After a smudge: 3 minutes of total quiet", g:"Spirit"},
+  {el:"Smudge στο δωμάτιό του το καρφώνει εκεί για 90s", en:"A smudge in its room pins it there for 90s", g:"Yurei"},
+  {el:"Το crucifix το μπλοκάρει από πιο μακριά", en:"The crucifix blocks it from further away", g:"Demon"},
+  {el:"Αναμμένη φλόγα δίπλα του δουλεύει σαν crucifix", en:"A lit flame next to it works like a crucifix", g:"Onryo"},
+  {el:"Το αλάτι μένει ανέγγιχτο ενώ υπάρχει activity", en:"Salt stays untouched despite activity", g:"Wraith"},
+ ]},
 ];
 const abilGrid=document.getElementById("abilGrid");
 function buildAbilities(){
   abilGrid.innerHTML="";
-  ABILITY_INDEX.forEach(a=>{
-    const d=document.createElement("div");
-    d.className="ab-row";
-    d.innerHTML=`<span>${lang==="en"?a.en:a.el}</span><span class="gh">${a.g}</span>`;
-    abilGrid.appendChild(d);
+  ABILITY_CATS.forEach(cat=>{
+    const c=document.createElement("div");
+    c.className="ab-cat";
+    const rows=cat.rows.map(a=>`<div class="ab-row"><span>${lang==="en"?a.en:a.el}</span><span class="gh">${a.g}</span></div>`).join("");
+    c.innerHTML=`<div class="ab-cat-h">${cat.ic} ${lang==="en"?cat.en:cat.el}</div><div class="ab-list">${rows}</div>`;
+    abilGrid.appendChild(c);
   });
 }
 
