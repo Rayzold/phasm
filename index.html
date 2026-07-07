@@ -67,8 +67,22 @@
   /* ---------- language switch ---------- */
   html[lang=en] .l-el{display:none!important}
   html:not([lang=en]) .l-en{display:none!important}
-  #langBtn{cursor:pointer}
-  #langBtn:hover{border-color:var(--nv);color:var(--nv)}
+  #langBtn,#minBtn{cursor:pointer}
+  #langBtn:hover,#minBtn:hover{border-color:var(--nv);color:var(--nv)}
+  /* ---------- minimal mode: μόνο evidence, sanity/smudge και ghosts ---------- */
+  body.minimal #hunt-toolkit,
+  body.minimal #survival,
+  body.minimal #cursed,
+  body.minimal #thresholds,
+  body.minimal #photos,
+  body.minimal #abilities,
+  body.minimal .jumpnav a[href="#hunt-toolkit"],
+  body.minimal .jumpnav a[href="#survival"],
+  body.minimal .jumpnav a[href="#cursed"],
+  body.minimal .jumpnav a[href="#thresholds"],
+  body.minimal .jumpnav a[href="#photos"],
+  body.minimal .jumpnav a[href="#abilities"]{display:none!important}
+  body.minimal #minBtn{border-color:var(--nv);color:var(--nv)}
   /* ---------- ability index ---------- */
   .ab-cat{margin-bottom:16px}
   .ab-cat-h{
@@ -343,7 +357,8 @@
     <a href="#photos">Photos</a>
     <a href="#ghosts">Ghosts</a>
     <a href="#abilities">Abilities</a>
-    <button id="langBtn" class="sel" style="margin-left:auto" title="Ελληνικά / English">ΕΛ</button>
+    <button id="minBtn" class="sel" style="margin-left:auto" title="Minimal: μόνο evidence, sanity/smudge & ghosts">Minimal</button>
+    <button id="langBtn" class="sel" title="Ελληνικά / English">ΕΛ</button>
     <select id="diffSel" class="sel" title="Difficulty">
       <option value="amateur">Amateur</option>
       <option value="intermediate" selected>Intermediate</option>
@@ -786,6 +801,7 @@ const state = {}; // key -> 0 unknown, 1 on, 2 off
 EV.forEach(e=>state[e.k]=0);
 let sanity = 50;
 let lang = "en";
+let minimalMode = false; // δηλωμένο εδώ: το loadState τρέχει πριν οριστεί το minimal-mode section
 const STR = {
  el:{
   searchPh:"🔍 Ψάξε ghost με όνομα…",
@@ -1335,7 +1351,7 @@ document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.rem
 // ---- persistence (refresh-proof evidence board & sanity) ----
 const LS_KEY="phasmo-journal-v1";
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang,sf:sanFilter.checked?1:0})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang,sf:sanFilter.checked?1:0,min:minimalMode?1:0})); }catch(e){/* ignore */}
 }
 (function loadState(){
   try{
@@ -1349,6 +1365,7 @@ function saveState(){
     if(d.diff && DIFF[d.diff]) diff=d.diff;
     if(d.lang==="en" || d.lang==="el") lang=d.lang;
     if(d.sf===1) sanFilter.checked=true;
+    if(d.min===1) minimalMode=true;
   }catch(e){/* corrupt state, start fresh */}
 })();
 
@@ -1384,12 +1401,22 @@ const toTopBtn=document.getElementById("toTop");
 function spy(){
   const y=scrollY+90; // ύψος sticky nav + offset
   let cur=-1;
-  navSections.forEach((s,i)=>{ if(s && s.offsetTop<=y) cur=i; });
+  navSections.forEach((s,i)=>{ if(s && s.offsetParent!==null && s.offsetTop<=y) cur=i; }); // αγνόησε κρυμμένα (minimal mode)
   navLinks.forEach((a,i)=>a.classList.toggle("active",i===cur));
   toTopBtn.classList.toggle("show", scrollY>600);
 }
 addEventListener("scroll",spy,{passive:true});
 toTopBtn.onclick=()=>scrollTo({top:0,behavior:"smooth"});
+
+// ---- minimal mode: κρύβει όλα εκτός από evidence, sanity/smudge και ghosts ----
+const minBtn=document.getElementById("minBtn");
+function applyMin(){
+  document.body.classList.toggle("minimal", minimalMode);
+  minBtn.textContent = minimalMode ? "Full" : "Minimal";
+  spy();
+  saveState();
+}
+minBtn.onclick=()=>{ minimalMode=!minimalMode; applyMin(); };
 
 // ---- language switch ----
 const langBtn=document.getElementById("langBtn");
@@ -1407,6 +1434,7 @@ langBtn.onclick=()=>setLang(lang==="el" ? "en" : "el");
 smudgeTimer.reset();
 huntTimer.reset();
 setLang(lang);
+applyMin();
 spy();
 </script>
 </body>
