@@ -1109,7 +1109,7 @@ function render(){
     const visible = ok && (!q || g.name.toLowerCase().includes(q));
     c.classList.toggle("gone",!visible);
     if(visible) visCnt++;
-    const canHuntNow = g.thMax >= sanity;
+    const canHuntNow = g.variableTh || g.thMax >= sanity; // variableTh (Mimic): μπορεί να μιμείται Demon
     const ribbon = c.querySelector(".hunt-ribbon");
     if(ok){
       cnt++;
@@ -1139,7 +1139,7 @@ function render(){
     const ev=effEv(g);
     const possible = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g);
     tr.classList.toggle("dim", !possible);
-    tr.classList.toggle("hot", g.thMax>=sanity);
+    tr.classList.toggle("hot", g.variableTh || g.thMax>=sanity);
   });
 
   // sanity status readout (based on ghosts still possible per evidence)
