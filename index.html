@@ -396,6 +396,9 @@
           <label class="chk"><input type="checkbox" id="drainSolo" checked> Solo</label>
           <button class="preset" id="pillBtn">💊 Pills +35%</button>
         </div>
+        <div class="drain-row">
+          <label class="chk"><input type="checkbox" id="sanFilter"> <span class="l-el">🔎 Extra φίλτρο: έγινε hunt σε αυτό το sanity — κόψε όσα δεν μπορούν</span><span class="l-en">🔎 Extra filter: a hunt happened at this sanity — cut those that can't</span></label>
+        </div>
         <div class="sanity-note" id="sanNote"><span class="l-el">Σύρε το slider στο τρέχον sanity σου — ή άναψε το <strong>Auto-drain</strong> για να πέφτει μόνο του (small 0.12 / medium 0.08 / large 0.05 %/s στο σκοτάδι, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — το difficulty αλλάζει από το μενού πάνω δεξιά). Στο φως δεν πέφτει — ξετίκαρε το «Σκοτάδι». Τα ghosts που κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω.</span><span class="l-en">Drag the slider to your current sanity — or switch on <strong>Auto-drain</strong> to let it fall on its own (small 0.12 / medium 0.08 / large 0.05 %/s in darkness, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — change difficulty from the menu top right). It doesn't drop in the light — untick "Darkness". Ghosts that can hunt at this level are highlighted below.</span></div>
       </div>
       <div class="tool-col">
@@ -953,6 +956,14 @@ function passesBehaviors(g){
   });
 }
 
+// Προαιρετικό sanity φίλτρο: «έγινε hunt στο τρέχον sanity» → όσα έχουν χαμηλότερο
+// threshold αποκλείονται. Τα variableTh (Mimic) περνούν πάντα — μιμούνται και thresholds.
+const sanFilter = document.getElementById("sanFilter");
+function passesSanity(g){
+  return !sanFilter.checked || g.variableTh || g.thMax >= sanity;
+}
+sanFilter.addEventListener("change", render);
+
 const evGrid = document.getElementById("evGrid");
 function buildEvBoard(){
   evGrid.innerHTML="";
@@ -1036,7 +1047,7 @@ function updateVerdict(pool,onKeys,offKeys){
     if(t.name===g.name || !offKeys.includes(t.key)) return;
     const tg=GHOSTS.find(x=>x.name===t.name);
     const ev=effEv(tg);
-    if(onKeys.every(k=>ev.includes(k)) && passesBehaviors(tg)) warns.push("⚠ "+STR[lang].trick[t.name]);
+    if(onKeys.every(k=>ev.includes(k)) && passesBehaviors(tg) && passesSanity(tg)) warns.push("⚠ "+STR[lang].trick[t.name]);
   });
   document.getElementById("verdictWarn").innerHTML=warns.join("<br><br>");
   box.classList.add("show");
@@ -1094,7 +1105,7 @@ function render(){
   document.querySelectorAll(".card").forEach(c=>{
     const g=GHOSTS[c.dataset.i];
     const ev=effEv(g);
-    const ok = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g);
+    const ok = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g);
     const visible = ok && (!q || g.name.toLowerCase().includes(q));
     c.classList.toggle("gone",!visible);
     if(visible) visCnt++;
@@ -1126,7 +1137,7 @@ function render(){
   document.querySelectorAll("#threshBody tr").forEach(tr=>{
     const g=GHOSTS[tr.dataset.i];
     const ev=effEv(g);
-    const possible = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g);
+    const possible = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g);
     tr.classList.toggle("dim", !possible);
     tr.classList.toggle("hot", g.thMax>=sanity);
   });
@@ -1315,7 +1326,7 @@ document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.rem
 // ---- persistence (refresh-proof evidence board & sanity) ----
 const LS_KEY="phasmo-journal-v1";
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang,sf:sanFilter.checked?1:0})); }catch(e){/* ignore */}
 }
 (function loadState(){
   try{
@@ -1328,12 +1339,14 @@ function saveState(){
     }
     if(d.diff && DIFF[d.diff]) diff=d.diff;
     if(d.lang==="en" || d.lang==="el") lang=d.lang;
+    if(d.sf===1) sanFilter.checked=true;
   }catch(e){/* corrupt state, start fresh */}
 })();
 
 document.getElementById("resetBtn").onclick=()=>{
   EV.forEach(e=>state[e.k]=0);
   BEHAVIORS.forEach(b=>bhState[b.id]=0);
+  sanFilter.checked=false;
   render();
 };
 
