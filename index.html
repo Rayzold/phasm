@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="el">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -335,7 +335,7 @@
     <a href="#photos">Photos</a>
     <a href="#ghosts">Ghosts</a>
     <a href="#abilities">Abilities</a>
-    <button id="langBtn" class="sel" style="margin-left:auto" title="Ελληνικά / English">EN</button>
+    <button id="langBtn" class="sel" style="margin-left:auto" title="Ελληνικά / English">ΕΛ</button>
     <select id="diffSel" class="sel" title="Difficulty">
       <option value="amateur">Amateur</option>
       <option value="intermediate" selected>Intermediate</option>
@@ -666,7 +666,7 @@
 
   <div class="ghost-head anchor-target" id="ghosts">
     <div class="panel-label" style="margin:0">Ghost Journal</div>
-    <input id="ghostSearch" class="search" type="search" placeholder="🔍 Ψάξε ghost με όνομα…" autocomplete="off">
+    <input id="ghostSearch" class="search" type="search" placeholder="🔍 Search ghost by name…" autocomplete="off">
   </div>
   <div class="grid" id="grid"></div>
   <div class="empty" id="empty">
@@ -777,7 +777,7 @@ const HUNT_EN = {
 const state = {}; // key -> 0 unknown, 1 on, 2 off
 EV.forEach(e=>state[e.k]=0);
 let sanity = 50;
-let lang = "el";
+let lang = "en";
 const STR = {
  el:{
   searchPh:"🔍 Ψάξε ghost με όνομα…",
