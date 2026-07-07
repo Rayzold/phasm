@@ -320,6 +320,7 @@
     <a href="#thresholds">Thresholds</a>
     <a href="#photos">Photos</a>
     <a href="#ghosts">Ghosts</a>
+    <a href="#abilities">Abilities</a>
     <button id="langBtn" class="sel" style="margin-left:auto" title="Ελληνικά / English">EN</button>
     <select id="diffSel" class="sel" title="Difficulty">
       <option value="amateur">Amateur</option>
@@ -659,6 +660,11 @@
     Some evidence is logged wrong — recheck your ✓/✗.<br>
     Usual suspect: fake Orbs from a Mimic or a misread EMF.</span>
   </div>
+
+  <div class="panel anchor-target" id="abilities" style="margin-top:22px">
+    <div class="panel-label"><span class="l-el">Unique Abilities — τι κάνει το καθένα ξεχωριστό</span><span class="l-en">Unique Abilities — what makes each one special</span></div>
+    <div class="cp-grid" id="abilGrid"></div>
+  </div>
   <footer><span class="l-el">Evidence data: Phasmophobia Wiki (Ιούλιος 2026, 29 ghosts)</span><span class="l-en">Evidence data: Phasmophobia Wiki (July 2026, 29 ghosts)</span></footer>
   <button class="toTop" id="toTop" title="Πάνω" aria-label="Επιστροφή στην κορυφή">↑</button>
 </div>
@@ -795,6 +801,78 @@ const STR = {
 };
 function tellOf(g){ return lang==="en" ? (TELL_EN[g.name]||g.tell) : g.tell; }
 function huntOf(g){ return lang==="en" ? (HUNT_EN[g.name]||g.hunt) : g.hunt; }
+
+// ---- unique abilities quick list (ίδια σειρά με το journal) ----
+const ABILITIES = [
+ {n:"Spirit",      el:"Καμία ενεργή ability — το «τεστ» του είναι παθητικό: μετά από smudge δεν κάνει hunt για 180s αντί για 90s.",
+                   en:"No active ability — its 'test' is passive: after a smudge it won't hunt for 180s instead of 90s."},
+ {n:"Wraith",      el:"Δεν ακουμπά ποτέ το πάτωμα: κανένα footprint σε αλάτι. Τηλεμεταφέρεται κοντά σε παίκτη αφήνοντας EMF.",
+                   en:"Never touches the ground: no footprints in salt. Teleports next to a player, leaving EMF behind."},
+ {n:"Phantom",     el:"Αόρατο στις φωτογραφίες. Αν το κοιτάς, χάνεις sanity. Φωτογραφία σε event το εξαφανίζει στη στιγμή.",
+                   en:"Invisible in photos. Looking at it drains your sanity. Photographing it during an event makes it vanish instantly."},
+ {n:"Poltergeist", el:"Εκτοξεύει πολλά αντικείμενα ταυτόχρονα — κάθε αντικείμενο ρίχνει sanity σε όσους είναι κοντά.",
+                   en:"Hurls many objects at once — each thrown object drains sanity from anyone nearby."},
+ {n:"Banshee",     el:"Κλειδώνει σε ΕΝΑΝ παίκτη-στόχο και κάνει hunt βάσει του ΔΙΚΟΥ ΤΟΥ sanity. Χαρακτηριστική κραυγή στο parabolic.",
+                   en:"Locks onto ONE target player and hunts based on THEIR sanity. Signature scream on the parabolic mic."},
+ {n:"Jinn",        el:"Με το ρεύμα ON: γρήγορο από απόσταση και ρίχνει απότομα sanity στους κοντινούς (EMF στο breaker). Δεν κλείνει ποτέ το breaker.",
+                   en:"With the power ON: fast from a distance and can zap nearby players' sanity (EMF at the breaker). Never turns the breaker off."},
+ {n:"Mare",        el:"Σβήνει το φως αμέσως μόλις το ανάψεις· δεν ανάβει ποτέ φως. Threshold 60% στο σκοτάδι, 40% στο φως.",
+                   en:"Snuffs a light the moment you switch it on; never turns one on itself. Threshold 60% in the dark, 40% in the light."},
+ {n:"Revenant",    el:"Διπλή ταχύτητα: 1.0 m/s στα τυφλά, 3.0 m/s μόλις σε εντοπίσει.",
+                   en:"Two speeds: 1.0 m/s when blind, 3.0 m/s the moment it spots you."},
+ {n:"Shade",       el:"Ντροπαλό: σχεδόν καθόλου activity/events και κανένα hunt όσο υπάρχει άνθρωπος στο δωμάτιό του.",
+                   en:"Shy: barely any activity/events and no hunts while someone is in its room."},
+ {n:"Demon",       el:"Hunt σε ΟΠΟΙΟΔΗΠΟΤΕ sanity (ability) και ελάχιστο cooldown 20s. Το crucifix πιάνει από μεγαλύτερη απόσταση πάνω του.",
+                   en:"Can hunt at ANY sanity (ability) with a minimum 20s cooldown. Crucifix works from a longer range on it."},
+ {n:"Yurei",       el:"Κλείνει μια πόρτα ΤΕΡΜΑ με δύναμη και ρίχνει το sanity όσων είναι κοντά. Smudge στο δωμάτιό του το καθηλώνει για 90s.",
+                   en:"Slams a door FULLY shut and drains the sanity of anyone nearby. A smudge in its room pins it there for 90s."},
+ {n:"Oni",         el:"Ποτέ «airball» event. Υπερδραστήριο με παρέα κοντά, πετά αντικείμενα με δύναμη, πιο ορατό σε hunts.",
+                   en:"Never does the 'airball' event. Hyperactive with people nearby, throws objects hard, more visible during hunts."},
+ {n:"Yokai",       el:"Η ομιλία κοντά του ανεβάζει το hunt threshold στο 80%. Σε hunt ακούει/εντοπίζει μόνο σε ~2.5m.",
+                   en:"Talking near it raises its hunt threshold to 80%. During hunts it only hears/detects you within ~2.5m."},
+ {n:"Hantu",       el:"Ταχύτητα ανάλογη του κρύου (1.4–2.7 m/s). Παγωμένη ανάσα σε hunt με breaker OFF. Δεν ανάβει ποτέ το breaker.",
+                   en:"Speed scales with cold (1.4–2.7 m/s). Freezing breath in hunts with the breaker OFF. Never turns the breaker on."},
+ {n:"Goryo",       el:"D.O.T.S. ορατό ΜΟΝΟ μέσω κάμερας και με άδειο δωμάτιο. Δεν απομακρύνεται σχεδόν ποτέ από το ghost room.",
+                   en:"D.O.T.S. visible ONLY through a camera with an empty room. Almost never wanders from its ghost room."},
+ {n:"Myling",      el:"Σε hunt ακούγεται μόνο από πολύ κοντά — «αθόρυβος δολοφόνος». Συχνότεροι paranormal ήχοι στο parabolic.",
+                   en:"Audible only from very close during hunts — a 'silent killer'. More frequent paranormal sounds on the parabolic."},
+ {n:"Onryo",       el:"Σβήνει φλόγες· κάθε 3η σβησμένη = hunt ανεξαρτήτως sanity. Μια αναμμένη φλόγα δίπλα του δρα σαν crucifix.",
+                   en:"Blows out flames; every 3rd one extinguished = hunt regardless of sanity. A lit flame next to it acts like a crucifix."},
+ {n:"The Twins",   el:"Interactions σε δύο σημεία σχεδόν ταυτόχρονα (το «δίδυμο» δρα από απόσταση). Hunt με δύο ελαφρώς διαφορετικές ταχύτητες.",
+                   en:"Interactions in two spots almost simultaneously (the 'twin' acts from a distance). Hunts at two slightly different speeds."},
+ {n:"Raiju",       el:"Δίπλα σε ενεργά ηλεκτρονικά: 2.5 m/s και hunt από 65%. Παρασιτεί τον εξοπλισμό από μεγαλύτερη απόσταση.",
+                   en:"Near active electronics: 2.5 m/s and hunts from 65%. Interferes with equipment from a longer range."},
+ {n:"Obake",       el:"Prints με 6 δάχτυλα/περίεργα σχήματα που ξεθωριάζουν στον μισό χρόνο — καμιά φορά δεν αφήνει καθόλου. Στιγμιαίο shapeshift σε hunt.",
+                   en:"Six-fingered/odd-shaped prints that fade in half the time — sometimes it leaves none at all. Brief shapeshift during hunts."},
+ {n:"The Mimic",   el:"Μιμείται τη συμπεριφορά άλλων ghosts και αλλάζει κάθε λίγα λεπτά. Δείχνει ΠΑΝΤΑ ψεύτικα Ghost Orbs ως 4ο evidence.",
+                   en:"Mimics other ghosts' behavior, switching every few minutes. ALWAYS shows fake Ghost Orbs as a 4th evidence."},
+ {n:"Moroi",       el:"Σε καταριέται μέσω Spirit Box/parabolic → γρηγορότερο sanity drain (pills τη σβήνουν). Ταχύτερο όσο πέφτει το sanity σου· τυφλώνεται περισσότερο από smudge.",
+                   en:"Curses you through the Spirit Box/parabolic → faster sanity drain (pills clear it). Speeds up as your sanity drops; blinded longer by smudges."},
+ {n:"Deogen",      el:"Σε εντοπίζει ΠΑΝΤΑ σε hunt — δεν κρύβεσαι. Πολύ αργό από κοντά (0.4 m/s). Βαριά ανάσα στο Spirit Box από κοντινή απόσταση.",
+                   en:"ALWAYS finds you in hunts — hiding is useless. Very slow up close (0.4 m/s). Heavy breathing on the Spirit Box up close."},
+ {n:"Thaye",       el:"«Γερνάει» όσο είσαι κοντά του: από υπερδραστήριο / 2.75 m/s / 75% threshold, σε ήσυχο / 1.0 m/s / 15%.",
+                   en:"It 'ages' while you're nearby: from hyperactive / 2.75 m/s / 75% threshold down to quiet / 1.0 m/s / 15%."},
+ {n:"Dayan",       el:"Πάντα θηλυκό όνομα &amp; μοντέλο. Κοντά της: ακίνητος = επιβραδύνει, τρέξιμο = επιταχύνει. Thresholds 45%/60%.",
+                   en:"Always a female name &amp; model. Near her: stand still = she slows, run = she speeds up. Thresholds 45%/60%."},
+ {n:"Gallu",       el:"Crucifix/incense/salt το εξαγριώνουν → ταχύτερο επόμενο hunt, μετά «εξαντλείται» και τα defensive items πιάνουν καλύτερα. Enraged δεν πατά αλάτι.",
+                   en:"Crucifix/incense/salt enrage it → faster next hunt, then it 'exhausts' and defensive items work better. Enraged it won't step in salt."},
+ {n:"Obambo",      el:"Εναλλάσσει mood κάθε 2 λεπτά: calm (αργό, hunt μόνο κάτω από 10%) ↔ aggressive (hunt από 65%, ταχύτερο, 20% συντομότερο hunt).",
+                   en:"Swaps mood every 2 minutes: calm (slow, hunts only below 10%) ↔ aggressive (hunts from 65%, faster, 20% shorter hunts)."},
+ {n:"Aswang",      el:"Πιάνει max ταχύτητα με line-of-sight σε ~9s (αντί ~13s). Αν σε φτάσει σε επίσημη κρυψώνα, το hunt τελειώνει — αλλά στο επόμενο πάει κατευθείαν εκεί.",
+                   en:"Reaches max line-of-sight speed in ~9s (instead of ~13s). If it catches you in an official hiding spot the hunt ends — but next hunt it goes straight there."},
+ {n:"Kormos",      el:"Τυφλό: σε εντοπίζει μόνο από ήχους βημάτων — ακίνητος είσαι άφαντος. Σκοτώνει σε 1.5m ακόμα και μέσα από τοίχους/έπιπλα.",
+                   en:"Blind: tracks you only by footstep sounds — stand still and you're invisible to it. Kills within 1.5m even through walls/furniture."},
+];
+const abilGrid=document.getElementById("abilGrid");
+function buildAbilities(){
+  abilGrid.innerHTML="";
+  ABILITIES.forEach(a=>{
+    const d=document.createElement("div");
+    d.className="cp";
+    d.innerHTML=`<h3>${a.n}</h3>${lang==="en"?a.en:a.el}`;
+    abilGrid.appendChild(d);
+  });
+}
 
 // Difficulty: drain multiplier, διάρκειες hunt ανά μέγεθος χάρτη, grace period, πόσα evidence δίνονται.
 const DIFF = {
@@ -1258,7 +1336,7 @@ function setLang(l){
   document.documentElement.setAttribute("lang",l);
   langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
   searchEl.placeholder = STR[l].searchPh;
-  buildEvBoard(); buildBhBoard(); buildCards(); buildThresh(); buildSpeedRows();
+  buildEvBoard(); buildBhBoard(); buildCards(); buildThresh(); buildSpeedRows(); buildAbilities();
   applyDiff();
   render();
 }
