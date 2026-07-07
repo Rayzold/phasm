@@ -205,6 +205,14 @@
   .chk{display:inline-flex;gap:5px;align-items:center;cursor:pointer;user-select:none}
   .chk input{accent-color:var(--nv);margin:0}
   .sel{background:#0c1118;border:1px solid var(--line);color:#B9C2CE;border-radius:8px;padding:5px 8px;font-family:inherit;font-size:12.5px}
+  .san-filter{
+    border:1px dashed var(--danger);border-radius:8px;
+    padding:7px 11px;color:var(--danger);
+    background:rgba(225,91,91,.06);transition:all .15s ease;
+  }
+  .san-filter input{accent-color:var(--danger)}
+  .san-filter:hover{box-shadow:0 0 10px rgba(225,91,91,.2)}
+  .san-filter.on{border-style:solid;background:rgba(225,91,91,.16);box-shadow:0 0 12px rgba(225,91,91,.3);font-weight:600}
   /* ---------- cursed possessions ---------- */
   .cp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
   .cp{border:1px solid var(--line);border-radius:8px;padding:12px 13px;background:#0c1119;font-size:13px;line-height:1.5;color:#C7CEDA}
@@ -397,7 +405,7 @@
           <button class="preset" id="pillBtn">💊 Pills +35%</button>
         </div>
         <div class="drain-row">
-          <label class="chk"><input type="checkbox" id="sanFilter"> <span class="l-el">🔎 Extra φίλτρο: έγινε hunt σε αυτό το sanity — κόψε όσα δεν μπορούν</span><span class="l-en">🔎 Extra filter: a hunt happened at this sanity — cut those that can't</span></label>
+          <label class="chk san-filter" id="sanFilterBox"><input type="checkbox" id="sanFilter"> <span class="l-el">🔎 Extra φίλτρο: έγινε hunt σε αυτό το sanity — κόψε όσα δεν μπορούν</span><span class="l-en">🔎 Extra filter: a hunt happened at this sanity — cut those that can't</span></label>
         </div>
         <div class="sanity-note" id="sanNote"><span class="l-el">Σύρε το slider στο τρέχον sanity σου — ή άναψε το <strong>Auto-drain</strong> για να πέφτει μόνο του (small 0.12 / medium 0.08 / large 0.05 %/s στο σκοτάδι, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — το difficulty αλλάζει από το μενού πάνω δεξιά). Στο φως δεν πέφτει — ξετίκαρε το «Σκοτάδι». Τα ghosts που κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω.</span><span class="l-en">Drag the slider to your current sanity — or switch on <strong>Auto-drain</strong> to let it fall on its own (small 0.12 / medium 0.08 / large 0.05 %/s in darkness, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — change difficulty from the menu top right). It doesn't drop in the light — untick "Darkness". Ghosts that can hunt at this level are highlighted below.</span></div>
       </div>
@@ -1128,6 +1136,7 @@ function render(){
   // Mimic warning if ORB confirmed and Mimic still possible
   const mimicOk = onKeys.every(k=>["SB","UV","FRZ","ORB"].includes(k)) && !offKeys.some(k=>["SB","UV","FRZ","ORB"].includes(k));
   document.getElementById("mimicWarn").classList.toggle("show", onKeys.includes("ORB") && mimicOk);
+  document.getElementById("sanFilterBox").classList.toggle("on", sanFilter.checked);
   const hint=document.getElementById("hintTxt");
   if(cnt>1 && cnt<=4 && onKeys.length>=1){
     hint.textContent=STR[lang].hintClose;
