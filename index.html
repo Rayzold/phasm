@@ -456,8 +456,12 @@
         <div class="tool-title">Footstep Speed Tapper</div>
         <button class="tap-btn" id="tapBtn">TAP<small><span class="l-el">ή πάτα Space</span><span class="l-en">or press Space</span></small></button>
         <div class="tap-readout"><span id="tapBpm">–</span><span class="dim"> bpm · </span><span id="tapMs">–</span><span class="dim"> m/s</span></div>
+        <div class="smudge-btns">
+          <button class="btn" id="speedApply" disabled><span class="l-el">🔗 Φίλτραρε με αυτή την ταχύτητα</span><span class="l-en">🔗 Filter by this speed</span></button>
+          <button class="btn ghostvar" id="speedClear" style="display:none"></button>
+        </div>
         <div class="speed-rows" id="speedRows"></div>
-        <div class="smudge-note"><span class="l-el">Χτύπα ρυθμικά μαζί με τα βήματα του ghost στο hunt (5+ taps για ακρίβεια — παύση 5s μηδενίζει). Οι γραμμές που ταιριάζουν με τη μετρημένη ταχύτητα ανάβουν πράσινες.</span><span class="l-en">Tap along with the ghost's footsteps during a hunt (5+ taps for accuracy — a 5s pause resets). Rows matching the measured speed light up green.</span></div>
+        <div class="smudge-note"><span class="l-el">Χτύπα ρυθμικά μαζί με τα βήματα του ghost στο hunt (5+ taps για ακρίβεια — παύση 5s μηδενίζει). Οι γραμμές που ταιριάζουν με τη μετρημένη ταχύτητα ανάβουν πράσινες. Το κουμπί φίλτρου κόβει από το ταμπλό όσα ghosts δεν κινούνται ποτέ έτσι — προσεγγιστικό όμως, μην αποκλείεις μόνο από αυτό.</span><span class="l-en">Tap along with the ghost's footsteps during a hunt (5+ taps for accuracy — a 5s pause resets). Rows matching the measured speed light up green. The filter button cuts ghosts that never move at this speed from the board — approximate though, don't exclude on it alone.</span></div>
       </div>
       <div class="tool-col">
         <div class="tool-title">Hunt Countdown</div>
@@ -1096,7 +1100,7 @@ function updateVerdict(pool,onKeys,offKeys){
     if(t.name===g.name || !offKeys.includes(t.key)) return;
     const tg=GHOSTS.find(x=>x.name===t.name);
     const ev=effEv(tg);
-    if(onKeys.every(k=>ev.includes(k)) && passesBehaviors(tg) && passesSanity(tg)) warns.push("⚠ "+STR[lang].trick[t.name]);
+    if(onKeys.every(k=>ev.includes(k)) && passesBehaviors(tg) && passesSanity(tg) && passesSpeed(tg)) warns.push("⚠ "+STR[lang].trick[t.name]);
   });
   document.getElementById("verdictWarn").innerHTML=warns.join("<br><br>");
   document.getElementById("verdictPlan").innerHTML=
@@ -1157,7 +1161,7 @@ function render(){
   document.querySelectorAll(".card").forEach(c=>{
     const g=GHOSTS[c.dataset.i];
     const ev=effEv(g);
-    const ok = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g);
+    const ok = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g) && passesSpeed(g);
     const visible = ok && (!q || g.name.toLowerCase().includes(q));
     c.classList.toggle("gone",!visible);
     if(visible) visCnt++;
@@ -1190,7 +1194,7 @@ function render(){
   document.querySelectorAll("#threshBody tr").forEach(tr=>{
     const g=GHOSTS[tr.dataset.i];
     const ev=effEv(g);
-    const possible = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g);
+    const possible = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g) && passesSpeed(g);
     tr.classList.toggle("dim", !possible);
     tr.classList.toggle("hot", g.variableTh || g.thMax>=sanity);
   });
@@ -1340,12 +1344,40 @@ function buildSpeedRows(){
     speedRows.appendChild(d);
   });
 }
+// ---- speed filter: η μετρημένη ταχύτητα ως extra layer ταυτοποίησης ----
+let speedFilter=null, lastSpeed=null;
+const SPEED_DEFAULT=[[1.7,2.81]]; // βασική 1.7 + LoS ×1.65
+const SPEED_OF={ // εύρη m/s ανά ghost όπου διαφέρουν (με LoS όπου ισχύει)
+ "Revenant":[[0.9,1.1],[2.9,3.1]],
+ "Deogen":[[0.4,3.0]],
+ "Hantu":[[1.4,2.7]],
+ "Moroi":[[1.5,3.71]],
+ "The Twins":[[1.53,3.09]],
+ "Thaye":[[1.0,2.75]],
+ "Dayan":[[1.0,2.8]],
+};
+function passesSpeed(g){
+  if(speedFilter===null || g.variableTh) return true; // Mimic: μιμείται και ταχύτητες
+  const ranges=SPEED_OF[g.name]||SPEED_DEFAULT;
+  return ranges.some(r=>speedFilter>=r[0]-0.1 && speedFilter<=r[1]+0.1);
+}
+const speedApply=document.getElementById("speedApply"), speedClear=document.getElementById("speedClear");
+speedApply.onclick=()=>{
+  if(lastSpeed===null) return;
+  speedFilter=lastSpeed;
+  speedClear.textContent="✕ "+speedFilter.toFixed(2)+" m/s";
+  speedClear.style.display="inline-block";
+  render();
+};
+speedClear.onclick=()=>{ speedFilter=null; speedClear.style.display="none"; render(); };
+
 let tapTimes=[];
 const tapBpmEl=document.getElementById("tapBpm"), tapMsEl=document.getElementById("tapMs");
 function bpmToSpeed(bpm){ return bpm/(60+0.075*bpm); }
 function paintTaps(){
   if(tapTimes.length<2){
     tapBpmEl.textContent="–"; tapMsEl.textContent="–";
+    lastSpeed=null; speedApply.disabled=true;
     speedRows.querySelectorAll(".speed-row").forEach(r=>r.classList.remove("hit"));
     return;
   }
@@ -1356,6 +1388,7 @@ function paintTaps(){
   const bpm=60000/avg, v=bpmToSpeed(bpm);
   tapBpmEl.textContent=Math.round(bpm);
   tapMsEl.textContent=v.toFixed(2);
+  lastSpeed=v; speedApply.disabled=false;
   speedRows.querySelectorAll(".speed-row").forEach(r=>{
     const s=SPEED_REF[r.dataset.i];
     r.classList.toggle("hit", v>=s.min-0.08 && v<=s.max+0.08);
@@ -1402,6 +1435,7 @@ document.getElementById("resetBtn").onclick=()=>{
   EV.forEach(e=>state[e.k]=0);
   BEHAVIORS.forEach(b=>bhState[b.id]=0);
   sanFilter.checked=false;
+  speedFilter=null; speedClear.style.display="none";
   render();
 };
 
