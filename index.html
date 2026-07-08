@@ -386,7 +386,8 @@
     <div class="toolbar">
       <span class="count"><span class="l-el">Πιθανά</span><span class="l-en">Possible</span>: <b id="cnt">29</b>/29</span>
       <span class="hint" id="hintTxt"></span>
-      <button class="reset" id="resetBtn">Reset</button>
+      <button class="reset" id="shareBtn" title="Copy link"><span class="l-el">🔗 Μοιράσου</span><span class="l-en">🔗 Share</span></button>
+      <button class="reset" id="resetBtn" style="margin-left:0">Reset</button>
     </div>
     <div class="suggest" id="suggestBox"></div>
     <div class="verdict" id="verdictBox">
@@ -1429,6 +1430,31 @@ function saveState(){
     if(d.sf===1) sanFilter.checked=true;
     if(d.min===1) minimalMode=true;
   }catch(e){/* corrupt state, start fresh */}
+})();
+
+// ---- share: το board κωδικοποιημένο στο URL (#s=...) — υπερισχύει του localStorage ----
+const shareBtn=document.getElementById("shareBtn");
+shareBtn.onclick=()=>{
+  const payload={ev:state,bh:bhState,sanity,diff,sf:sanFilter.checked?1:0};
+  const url=location.origin+location.pathname+"#s="+btoa(JSON.stringify(payload));
+  const done=()=>{ const keep=shareBtn.innerHTML; shareBtn.textContent=STR[lang].copied; setTimeout(()=>{ shareBtn.innerHTML=keep; },1500); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(done).catch(()=>prompt("URL:",url));
+  } else prompt("URL:",url);
+};
+(function loadHash(){
+  if(!location.hash.startsWith("#s=")) return;
+  try{
+    const d=JSON.parse(atob(location.hash.slice(3)));
+    EV.forEach(e=>{ const v=d.ev && d.ev[e.k]; state[e.k]=(v===1||v===2)?v:0; });
+    BEHAVIORS.forEach(b=>{ bhState[b.id]=(d.bh && d.bh[b.id]===1)?1:0; });
+    if(typeof d.sanity==="number" && d.sanity>=0 && d.sanity<=100){
+      sanity=Math.round(d.sanity); sanFloat=sanity; sanRange.value=sanity; sanVal.textContent=sanity;
+    }
+    if(d.diff && DIFF[d.diff]) diff=d.diff;
+    sanFilter.checked = d.sf===1;
+    history.replaceState(null,"",location.pathname+location.search);
+  }catch(e){/* χαλασμένο link — αγνόησέ το */}
 })();
 
 document.getElementById("resetBtn").onclick=()=>{
