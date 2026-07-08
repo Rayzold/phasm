@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Phasmo Journal — Ghost Cheat Sheet</title>
+<meta name="theme-color" content="#0A0D12">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -1256,7 +1259,8 @@ function drainTick(){
 }
 drainOn.addEventListener("change", ()=>{
   clearInterval(drainTimer); drainTimer=null;
-  if(drainOn.checked){ drainLast = Date.now(); drainTimer = setInterval(drainTick, 500); }
+  if(drainOn.checked){ drainLast = Date.now(); drainTimer = setInterval(drainTick, 500); wake.acquire(); }
+  else wake.release();
 });
 document.querySelectorAll("[data-pill]").forEach(b=>b.addEventListener("click", ()=>setSanity(sanFloat + Number(b.dataset.pill))));
 
@@ -1283,6 +1287,22 @@ function beep(freq,times){
   }catch(e){/* ignore */}
 }
 
+// ---- wake lock: κράτα την οθόνη αναμμένη όσο τρέχει timer ή auto-drain ----
+const wake={
+  count:0, lock:null,
+  async _req(){
+    if(this.lock || !("wakeLock" in navigator) || document.hidden) return;
+    try{
+      this.lock=await navigator.wakeLock.request("screen");
+      this.lock.addEventListener("release",()=>{ this.lock=null; });
+    }catch(e){/* δεν επιτρέπεται — δεν πειράζει */}
+  },
+  acquire(){ this.count++; this._req(); },
+  release(){ this.count=Math.max(0,this.count-1); if(this.count===0 && this.lock){ this.lock.release(); this.lock=null; } }
+};
+// τα browsers ελευθερώνουν το lock όταν κρυφτεί το tab — ξαναζήτα το μόλις επιστρέψει
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden && wake.count>0) wake._req(); });
+
 // ---- timers ----
 // Βασισμένοι σε Date.now() deadline αντί για μέτρημα ticks: τα setInterval στραγγαλίζονται
 // σε background tabs (και αυτό το tab ΘΑ είναι background όσο παίζεις), οπότε το υπόλοιπο
@@ -1290,7 +1310,7 @@ function beep(freq,times){
 function fmt(s){ const m=Math.floor(s/60), r=s%60; return m+":"+String(r).padStart(2,"0"); }
 function makeTimer(displayId,barId,defaultSecs,onDone){
   const display=document.getElementById(displayId), bar=document.getElementById(barId);
-  let deadline=0, total=defaultSecs, interval=null;
+  let deadline=0, total=defaultSecs, interval=null, running=false;
   function paint(rem,idle){
     display.textContent = fmt(Math.max(rem,0));
     display.classList.toggle("done", !idle && rem<=0);
@@ -1299,17 +1319,18 @@ function makeTimer(displayId,barId,defaultSecs,onDone){
   function tick(){
     const rem = Math.ceil((deadline-Date.now())/1000);
     paint(rem,false);
-    if(rem<=0){ clearInterval(interval); interval=null; onDone(); }
+    if(rem<=0){ clearInterval(interval); interval=null; if(running){running=false; wake.release();} onDone(); }
   }
   return {
     start(seconds){
       ensureAudio();
+      if(!running){ running=true; wake.acquire(); }
       total=seconds; deadline=Date.now()+seconds*1000;
       clearInterval(interval);
       paint(seconds,false);
       interval=setInterval(tick,250);
     },
-    reset(){ clearInterval(interval); interval=null; deadline=0; paint(defaultSecs,true); }
+    reset(){ clearInterval(interval); interval=null; deadline=0; if(running){running=false; wake.release();} paint(defaultSecs,true); }
   };
 }
 const smudgeTimer = makeTimer("smDisplay","smBar",90,()=>beep(660,1));
@@ -1527,6 +1548,11 @@ huntTimer.reset();
 setLang(lang);
 applyMin();
 spy();
+
+// ---- PWA: offline cache & εγκατάσταση σε κινητό ----
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(()=>{/* χωρίς offline mode — συνεχίζουμε κανονικά */});
+}
 </script>
 </body>
 </html>
