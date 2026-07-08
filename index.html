@@ -368,7 +368,7 @@
     <a href="#photos">Photos</a>
     <a href="#ghosts">Ghosts</a>
     <a href="#abilities">Abilities</a>
-    <button id="wakeBtn" class="sel" style="margin-left:auto" title="Κράτα την οθόνη αναμμένη όσο είσαι στη σελίδα">🔅 <span class="l-el">Οθόνη</span><span class="l-en">Screen</span></button>
+    <button id="wakeBtn" class="sel" style="margin-left:auto" title="Κράτα την οθόνη αναμμένη όσο είσαι στη σελίδα"><span class="wakeIc">🔅</span> <span class="l-el">Κράτα Ξύπνια</span><span class="l-en">Keep Awake</span></button>
     <button id="minBtn" class="sel" title="Minimal: μόνο evidence, sanity/smudge & ghosts">Minimal</button>
     <button id="langBtn" class="sel" title="Ελληνικά / English">ΕΛ</button>
     <select id="diffSel" class="sel" title="Difficulty">
@@ -820,7 +820,7 @@ const HUNT_EN = {
  "Kormos":"50% / 70% if you sprint near it",
 };
 
-const APP_VERSION = "1.10.0"; // bump μαζί με το CACHE στο sw.js όταν αλλάζει κάτι ουσιαστικό
+const APP_VERSION = "1.10.1"; // bump μαζί με το CACHE στο sw.js όταν αλλάζει κάτι ουσιαστικό
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -1534,8 +1534,10 @@ if(!("wakeLock" in navigator)){
   wakeBtn.title="Wake Lock API μη διαθέσιμο σε αυτόν τον browser";
   wakeBtn.style.opacity=".4";
 }
+const wakeIc=wakeBtn.querySelector(".wakeIc");
 function applyWakeBtn(){
   wakeBtn.classList.toggle("on", wakeManual);
+  wakeIc.textContent = wakeManual ? "🔆" : "🔅";
 }
 wakeBtn.onclick=()=>{
   wakeManual=!wakeManual;
