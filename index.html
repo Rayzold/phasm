@@ -726,7 +726,7 @@
     <div class="panel-label"><span class="l-el">Ability Index — τι είδες → ποιο ghost το κάνει</span><span class="l-en">Ability Index — what you saw → which ghost does it</span></div>
     <div id="abilGrid"></div>
   </div>
-  <footer><span class="l-el">Evidence data: Phasmophobia Wiki (Ιούλιος 2026, 29 ghosts)</span><span class="l-en">Evidence data: Phasmophobia Wiki (July 2026, 29 ghosts)</span></footer>
+  <footer><span class="l-el">Evidence data: Phasmophobia Wiki (Ιούλιος 2026, 29 ghosts)</span><span class="l-en">Evidence data: Phasmophobia Wiki (July 2026, 29 ghosts)</span> · <span id="verTxt"></span></footer>
   <button class="toTop" id="toTop" title="Πάνω" aria-label="Επιστροφή στην κορυφή">↑</button>
 </div>
 <script>
@@ -817,6 +817,9 @@ const HUNT_EN = {
  "Gallu":"50% (earlier when enraged)",
  "Kormos":"50% / 70% if you sprint near it",
 };
+
+const APP_VERSION = "1.9.0"; // bump μαζί με το CACHE στο sw.js όταν αλλάζει κάτι ουσιαστικό
+document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
 EV.forEach(e=>state[e.k]=0);
