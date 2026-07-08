@@ -417,12 +417,15 @@
           </select>
           <label class="chk"><input type="checkbox" id="drainDark" checked> <span class="l-el">Σκοτάδι</span><span class="l-en">Darkness</span></label>
           <label class="chk"><input type="checkbox" id="drainSolo" checked> Solo</label>
-          <button class="preset" id="pillBtn">💊 Pills +35%</button>
+          <label class="chk"><input type="checkbox" id="drainFire"> 🕯️ <span class="l-el">Firelight κοντά</span><span class="l-en">Near firelight</span></label>
+          <button class="preset" data-pill="25" title="Tier I">💊 +25%</button>
+          <button class="preset" data-pill="35" title="Tier II">💊 +35%</button>
+          <button class="preset" data-pill="50" title="Tier III">💊 +50%</button>
         </div>
         <div class="drain-row">
           <label class="chk san-filter" id="sanFilterBox"><input type="checkbox" id="sanFilter"> <span class="l-el">🔎 Extra φίλτρο: έγινε hunt σε αυτό το sanity — κόψε όσα δεν μπορούν</span><span class="l-en">🔎 Extra filter: a hunt happened at this sanity — cut those that can't</span></label>
         </div>
-        <div class="sanity-note" id="sanNote"><span class="l-el">Σύρε το slider στο τρέχον sanity σου — ή άναψε το <strong>Auto-drain</strong> για να πέφτει μόνο του (small 0.12 / medium 0.08 / large 0.05 %/s στο σκοτάδι, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — το difficulty αλλάζει από το μενού πάνω δεξιά). Στο φως δεν πέφτει — ξετίκαρε το «Σκοτάδι». Τα ghosts που κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω.</span><span class="l-en">Drag the slider to your current sanity — or switch on <strong>Auto-drain</strong> to let it fall on its own (small 0.12 / medium 0.08 / large 0.05 %/s in darkness, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — change difficulty from the menu top right). It doesn't drop in the light — untick "Darkness". Ghosts that can hunt at this level are highlighted below.</span></div>
+        <div class="sanity-note" id="sanNote"><span class="l-el">Σύρε το slider στο τρέχον sanity σου — ή άναψε το <strong>Auto-drain</strong> για να πέφτει μόνο του (small 0.12 / medium 0.08 / large 0.05 %/s στο σκοτάδι, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — το difficulty αλλάζει από το μενού πάνω δεξιά). Στο φως δεν πέφτει — ξετίκαρε το «Σκοτάδι». Τα ghosts που κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω. <strong>Σε ομάδα:</strong> τα hunts κρίνονται από τον ΜΕΣΟ ΟΡΟ sanity της ομάδας (Banshee: μόνο του στόχου της).</span><span class="l-en">Drag the slider to your current sanity — or switch on <strong>Auto-drain</strong> to let it fall on its own (small 0.12 / medium 0.08 / large 0.05 %/s in darkness, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — change difficulty from the menu top right). It doesn't drop in the light — untick "Darkness". Ghosts that can hunt at this level are highlighted below. <strong>In a team:</strong> hunts trigger off the team's AVERAGE sanity (Banshee: its target's only).</span></div>
       </div>
       <div class="tool-col">
         <div class="tool-title">Smudge Timer</div>
@@ -814,6 +817,12 @@ const STR = {
   sugNext:(a,c,n)=>`🎯 Επόμενο item: ${a} — <span class="dim">ό,τι κι αν δείξει, κόβει τουλάχιστον ${c} από τα ${n} πιθανά.</span>`,
   sugEither:(a,b,c,n)=>`🎯 Πάρε είτε ${a} είτε ${b} — <span class="dim">όποιο από τα δύο κι αν δοκιμάσεις, κόβει τουλάχιστον ${c} από τα ${n} πιθανά.</span>`,
   sugFirst:(a,c,n,b,c2)=>`🎯 Πάρε πρώτα ${a} — <span class="dim">ό,τι κι αν δείξει, κόβει τουλάχιστον ${c} από τα ${n} πιθανά.</span> Μετά αξίζει το ${b} <span class="dim">(κόβει τουλάχιστον ${c2})</span>.`,
+  sugNightmare:"⚠ Nightmare: το «δεν βρήκα» δεν είναι απόδειξη — το 3ο evidence μένει κρυφό, οπότε βάλε ✗ μόνο σε ό,τι απέκλεισες σίγουρα.",
+  minTitle:"Minimal: μόνο evidence, sanity/smudge & ghosts",
+  diffTitle:"Difficulty — προσαρμόζει drain, διάρκειες hunt και grace period",
+  planLbl:"Σχέδιο",
+  planPhoto:"Πάρε τη ghost photo — λεφτά!",
+  copied:"✓ Αντιγράφηκε!",
   mimicSelf:"Θυμήσου: τα Ghost Orbs του Mimic είναι <strong>ψεύτικα</strong> — τα πραγματικά του evidence είναι Spirit Box, Ultraviolet και Freezing. Επιβεβαίωσε τουλάχιστον ένα από αυτά.",
   trick:{
    "The Mimic":"Έκοψες τα <strong>Ghost Orbs</strong> με ✗, αλλά το <strong>Mimic</strong> δείχνει πάντα ψεύτικα Orbs — αν η κάμερα δεν κοίταζε σωστά το δωμάτιο ή είχε φως, μπορεί απλώς να τα έχασες. Ξαναστήσε την πριν κλειδώσεις.",
@@ -832,6 +841,12 @@ const STR = {
   sugNext:(a,c,n)=>`🎯 Next item: ${a} — <span class="dim">whatever it shows, it cuts at least ${c} of the ${n} possible.</span>`,
   sugEither:(a,b,c,n)=>`🎯 Grab either ${a} or ${b} — <span class="dim">whichever you test, it cuts at least ${c} of the ${n} possible.</span>`,
   sugFirst:(a,c,n,b,c2)=>`🎯 Grab ${a} first — <span class="dim">whatever it shows, it cuts at least ${c} of the ${n} possible.</span> Then ${b} is worth it <span class="dim">(cuts at least ${c2})</span>.`,
+  sugNightmare:"⚠ Nightmare: a no-show isn't proof — the 3rd evidence stays hidden, so only ✗ what you've truly ruled out.",
+  minTitle:"Minimal: evidence, sanity/smudge & ghosts only",
+  diffTitle:"Difficulty — adjusts drain, hunt durations and grace period",
+  planLbl:"Plan",
+  planPhoto:"Grab the ghost photo — money!",
+  copied:"✓ Copied!",
   mimicSelf:"Remember: the Mimic's Ghost Orbs are <strong>fake</strong> — its real evidence is Spirit Box, Ultraviolet and Freezing. Confirm at least one of those.",
   trick:{
    "The Mimic":"You ✗'ed <strong>Ghost Orbs</strong>, but the <strong>Mimic</strong> always shows fake Orbs — if the camera wasn't covering the room properly or the lights were on, you may simply have missed them. Set it up again before you lock in.",
@@ -1097,6 +1112,7 @@ function updateSuggestion(pool){
   } else {
     html=s.sugFirst(nameOf(one), one.cut, pool.length, nameOf(two), two.cut);
   }
+  if(DIFF[diff].evid<3) html+=`<br><span class="dim">${s.sugNightmare}</span>`;
   box.innerHTML=html;
   box.classList.add("show");
 }
@@ -1203,7 +1219,8 @@ const DRAIN_BASE = {small:0.12, medium:0.08, large:0.05};
 const drainOn=document.getElementById("drainOn"),
       drainMap=document.getElementById("drainMap"),
       drainDark=document.getElementById("drainDark"),
-      drainSolo=document.getElementById("drainSolo");
+      drainSolo=document.getElementById("drainSolo"),
+      drainFire=document.getElementById("drainFire");
 let drainLast=0, drainTimer=null;
 function setSanity(v){
   sanFloat = Math.min(100, Math.max(0, v));
@@ -1215,7 +1232,7 @@ function drainTick(){
   const now = Date.now();
   const dt = (now - drainLast)/1000;
   drainLast = now;
-  if(!drainDark.checked) return;
+  if(!drainDark.checked || drainFire.checked) return; // φως ή firelight δίπλα = μηδενικό drain
   let rate = DRAIN_BASE[drainMap.value] * DIFF[diff].mult;
   if(drainSolo.checked) rate *= 0.5;
   setSanity(sanFloat - rate*dt);
@@ -1224,7 +1241,7 @@ drainOn.addEventListener("change", ()=>{
   clearInterval(drainTimer); drainTimer=null;
   if(drainOn.checked){ drainLast = Date.now(); drainTimer = setInterval(drainTick, 500); }
 });
-document.getElementById("pillBtn").addEventListener("click", ()=>setSanity(sanFloat + 35));
+document.querySelectorAll("[data-pill]").forEach(b=>b.addEventListener("click", ()=>setSanity(sanFloat + Number(b.dataset.pill))));
 
 // ---- shared audio ----
 // Το AudioContext δημιουργείται/γίνεται resume μέσα σε user gesture (κλικ στα Start/TAP),
@@ -1425,6 +1442,8 @@ function setLang(l){
   document.documentElement.setAttribute("lang",l);
   langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
   searchEl.placeholder = STR[l].searchPh;
+  minBtn.title = STR[l].minTitle;
+  diffSel.title = STR[l].diffTitle;
   buildEvBoard(); buildBhBoard(); buildCards(); buildThresh(); buildSpeedRows(); buildAbilities();
   applyDiff();
   render();
