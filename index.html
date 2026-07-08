@@ -70,8 +70,9 @@
   /* ---------- language switch ---------- */
   html[lang=en] .l-el{display:none!important}
   html:not([lang=en]) .l-en{display:none!important}
-  #langBtn,#minBtn{cursor:pointer}
-  #langBtn:hover,#minBtn:hover{border-color:var(--nv);color:var(--nv)}
+  #langBtn,#minBtn,#wakeBtn{cursor:pointer}
+  #langBtn:hover,#minBtn:hover,#wakeBtn:hover{border-color:var(--nv);color:var(--nv)}
+  #wakeBtn.on{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.1);box-shadow:0 0 10px rgba(143,227,136,.2)}
   /* ---------- minimal mode: μόνο evidence, sanity/smudge και ghosts ---------- */
   body.minimal #hunt-toolkit,
   body.minimal #survival,
@@ -367,7 +368,8 @@
     <a href="#photos">Photos</a>
     <a href="#ghosts">Ghosts</a>
     <a href="#abilities">Abilities</a>
-    <button id="minBtn" class="sel" style="margin-left:auto" title="Minimal: μόνο evidence, sanity/smudge & ghosts">Minimal</button>
+    <button id="wakeBtn" class="sel" style="margin-left:auto" title="Κράτα την οθόνη αναμμένη όσο είσαι στη σελίδα">🔅 <span class="l-el">Οθόνη</span><span class="l-en">Screen</span></button>
+    <button id="minBtn" class="sel" title="Minimal: μόνο evidence, sanity/smudge & ghosts">Minimal</button>
     <button id="langBtn" class="sel" title="Ελληνικά / English">ΕΛ</button>
     <select id="diffSel" class="sel" title="Difficulty">
       <option value="amateur">Amateur</option>
@@ -818,7 +820,7 @@ const HUNT_EN = {
  "Kormos":"50% / 70% if you sprint near it",
 };
 
-const APP_VERSION = "1.9.0"; // bump μαζί με το CACHE στο sw.js όταν αλλάζει κάτι ουσιαστικό
+const APP_VERSION = "1.10.0"; // bump μαζί με το CACHE στο sw.js όταν αλλάζει κάτι ουσιαστικό
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -826,6 +828,7 @@ EV.forEach(e=>state[e.k]=0);
 let sanity = 50;
 let lang = "en";
 let minimalMode = false; // δηλωμένο εδώ: το loadState τρέχει πριν οριστεί το minimal-mode section
+let wakeManual = false;  // ίδιος λόγος: το loadState τρέχει πριν οριστεί το wake-toggle section
 const STR = {
  el:{
   searchPh:"🔍 Ψάξε ghost με όνομα…",
@@ -841,6 +844,7 @@ const STR = {
   sugNightmare:"⚠ Nightmare: το «δεν βρήκα» δεν είναι απόδειξη — το 3ο evidence μένει κρυφό, οπότε βάλε ✗ μόνο σε ό,τι απέκλεισες σίγουρα.",
   minTitle:"Minimal: μόνο evidence, sanity/smudge & ghosts",
   diffTitle:"Difficulty — προσαρμόζει drain, διάρκειες hunt και grace period",
+  wakeTitle:"Κράτα την οθόνη αναμμένη όσο είσαι στη σελίδα (πέρα από timers/auto-drain)",
   planLbl:"Σχέδιο",
   planPhoto:"Πάρε τη ghost photo — λεφτά!",
   copied:"✓ Αντιγράφηκε!",
@@ -865,6 +869,7 @@ const STR = {
   sugNightmare:"⚠ Nightmare: a no-show isn't proof — the 3rd evidence stays hidden, so only ✗ what you've truly ruled out.",
   minTitle:"Minimal: evidence, sanity/smudge & ghosts only",
   diffTitle:"Difficulty — adjusts drain, hunt durations and grace period",
+  wakeTitle:"Keep the screen awake while on this page (beyond timers/auto-drain)",
   planLbl:"Plan",
   planPhoto:"Grab the ghost photo — money!",
   copied:"✓ Copied!",
@@ -1438,7 +1443,7 @@ document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.rem
 // ---- persistence (refresh-proof evidence board & sanity) ----
 const LS_KEY="phasmo-journal-v1";
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang,sf:sanFilter.checked?1:0,min:minimalMode?1:0})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang,sf:sanFilter.checked?1:0,min:minimalMode?1:0,wk:wakeManual?1:0})); }catch(e){/* ignore */}
 }
 (function loadState(){
   try{
@@ -1453,6 +1458,7 @@ function saveState(){
     if(d.lang==="en" || d.lang==="el") lang=d.lang;
     if(d.sf===1) sanFilter.checked=true;
     if(d.min===1) minimalMode=true;
+    if(d.wk===1) wakeManual=true;
   }catch(e){/* corrupt state, start fresh */}
 })();
 
@@ -1521,6 +1527,23 @@ function spy(){
 addEventListener("scroll",spy,{passive:true});
 toTopBtn.onclick=()=>scrollTo({top:0,behavior:"smooth"});
 
+// ---- manual «κράτα την οθόνη αναμμένη» toggle (πέρα από timers/auto-drain) ----
+const wakeBtn=document.getElementById("wakeBtn");
+if(!("wakeLock" in navigator)){
+  wakeBtn.disabled=true;
+  wakeBtn.title="Wake Lock API μη διαθέσιμο σε αυτόν τον browser";
+  wakeBtn.style.opacity=".4";
+}
+function applyWakeBtn(){
+  wakeBtn.classList.toggle("on", wakeManual);
+}
+wakeBtn.onclick=()=>{
+  wakeManual=!wakeManual;
+  if(wakeManual) wake.acquire(); else wake.release();
+  applyWakeBtn();
+  saveState();
+};
+
 // ---- minimal mode: κρύβει όλα εκτός από evidence, sanity/smudge και ghosts ----
 const minBtn=document.getElementById("minBtn");
 function applyMin(){
@@ -1540,6 +1563,7 @@ function setLang(l){
   searchEl.placeholder = STR[l].searchPh;
   minBtn.title = STR[l].minTitle;
   diffSel.title = STR[l].diffTitle;
+  if("wakeLock" in navigator) wakeBtn.title = STR[l].wakeTitle;
   buildEvBoard(); buildBhBoard(); buildCards(); buildThresh(); buildSpeedRows(); buildAbilities();
   applyDiff();
   render();
@@ -1550,6 +1574,8 @@ smudgeTimer.reset();
 huntTimer.reset();
 setLang(lang);
 applyMin();
+applyWakeBtn();
+if(wakeManual) wake.acquire();
 spy();
 
 // ---- PWA: offline cache & εγκατάσταση σε κινητό ----
