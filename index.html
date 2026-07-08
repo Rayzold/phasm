@@ -195,6 +195,13 @@
   }
   .v-warn{margin-top:10px;font-size:13.5px;color:var(--warn);line-height:1.55;text-align:left;max-width:640px;margin-left:auto;margin-right:auto}
   .v-warn:empty{display:none}
+  .v-plan{
+    margin:12px auto 0;max-width:640px;text-align:left;
+    font-size:13.5px;color:#C7CEDA;line-height:1.55;
+    border-top:1px dashed var(--nv-dim);padding-top:10px;
+  }
+  .v-plan b{color:var(--nv)}
+  .v-plan:empty{display:none}
   /* ---------- sanity tracker + smudge timer ---------- */
   .tools-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}
   @media (max-width:760px){.tools-grid{grid-template-columns:1fr}}
@@ -386,6 +393,7 @@
       <div class="v-label"><span class="l-el">ΤΑΥΤΟΠΟΙΗΘΗΚΕ</span><span class="l-en">IDENTIFIED</span></div>
       <div class="v-name" id="verdictName"></div>
       <div class="v-warn" id="verdictWarn"></div>
+      <div class="v-plan" id="verdictPlan"></div>
     </div>
   </div>
 
@@ -474,6 +482,7 @@
         <div class="l-el">
         <h3>🤫 Κανόνες κρυψίματος (hunt)</h3>
         <ul>
+          <li>🎭 <strong>Event ≠ hunt</strong>: heartbeat, τραγούδι, «airball» = event, δεν σκοτώνει. Φώτα/electronics τρεμοπαίζουν παντού + κλειδωμένη εξώπορτα = <strong>hunt</strong> — κρύψου ΤΩΡΑ</li>
           <li>🔦 Σβήσε flashlight &amp; video cam <strong>πριν</strong> κρυφτείς — τα ενεργά electronics στο χέρι σου σε προδίδουν</li>
           <li>🎙️ Βουβός σε όλο το hunt — σε ακούει από το mic (<strong>Yokai</strong>: μόνο από ~2.5m)</li>
           <li>👀 Σπάσε το line-of-sight πριν τρυπώσεις — θυμάται το τελευταίο σημείο που σε είδε</li>
@@ -484,6 +493,7 @@
         <div class="l-en">
         <h3>🤫 Hiding rules (hunt)</h3>
         <ul>
+          <li>🎭 <strong>Event ≠ hunt</strong>: heartbeat, singing, an "airball" = event, can't kill you. Lights/electronics flickering everywhere + locked front door = <strong>hunt</strong> — hide NOW</li>
           <li>🔦 Turn off flashlight &amp; video cam <strong>before</strong> hiding — active electronics in your hand give you away</li>
           <li>🎙️ Stay silent for the whole hunt — it hears your mic (<strong>Yokai</strong>: only within ~2.5m)</li>
           <li>👀 Break line-of-sight before you tuck in — it remembers where it last saw you</li>
@@ -1089,6 +1099,8 @@ function updateVerdict(pool,onKeys,offKeys){
     if(onKeys.every(k=>ev.includes(k)) && passesBehaviors(tg) && passesSanity(tg)) warns.push("⚠ "+STR[lang].trick[t.name]);
   });
   document.getElementById("verdictWarn").innerHTML=warns.join("<br><br>");
+  document.getElementById("verdictPlan").innerHTML=
+    `<b>📋 ${STR[lang].planLbl}:</b> ${tellOf(g)}<br>👹 Hunt: <b>${huntOf(g)}</b> · 📸 ${STR[lang].planPhoto}`;
   box.classList.add("show");
 }
 
