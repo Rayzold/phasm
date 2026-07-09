@@ -183,6 +183,21 @@
   .suggest.show{display:block}
   .suggest b{color:var(--nv)}
   .suggest .dim{color:var(--muted)}
+  /* ---------- shortlist (2-5 πιθανά ghosts) ---------- */
+  .shortlist{
+    display:none;margin-top:12px;padding:10px 12px;
+    border:1px solid var(--nv-dim);border-radius:8px;
+    background:rgba(143,227,136,.05);
+  }
+  .shortlist.show{display:block}
+  .shortlist-lbl{font-family:"Special Elite",monospace;font-size:11.5px;letter-spacing:2px;color:var(--nv-dim);text-transform:uppercase;margin-bottom:8px}
+  .shortlist-chips{display:flex;flex-wrap:wrap;gap:7px}
+  .shortlist-chip{
+    font-family:"Special Elite",monospace;font-size:13.5px;letter-spacing:.5px;
+    border:1px solid var(--nv-dim);color:var(--nv);background:#0c1118;
+    border-radius:14px;padding:4px 12px;cursor:pointer;
+  }
+  .shortlist-chip:hover{border-color:var(--danger);color:var(--danger)}
   /* ---------- verdict (μοναδικό πιθανό ghost) ---------- */
   .verdict{
     display:none;margin-top:14px;text-align:center;
@@ -315,11 +330,24 @@
     position:relative;
     line-height:1.45;
   }
-  .card::after{ /* συνδετήρας-πινέζα */
-    content:"";position:absolute;top:8px;right:10px;width:10px;height:10px;border-radius:50%;
+  .pin{ /* συνδετήρας-πινέζα, τώρα κλικαρίσμιμο κουμπί: κλικ = χειροκίνητος αποκλεισμός */
+    position:absolute;top:7px;right:9px;width:18px;height:18px;border-radius:50%;
+    border:none;padding:0;cursor:pointer;
     background:radial-gradient(circle at 35% 30%, #c9524a, #7e2b25);
     box-shadow:0 1px 2px rgba(0,0,0,.4);
+    transition:transform .12s ease, box-shadow .12s ease, width .12s ease, height .12s ease;
   }
+  .pin:hover{transform:scale(1.2);box-shadow:0 0 8px rgba(225,91,91,.65)}
+  .pin.off{
+    width:26px;height:26px;top:5px;right:7px;
+    background:radial-gradient(circle at 35% 30%, #ff6b61, #a3271f);
+    box-shadow:0 0 12px rgba(225,91,91,.85);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:14px;font-weight:900;line-height:1;
+  }
+  .pin.off::before{content:"✕"}
+  .card.excluded{opacity:.42;filter:grayscale(65%)}
+  .card.excluded .g-name{text-decoration:line-through}
   .g-name{
     font-family:"Special Elite","Courier New",monospace;
     font-size:21px;margin:0 0 7px;color:#1c1914;letter-spacing:.5px;
@@ -421,6 +449,10 @@
     <div class="toolbar">
       <span class="count"><span class="l-el">Πιθανά</span><span class="l-en">Possible</span>: <b id="cnt">29</b>/29</span>
       <span class="hint" id="hintTxt"></span>
+    </div>
+    <div class="shortlist" id="shortlistBox">
+      <div class="shortlist-lbl">🔎 <span class="l-el">Λίγα ακόμα…</span><span class="l-en">Down to a few…</span></div>
+      <div class="shortlist-chips" id="shortlistChips"></div>
     </div>
     <div class="suggest" id="suggestBox"></div>
     <div class="verdict" id="verdictBox">
@@ -855,7 +887,7 @@ const HUNT_EN = {
  "Kormos":"50% / 70% if you sprint near it",
 };
 
-const APP_VERSION = "1.11.2"; // bump μαζί με το CACHE στο sw.js όταν αλλάζει κάτι ουσιαστικό
+const APP_VERSION = "1.12.0"; // bump μαζί με το CACHE στο sw.js όταν αλλάζει κάτι ουσιαστικό
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -865,6 +897,7 @@ let lang = "en";
 let minimalMode = false; // δηλωμένο εδώ: το loadState τρέχει πριν οριστεί το minimal-mode section
 let wakeManual = false;  // ίδιος λόγος: το loadState τρέχει πριν οριστεί το wake-toggle section
 let calibOffset = 0;     // ίδιος λόγος: offset βαθμονόμησης του footstep tapper (m/s)
+const manualOut = new Set(); // ghosts που ο παίκτης έβγαλε με το χέρι (κόκκινη πινέζα στην κάρτα)
 const STR = {
  el:{
   searchPh:"🔍 Ψάξε ghost με όνομα…",
@@ -886,6 +919,9 @@ const STR = {
   planPhoto:"Πάρε τη ghost photo — λεφτά!",
   copied:"✓ Αντιγράφηκε!",
   mimicSelf:"Θυμήσου: τα Ghost Orbs του Mimic είναι <strong>ψεύτικα</strong> — τα πραγματικά του evidence είναι Spirit Box, Ultraviolet και Freezing. Επιβεβαίωσε τουλάχιστον ένα από αυτά.",
+  pinTitle:"Κλικ για να το βγάλεις χειροκίνητα από τα πιθανά (ξανακλίκ για επαναφορά)",
+  pinTitleOff:"Χειροκίνητα εκτός πιθανών — κλικ για επαναφορά",
+  shortlistLbl:"Λίγα ακόμα…",
   trick:{
    "The Mimic":"Έκοψες τα <strong>Ghost Orbs</strong> με ✗, αλλά το <strong>Mimic</strong> δείχνει πάντα ψεύτικα Orbs — αν η κάμερα δεν κοίταζε σωστά το δωμάτιο ή είχε φως, μπορεί απλώς να τα έχασες. Ξαναστήσε την πριν κλειδώσεις.",
    "Obake":"Έκοψες το <strong>Ultraviolet</strong> με ✗, αλλά το <strong>Obake</strong> με το ability του αφήνει λιγότερα fingerprints και ξεθωριάζουν στον μισό χρόνο. Ξαναδές για prints (ή 6 δάχτυλα!) πριν κλειδώσεις.",
@@ -912,6 +948,9 @@ const STR = {
   planPhoto:"Grab the ghost photo — money!",
   copied:"✓ Copied!",
   mimicSelf:"Remember: the Mimic's Ghost Orbs are <strong>fake</strong> — its real evidence is Spirit Box, Ultraviolet and Freezing. Confirm at least one of those.",
+  pinTitle:"Click to manually take this out of the possible ghosts (click again to restore)",
+  pinTitleOff:"Manually excluded — click to restore",
+  shortlistLbl:"Down to a few…",
   trick:{
    "The Mimic":"You ✗'ed <strong>Ghost Orbs</strong>, but the <strong>Mimic</strong> always shows fake Orbs — if the camera wasn't covering the room properly or the lights were on, you may simply have missed them. Set it up again before you lock in.",
    "Obake":"You ✗'ed <strong>Ultraviolet</strong>, but the <strong>Obake</strong>'s ability leaves fewer fingerprints and they fade in half the time. Look again for prints (or 6 fingers!) before you lock in.",
@@ -1112,12 +1151,20 @@ function buildBhBoard(){
 }
 
 const grid=document.getElementById("grid");
+grid.addEventListener("click", e=>{
+  const pin=e.target.closest(".pin");
+  if(!pin) return;
+  const g=GHOSTS[pin.dataset.i];
+  if(manualOut.has(g.name)) manualOut.delete(g.name); else manualOut.add(g.name);
+  render();
+});
 function buildCards(){
   grid.innerHTML="";
   GHOSTS.forEach((g,i)=>{
     const c=document.createElement("div");
     c.className="card"; c.dataset.i=i;
     c.innerHTML=`
+      <button type="button" class="pin" data-i="${i}" title="${STR[lang].pinTitle}"></button>
       <div class="hunt-ribbon" style="display:none">${STR[lang].ribbon}</div>
       <h2 class="g-name">${g.name}</h2>
       <div class="chips">${g.ev.map(k=>`<span class="chip" data-k="${k}">${EV.find(e=>e.k===k).n}</span>`).join("")}${g.mimic?`<span class="chip" data-k="ORB">${STR[lang].fakeOrbs}</span>`:""}</div>
@@ -1169,12 +1216,27 @@ function updateVerdict(pool,onKeys,offKeys){
     if(t.name===g.name || !offKeys.includes(t.key)) return;
     const tg=GHOSTS.find(x=>x.name===t.name);
     const ev=effEv(tg);
-    if(onKeys.every(k=>ev.includes(k)) && passesBehaviors(tg) && passesSanity(tg) && passesSpeed(tg)) warns.push("⚠ "+STR[lang].trick[t.name]);
+    if(onKeys.every(k=>ev.includes(k)) && passesBehaviors(tg) && passesSanity(tg) && passesSpeed(tg) && passesManual(tg)) warns.push("⚠ "+STR[lang].trick[t.name]);
   });
   document.getElementById("verdictWarn").innerHTML=warns.join("<br><br>");
   document.getElementById("verdictPlan").innerHTML=
     `<b>📋 ${STR[lang].planLbl}:</b> ${tellOf(g)}<br>👹 Hunt: <b>${huntOf(g)}</b> · 📸 ${STR[lang].planPhoto}`;
   box.classList.add("show");
+}
+
+// ---- shortlist: όταν μένουν 2-5 πιθανά, δείξε τα ονόματα ψηλά (πριν τον verdict, που καλύπτει το 1) ----
+const shortlistBox=document.getElementById("shortlistBox"), shortlistChips=document.getElementById("shortlistChips");
+shortlistChips.addEventListener("click", e=>{
+  const chip=e.target.closest(".shortlist-chip");
+  if(!chip) return;
+  const name=chip.dataset.name;
+  if(manualOut.has(name)) manualOut.delete(name); else manualOut.add(name);
+  render();
+});
+function updateShortlist(pool){
+  if(pool.length<2 || pool.length>5){ shortlistBox.classList.remove("show"); return; }
+  shortlistChips.innerHTML=pool.map(g=>`<button type="button" class="shortlist-chip" data-name="${g.name}">${g.name}</button>`).join("");
+  shortlistBox.classList.add("show");
 }
 
 function updateSuggestion(pool){
@@ -1230,9 +1292,15 @@ function render(){
   document.querySelectorAll(".card").forEach(c=>{
     const g=GHOSTS[c.dataset.i];
     const ev=effEv(g);
-    const ok = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g) && passesSpeed(g);
-    const visible = ok && (!q || g.name.toLowerCase().includes(q));
+    const evidenceOk = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g) && passesSpeed(g);
+    const manuallyOut = manualOut.has(g.name);
+    const ok = evidenceOk && !manuallyOut; // «πιθανό» = περνάει evidence ΚΑΙ δεν το έβγαλες εσύ με το χέρι
+    const visible = evidenceOk && (!q || g.name.toLowerCase().includes(q));
     c.classList.toggle("gone",!visible);
+    c.classList.toggle("excluded", evidenceOk && manuallyOut); // ορατό αλλά χτυπημένο, όχι κρυμμένο — για να μπορείς να το ξαναφέρεις
+    const pin=c.querySelector(".pin");
+    pin.classList.toggle("off", manuallyOut);
+    pin.title = manuallyOut ? STR[lang].pinTitleOff : STR[lang].pinTitle;
     if(visible) visCnt++;
     const canHuntNow = g.variableTh || g.thMax >= sanity; // variableTh (Mimic): μπορεί να μιμείται Demon
     const ribbon = c.querySelector(".hunt-ribbon");
@@ -1248,6 +1316,7 @@ function render(){
   });
   document.getElementById("cnt").textContent=cnt;
   document.getElementById("empty").classList.toggle("show",visCnt===0);
+  updateShortlist(pool);
   updateSuggestion(pool);
   updateVerdict(pool,onKeys,offKeys);
   // Mimic warning if ORB confirmed and Mimic still possible
@@ -1263,7 +1332,7 @@ function render(){
   document.querySelectorAll("#threshBody tr").forEach(tr=>{
     const g=GHOSTS[tr.dataset.i];
     const ev=effEv(g);
-    const possible = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g) && passesSpeed(g);
+    const possible = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g) && passesSpeed(g) && passesManual(g);
     tr.classList.toggle("dim", !possible);
     tr.classList.toggle("hot", g.variableTh || g.thMax>=sanity);
   });
@@ -1449,6 +1518,8 @@ function passesSpeed(g){
   const ranges=SPEED_OF[g.name]||SPEED_DEFAULT;
   return ranges.some(r=>speedFilter>=r[0]-0.1 && speedFilter<=r[1]+0.1);
 }
+function passesManual(g){ return !manualOut.has(g.name); }
+
 const speedApply=document.getElementById("speedApply"), speedClear=document.getElementById("speedClear");
 speedApply.onclick=()=>{
   if(lastSpeed===null) return;
@@ -1510,7 +1581,7 @@ document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.rem
 // ---- persistence (refresh-proof evidence board & sanity) ----
 const LS_KEY="phasmo-journal-v1";
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang,sf:sanFilter.checked?1:0,min:minimalMode?1:0,wk:wakeManual?1:0,cc:customCfg,bm:bloodMoon.checked?1:0,cal:calibOffset})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang,sf:sanFilter.checked?1:0,min:minimalMode?1:0,wk:wakeManual?1:0,cc:customCfg,bm:bloodMoon.checked?1:0,cal:calibOffset,mo:[...manualOut]})); }catch(e){/* ignore */}
 }
 (function loadState(){
   try{
@@ -1529,13 +1600,14 @@ function saveState(){
     const cc=clampCC(d.cc); if(cc){ customCfg=cc; rebuildCustomDiff(); }
     if(d.bm===1) bloodMoon.checked=true;
     if(typeof d.cal==="number" && d.cal>=-1 && d.cal<=1) calibOffset=d.cal;
+    if(Array.isArray(d.mo)) d.mo.forEach(n=>{ if(GHOSTS.some(g=>g.name===n)) manualOut.add(n); });
   }catch(e){/* corrupt state, start fresh */}
 })();
 
 // ---- share: το board κωδικοποιημένο στο URL (#s=...) — υπερισχύει του localStorage ----
 const shareBtn=document.getElementById("shareBtn");
 shareBtn.onclick=()=>{
-  const payload={ev:state,bh:bhState,sanity,diff,sf:sanFilter.checked?1:0,cc:customCfg,bm:bloodMoon.checked?1:0};
+  const payload={ev:state,bh:bhState,sanity,diff,sf:sanFilter.checked?1:0,cc:customCfg,bm:bloodMoon.checked?1:0,mo:[...manualOut]};
   const url=location.origin+location.pathname+"#s="+btoa(JSON.stringify(payload));
   const done=()=>{ const keep=shareBtn.innerHTML; shareBtn.textContent=STR[lang].copied; setTimeout(()=>{ shareBtn.innerHTML=keep; },1500); };
   if(navigator.clipboard && navigator.clipboard.writeText){
@@ -1555,6 +1627,8 @@ shareBtn.onclick=()=>{
     if(d.diff && DIFF[d.diff]) diff=d.diff;
     sanFilter.checked = d.sf===1;
     bloodMoon.checked = d.bm===1;
+    manualOut.clear();
+    if(Array.isArray(d.mo)) d.mo.forEach(n=>{ if(GHOSTS.some(g=>g.name===n)) manualOut.add(n); });
     history.replaceState(null,"",location.pathname+location.search);
   }catch(e){/* χαλασμένο link — αγνόησέ το */}
 })();
@@ -1564,6 +1638,7 @@ document.getElementById("resetBtn").onclick=()=>{
   BEHAVIORS.forEach(b=>bhState[b.id]=0);
   sanFilter.checked=false;
   speedFilter=null; speedClear.style.display="none";
+  manualOut.clear();
   render();
 };
 
