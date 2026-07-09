@@ -1,5 +1,5 @@
 // Phasmo Journal service worker — network-first με cache fallback για offline χρήση στο βαν.
-const CACHE = "phasmo-journal-v1.11.0"; // κρατά ίδιο πρόθεμα με APP_VERSION στο index.html
+const CACHE = "phasmo-journal-v1.11.1"; // κρατά ίδιο πρόθεμα με APP_VERSION στο index.html
 const CORE = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", e => {
