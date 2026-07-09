@@ -376,8 +376,34 @@
       <option value="intermediate" selected>Intermediate</option>
       <option value="professional">Professional</option>
       <option value="nightmare">Nightmare</option>
+      <option value="custom" id="ccOption">Custom</option>
     </select>
   </nav>
+
+  <div class="panel" id="customDiffBox" style="display:none">
+    <div class="panel-label"><span class="l-el">Προσαρμοσμένη δυσκολία</span><span class="l-en">Custom difficulty</span></div>
+    <div class="drain-row">
+      <label class="chk"><span class="l-el">Evidence</span><span class="l-en">Evidence</span>
+        <select id="ccEvid" class="sel"><option value="3">3</option><option value="2">2</option><option value="1">1</option><option value="0">0</option></select>
+      </label>
+      <label class="chk">🏚️ <span class="l-el">Small hunt (s)</span><span class="l-en">Small hunt (s)</span>
+        <input id="ccSmall" class="sel" type="number" min="1" max="120" style="width:64px">
+      </label>
+      <label class="chk">🏠 <span class="l-el">Medium hunt (s)</span><span class="l-en">Medium hunt (s)</span>
+        <input id="ccMedium" class="sel" type="number" min="1" max="120" style="width:64px">
+      </label>
+      <label class="chk">🏰 <span class="l-el">Large hunt (s)</span><span class="l-en">Large hunt (s)</span>
+        <input id="ccLarge" class="sel" type="number" min="1" max="120" style="width:64px">
+      </label>
+      <label class="chk">⏱️ <span class="l-el">Grace (s)</span><span class="l-en">Grace (s)</span>
+        <input id="ccGrace" class="sel" type="number" min="0" max="30" style="width:60px">
+      </label>
+      <label class="chk">🧠 <span class="l-el">Drain ×</span><span class="l-en">Drain ×</span>
+        <input id="ccMult" class="sel" type="number" min="0" max="5" step="0.1" style="width:60px">
+      </label>
+    </div>
+    <div class="sanity-note" style="margin-top:8px"><span class="l-el">Για community lobbies με custom ρυθμίσεις (π.χ. "Apocalypse"-style) — ρύθμισε τα δικά σου νούμερα εδώ και θα χρησιμοποιηθούν παντού στη σελίδα σαν να ήταν προεπιλεγμένο επίπεδο.</span><span class="l-en">For community lobbies with custom settings (e.g. "Apocalypse"-style) — set your own numbers here and they're used everywhere on the page just like a built-in preset.</span></div>
+  </div>
 
   <div class="panel anchor-target" id="evidence">
     <div class="panel-label">Evidence Board</div>
@@ -432,6 +458,7 @@
           <label class="chk"><input type="checkbox" id="drainDark" checked> <span class="l-el">Σκοτάδι</span><span class="l-en">Darkness</span></label>
           <label class="chk"><input type="checkbox" id="drainSolo" checked> Solo</label>
           <label class="chk"><input type="checkbox" id="drainFire"> 🕯️ <span class="l-el">Firelight κοντά</span><span class="l-en">Near firelight</span></label>
+          <label class="chk" id="bloodMoonLbl"><input type="checkbox" id="drainBloodMoon"> 🌕 Blood Moon</label>
           <button class="preset" data-pill="25" title="Tier I">💊 +25%</button>
           <button class="preset" data-pill="35" title="Tier II">💊 +35%</button>
           <button class="preset" data-pill="50" title="Tier III">💊 +50%</button>
@@ -462,6 +489,12 @@
         <div class="tool-title">Footstep Speed Tapper</div>
         <button class="tap-btn" id="tapBtn">TAP<small><span class="l-el">ή πάτα Space</span><span class="l-en">or press Space</span></small></button>
         <div class="tap-readout"><span id="tapBpm">–</span><span class="dim"> bpm · </span><span id="tapMs">–</span><span class="dim"> m/s</span></div>
+        <div class="drain-row" style="margin:2px 0 10px">
+          <label class="chk" style="flex:1;min-width:220px" title="Calibration"><span style="white-space:nowrap">🎚️ <span class="l-el">Βαθμονόμηση</span><span class="l-en">Calibration</span></span>
+            <input type="range" id="tapCalib" min="-1" max="1" step="0.05" value="0" style="flex:1;margin:0 8px">
+            <span id="tapCalibVal" style="min-width:50px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)">+0.00</span>
+          </label>
+        </div>
         <div class="smudge-btns">
           <button class="btn" id="speedApply" disabled><span class="l-el">🔗 Φίλτραρε με αυτή την ταχύτητα</span><span class="l-en">🔗 Filter by this speed</span></button>
           <button class="btn ghostvar" id="speedClear" style="display:none"></button>
@@ -820,7 +853,7 @@ const HUNT_EN = {
  "Kormos":"50% / 70% if you sprint near it",
 };
 
-const APP_VERSION = "1.10.1"; // bump μαζί με το CACHE στο sw.js όταν αλλάζει κάτι ουσιαστικό
+const APP_VERSION = "1.11.0"; // bump μαζί με το CACHE στο sw.js όταν αλλάζει κάτι ουσιαστικό
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -829,6 +862,7 @@ let sanity = 50;
 let lang = "en";
 let minimalMode = false; // δηλωμένο εδώ: το loadState τρέχει πριν οριστεί το minimal-mode section
 let wakeManual = false;  // ίδιος λόγος: το loadState τρέχει πριν οριστεί το wake-toggle section
+let calibOffset = 0;     // ίδιος λόγος: offset βαθμονόμησης του footstep tapper (m/s)
 const STR = {
  el:{
   searchPh:"🔍 Ψάξε ghost με όνομα…",
@@ -845,6 +879,7 @@ const STR = {
   minTitle:"Minimal: μόνο evidence, sanity/smudge & ghosts",
   diffTitle:"Difficulty — προσαρμόζει drain, διάρκειες hunt και grace period",
   wakeTitle:"Κράτα την οθόνη αναμμένη όσο είσαι στη σελίδα (πέρα από timers/auto-drain)",
+  bloodMoonTitle:"Blood Moon weather: +1 στον sanity drain multiplier (~διπλασιάζει το drain). Επίσης: ghosts 15% πιο γρήγορα σε hunt, περισσότερα events, +10% payout (μόνο ενημερωτικά — δεν επηρεάζει άλλους υπολογισμούς της σελίδας).",
   planLbl:"Σχέδιο",
   planPhoto:"Πάρε τη ghost photo — λεφτά!",
   copied:"✓ Αντιγράφηκε!",
@@ -870,6 +905,7 @@ const STR = {
   minTitle:"Minimal: evidence, sanity/smudge & ghosts only",
   diffTitle:"Difficulty — adjusts drain, hunt durations and grace period",
   wakeTitle:"Keep the screen awake while on this page (beyond timers/auto-drain)",
+  bloodMoonTitle:"Blood Moon weather: +1 to the sanity drain multiplier (~doubles drain). Also: ghosts 15% faster in hunts, more events, +10% payout (informational only — doesn't affect other calculations on the page).",
   planLbl:"Plan",
   planPhoto:"Grab the ghost photo — money!",
   copied:"✓ Copied!",
@@ -988,8 +1024,27 @@ const DIFF = {
  intermediate: {label:"Intermediate", mult:1.5, hunts:{small:20,medium:40,large:50}, grace:4, evid:3},
  professional: {label:"Professional", mult:2.0, hunts:{small:30,medium:50,large:60}, grace:3, evid:3},
  nightmare:    {label:"Nightmare",    mult:2.0, hunts:{small:30,medium:50,large:60}, grace:2, evid:2},
+ custom:       {label:"Custom",       mult:1.5, hunts:{small:20,medium:40,large:50}, grace:4, evid:3},
 };
 let diff = "intermediate";
+// Custom difficulty: τιμές που ο χρήστης ορίζει με το χέρι όταν επιλέγει "Custom" (π.χ. community
+// "Apocalypse"-style lobbies). Το DIFF.custom ξαναχτίζεται από αυτό όποτε αλλάζει κάποιο πεδίο.
+let customCfg = {mult:1.5, small:20, medium:40, large:50, grace:4, evid:3};
+function rebuildCustomDiff(){
+  DIFF.custom = {label:"Custom", mult:customCfg.mult, hunts:{small:customCfg.small,medium:customCfg.medium,large:customCfg.large}, grace:customCfg.grace, evid:customCfg.evid};
+}
+rebuildCustomDiff();
+function clampCC(c){
+  if(!c || typeof c!=="object") return null;
+  return {
+    evid:  (Number.isInteger(c.evid) && c.evid>=0 && c.evid<=3) ? c.evid : customCfg.evid,
+    small: (typeof c.small==="number"  && c.small>0  && c.small<=300)  ? c.small  : customCfg.small,
+    medium:(typeof c.medium==="number" && c.medium>0 && c.medium<=300) ? c.medium : customCfg.medium,
+    large: (typeof c.large==="number"  && c.large>0  && c.large<=300)  ? c.large  : customCfg.large,
+    grace: (typeof c.grace==="number"  && c.grace>=0 && c.grace<=60)   ? c.grace  : customCfg.grace,
+    mult:  (typeof c.mult==="number"   && c.mult>=0  && c.mult<=10)    ? c.mult   : customCfg.mult,
+  };
+}
 
 // Behavior φίλτρα: exclude = ghosts που ΔΕΝ κάνουν ποτέ αυτό που είδες (αποκλείονται),
 // include = μόνο αυτά τα ghosts το κάνουν. Το Mimic περνάει πάντα τα include (μιμείται τα πάντα).
@@ -1248,7 +1303,8 @@ const drainOn=document.getElementById("drainOn"),
       drainMap=document.getElementById("drainMap"),
       drainDark=document.getElementById("drainDark"),
       drainSolo=document.getElementById("drainSolo"),
-      drainFire=document.getElementById("drainFire");
+      drainFire=document.getElementById("drainFire"),
+      bloodMoon=document.getElementById("drainBloodMoon");
 let drainLast=0, drainTimer=null;
 function setSanity(v){
   sanFloat = Math.min(100, Math.max(0, v));
@@ -1261,7 +1317,7 @@ function drainTick(){
   const dt = (now - drainLast)/1000;
   drainLast = now;
   if(!drainDark.checked || drainFire.checked) return; // φως ή firelight δίπλα = μηδενικό drain
-  let rate = DRAIN_BASE[drainMap.value] * DIFF[diff].mult;
+  let rate = DRAIN_BASE[drainMap.value] * (DIFF[diff].mult + (bloodMoon.checked?1:0)); // Blood Moon: +1 στον multiplier (~διπλασιάζει το drain)
   if(drainSolo.checked) rate *= 0.5;
   setSanity(sanFloat - rate*dt);
 }
@@ -1401,6 +1457,15 @@ speedApply.onclick=()=>{
 };
 speedClear.onclick=()=>{ speedFilter=null; speedClear.style.display="none"; render(); };
 
+const tapCalib=document.getElementById("tapCalib"), tapCalibVal=document.getElementById("tapCalibVal");
+function paintCalib(){ tapCalibVal.textContent=(calibOffset>=0?"+":"")+calibOffset.toFixed(2); }
+tapCalib.addEventListener("input",()=>{
+  calibOffset=Number(tapCalib.value);
+  paintCalib();
+  paintTaps(); // ξαναϋπολόγισε την ήδη μετρημένη ταχύτητα με το νέο offset
+  saveState();
+});
+
 let tapTimes=[];
 const tapBpmEl=document.getElementById("tapBpm"), tapMsEl=document.getElementById("tapMs");
 function bpmToSpeed(bpm){ return bpm/(60+0.075*bpm); }
@@ -1415,7 +1480,7 @@ function paintTaps(){
   for(let i=1;i<tapTimes.length;i++) ints.push(tapTimes[i]-tapTimes[i-1]);
   const use=ints.slice(-5);
   const avg=use.reduce((a,b)=>a+b,0)/use.length;
-  const bpm=60000/avg, v=bpmToSpeed(bpm);
+  const bpm=60000/avg, v=Math.max(0, bpmToSpeed(bpm)+calibOffset); // +calibOffset: προσωπική διόρθωση καθυστέρησης
   tapBpmEl.textContent=Math.round(bpm);
   tapMsEl.textContent=v.toFixed(2);
   lastSpeed=v; speedApply.disabled=false;
@@ -1443,7 +1508,7 @@ document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.rem
 // ---- persistence (refresh-proof evidence board & sanity) ----
 const LS_KEY="phasmo-journal-v1";
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang,sf:sanFilter.checked?1:0,min:minimalMode?1:0,wk:wakeManual?1:0})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang,sf:sanFilter.checked?1:0,min:minimalMode?1:0,wk:wakeManual?1:0,cc:customCfg,bm:bloodMoon.checked?1:0,cal:calibOffset})); }catch(e){/* ignore */}
 }
 (function loadState(){
   try{
@@ -1459,13 +1524,16 @@ function saveState(){
     if(d.sf===1) sanFilter.checked=true;
     if(d.min===1) minimalMode=true;
     if(d.wk===1) wakeManual=true;
+    const cc=clampCC(d.cc); if(cc){ customCfg=cc; rebuildCustomDiff(); }
+    if(d.bm===1) bloodMoon.checked=true;
+    if(typeof d.cal==="number" && d.cal>=-1 && d.cal<=1) calibOffset=d.cal;
   }catch(e){/* corrupt state, start fresh */}
 })();
 
 // ---- share: το board κωδικοποιημένο στο URL (#s=...) — υπερισχύει του localStorage ----
 const shareBtn=document.getElementById("shareBtn");
 shareBtn.onclick=()=>{
-  const payload={ev:state,bh:bhState,sanity,diff,sf:sanFilter.checked?1:0};
+  const payload={ev:state,bh:bhState,sanity,diff,sf:sanFilter.checked?1:0,cc:customCfg,bm:bloodMoon.checked?1:0};
   const url=location.origin+location.pathname+"#s="+btoa(JSON.stringify(payload));
   const done=()=>{ const keep=shareBtn.innerHTML; shareBtn.textContent=STR[lang].copied; setTimeout(()=>{ shareBtn.innerHTML=keep; },1500); };
   if(navigator.clipboard && navigator.clipboard.writeText){
@@ -1481,8 +1549,10 @@ shareBtn.onclick=()=>{
     if(typeof d.sanity==="number" && d.sanity>=0 && d.sanity<=100){
       sanity=Math.round(d.sanity); sanFloat=sanity; sanRange.value=sanity; sanVal.textContent=sanity;
     }
+    const cc=clampCC(d.cc); if(cc){ customCfg=cc; rebuildCustomDiff(); }
     if(d.diff && DIFF[d.diff]) diff=d.diff;
     sanFilter.checked = d.sf===1;
+    bloodMoon.checked = d.bm===1;
     history.replaceState(null,"",location.pathname+location.search);
   }catch(e){/* χαλασμένο link — αγνόησέ το */}
 })();
@@ -1497,9 +1567,34 @@ document.getElementById("resetBtn").onclick=()=>{
 
 // ---- difficulty selector ----
 const diffSel=document.getElementById("diffSel");
+const customDiffBox=document.getElementById("customDiffBox");
+const ccEvid=document.getElementById("ccEvid"), ccSmall=document.getElementById("ccSmall"),
+      ccMedium=document.getElementById("ccMedium"), ccLarge=document.getElementById("ccLarge"),
+      ccGrace=document.getElementById("ccGrace"), ccMult=document.getElementById("ccMult");
+function syncCCInputs(){
+  ccEvid.value=customCfg.evid; ccSmall.value=customCfg.small; ccMedium.value=customCfg.medium;
+  ccLarge.value=customCfg.large; ccGrace.value=customCfg.grace; ccMult.value=customCfg.mult;
+}
+function readCCInputs(){
+  customCfg={
+    evid:Math.min(3,Math.max(0,parseInt(ccEvid.value,10)||0)),
+    small:Math.min(300,Math.max(1,Number(ccSmall.value)||20)),
+    medium:Math.min(300,Math.max(1,Number(ccMedium.value)||40)),
+    large:Math.min(300,Math.max(1,Number(ccLarge.value)||50)),
+    grace:Math.min(60,Math.max(0,Number(ccGrace.value)||0)),
+    mult:Math.min(10,Math.max(0,Number(ccMult.value)||1)),
+  };
+  rebuildCustomDiff();
+  if(diff==="custom") applyDiff();
+  else saveState();
+}
+[ccEvid,ccSmall,ccMedium,ccLarge,ccGrace,ccMult].forEach(el=>el.addEventListener("input",readCCInputs));
+
 function applyDiff(){
   const d=DIFF[diff];
   diffSel.value=diff;
+  customDiffBox.style.display = diff==="custom" ? "block" : "none";
+  if(diff==="custom") syncCCInputs();
   document.querySelectorAll("[data-map]").forEach(b=>{
     const secs=d.hunts[b.dataset.map];
     b.dataset.hunt=secs;
@@ -1507,11 +1602,12 @@ function applyDiff(){
   });
   document.querySelectorAll(".diffNameTxt").forEach(el=>el.textContent=d.label);
   document.querySelectorAll(".graceTxt").forEach(el=>el.textContent=d.grace+"s");
-  document.querySelectorAll(".drainMultTxt").forEach(el=>el.textContent="×"+d.mult);
+  document.querySelectorAll(".drainMultTxt").forEach(el=>el.textContent="×"+(d.mult+(bloodMoon.checked?1:0)));
   document.getElementById("evidNote").style.display = d.evid<3 ? "block" : "none";
   saveState();
 }
 diffSel.addEventListener("change",()=>{ diff=diffSel.value; applyDiff(); });
+bloodMoon.addEventListener("change", applyDiff); // ξαναγράφει το ×N στο sanity note + saveState
 
 // ---- scroll-spy nav + back-to-top ----
 const navLinks=[...document.querySelectorAll(".jumpnav a")];
@@ -1566,6 +1662,8 @@ function setLang(l){
   minBtn.title = STR[l].minTitle;
   diffSel.title = STR[l].diffTitle;
   if("wakeLock" in navigator) wakeBtn.title = STR[l].wakeTitle;
+  document.getElementById("bloodMoonLbl").title = STR[l].bloodMoonTitle;
+  document.getElementById("ccOption").textContent = l==="el" ? "Προσαρμοσμένη" : "Custom";
   buildEvBoard(); buildBhBoard(); buildCards(); buildThresh(); buildSpeedRows(); buildAbilities();
   applyDiff();
   render();
@@ -1578,6 +1676,7 @@ setLang(lang);
 applyMin();
 applyWakeBtn();
 if(wakeManual) wake.acquire();
+tapCalib.value=calibOffset; paintCalib();
 spy();
 
 // ---- PWA: offline cache & εγκατάσταση σε κινητό ----
