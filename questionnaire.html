@@ -76,6 +76,7 @@
     border-radius:20px;padding:6px 13px;font-size:12.5px;cursor:pointer;font-family:inherit;white-space:nowrap;
   }
   .status-btn:hover{box-shadow:0 0 10px rgba(143,227,136,.25)}
+  .status-btn.off{border-color:var(--muted);color:var(--muted)}
   /* ---------- progress dots ---------- */
   .dots{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px}
   .dot{
@@ -87,6 +88,7 @@
   .dot.answered-yes{background:var(--nv-dim)}
   .dot.answered-no{background:#6b3430}
   .dot.answered-choice{background:var(--warn)}
+  .dot.moot{opacity:.3}
   /* ---------- question card ---------- */
   .qmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
   .qsection{font-family:"Special Elite",monospace;font-size:11px;letter-spacing:2px;color:var(--nv-dim);text-transform:uppercase}
@@ -185,6 +187,7 @@
     <div class="statusbar">
       <span class="status-count"><span class="l-el">Πιθανά</span><span class="l-en">Possible</span>: <b id="statCount">29</b>/29</span>
       <div class="status-progress"><div id="statProgress"></div></div>
+      <button class="status-btn" id="smartBtn"></button>
       <button class="status-btn" id="jumpResults">🔮 <span class="l-el">Αποτελέσματα</span><span class="l-en">Results</span></button>
     </div>
     <div class="dots" id="dots"></div>
@@ -251,6 +254,8 @@ const STR = {
   confirmRestart:"Καθαρισμός όλων των απαντήσεων και επανεκκίνηση;",
   dashLink:"🔗 Άνοιγμα στο Dashboard",
   dashLinkTitle:"Ανοίγει το κεντρικό dashboard με τα evidence, behaviors και sanity που απάντησες ήδη συμπληρωμένα",
+  smartOn:"🧠 Έξυπνη Παράλειψη: ON", smartOff:"🧠 Έξυπνη Παράλειψη: OFF",
+  smartTitle:"Προσπερνά αυτόματα ερωτήσεις που δεν μπορούν πλέον να αλλάξουν το τρέχον pool (π.χ. tell ghost που ήδη αποκλείστηκε). Κλικ για toggle.",
  },
  en:{
   evidenceCheck:"Evidence check:",
@@ -270,6 +275,8 @@ const STR = {
   confirmRestart:"Clear all answers and start over?",
   dashLink:"🔗 Open on Dashboard",
   dashLinkTitle:"Opens the main dashboard with your evidence, behaviors and sanity already filled in",
+  smartOn:"🧠 Smart Skip: ON", smartOff:"🧠 Smart Skip: OFF",
+  smartTitle:"Automatically skips questions that can no longer change the current pool (e.g. a tell for a ghost already ruled out). Click to toggle.",
  },
 };
 
@@ -417,6 +424,7 @@ const LS_KEY="phasmo-quiz-v1";
 const answers={}; // id -> 0 unanswered, 1 yes, 2 no  (choice: stores chosen option index+1, 0=unanswered)
 let cur=0;
 let lang="en";
+let smartMode=true; // αγνόησε ερωτήσεις που δεν μπορούν πλέον να αλλάξουν το τρέχον pool
 
 function loadState(){
   try{
@@ -425,11 +433,12 @@ function loadState(){
     if(d.answers && typeof d.answers==="object") Object.assign(answers,d.answers);
     if(typeof d.cur==="number" && d.cur>=0 && d.cur<QUESTIONS.length) cur=d.cur;
     if(d.lang==="en" || d.lang==="el") lang=d.lang;
+    if(typeof d.smart==="boolean") smartMode=d.smart;
     if(d.started) showQuiz();
   }catch(e){/* corrupt state, start fresh */}
 }
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({answers,cur,lang,started:screenQuiz.style.display!=="none"||screenResults.style.display!=="none"})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({answers,cur,lang,smart:smartMode,started:screenQuiz.style.display!=="none"||screenResults.style.display!=="none"})); }catch(e){/* ignore */}
 }
 
 // ---- pool computation ----
@@ -469,6 +478,39 @@ function computePool(){
 }
 function answeredCount(){
   return QUESTIONS.filter(q=>answers[q.id]).length;
+}
+
+// Smart Skip: μια ερώτηση είναι "moot" (χωρίς νόημα να ρωτηθεί) αν ΚΑΜΙΑ πιθανή απάντησή της
+// δεν θα άλλαζε το τρέχον pool — δηλαδή είτε κανένα ghost του pool δεν την αφορά, είτε όλα
+// τα ghost του pool ήδη περνάνε το ίδιο. Δουλεύει σε οποιοδήποτε μέγεθος pool, όχι μόνο 1-2 —
+// αν π.χ. το Kormos αποκλείστηκε νωρίς από evidence, η ερώτηση για το Kormos γίνεται moot αμέσως.
+function isQuestionMoot(q, pool){
+  if(answers[q.id]) return false; // ήδη απαντημένη — δείξ' την κανονικά για review/επεξεργασία
+  pool = pool || computePool();
+  if(pool.length===0) return false; // ήδη αντίφαση — άσε τον χρήστη να δει/διορθώσει τα πάντα
+  if(q.type==="evidence"){
+    const has=pool.filter(g=>effEv(g).includes(q.code)).length;
+    return has===0 || has===pool.length;
+  }
+  if(q.type==="yesno"){
+    const passYes=pool.filter(g=> q.include ? q.include.includes(g.name) : !q.exclude.includes(g.name)).length;
+    return passYes===0 || passYes===pool.length;
+  }
+  if(q.type==="choice"||q.type==="sanity"){
+    // moot μόνο αν ΚΑΜΙΑ επιλογή δεν χωρίζει το pool (κάθε επιλογή είτε αφήνει όλους είτε κανέναν)
+    return q.options.every((opt,i)=>{
+      const passCount=pool.filter(g=>passesQuestion(g,q,i+1)).length;
+      return passCount===0 || passCount===pool.length;
+    });
+  }
+  return false;
+}
+// Επόμενος δείκτης ξεκινώντας από i (>=0): πρώτη μη-moot ερώτηση όταν το Smart Skip είναι ON,
+// αλλιώς απλά i. Επιστρέφει QUESTIONS.length αν δεν μείνει καμία (τέλος ερωτηματολογίου).
+function nextRelevantIndex(i){
+  if(!smartMode) return i;
+  while(i<QUESTIONS.length && isQuestionMoot(QUESTIONS[i])) i++;
+  return i;
 }
 function questionText(q){
   if(q.type==="evidence") return `${STR[lang].evidenceCheck} ${q.evName}`;
@@ -516,10 +558,12 @@ function buildDots(){
   });
 }
 function paintDots(){
+  const pool=computePool(); // ένας υπολογισμός, ξαναχρησιμοποιείται για όλες τις κουκκίδες
   [...dotsEl.children].forEach((d,i)=>{
     const q=QUESTIONS[i], v=answers[q.id];
     d.title=(i+1)+". "+questionText(q);
     d.classList.toggle("current", i===cur);
+    d.classList.toggle("moot", isQuestionMoot(q,pool));
     d.classList.remove("answered-yes","answered-no","answered-choice");
     if(q.type==="choice"||q.type==="sanity"){ if(v) d.classList.add("answered-choice"); }
     else if(v===1) d.classList.add("answered-yes");
@@ -561,13 +605,15 @@ function renderQuestion(){
   paintDots();
   updateStatus();
 }
+function goForward(){
+  const next=nextRelevantIndex(cur+1);
+  if(next<QUESTIONS.length){ cur=next; renderQuestion(); saveState(); }
+  else showResults();
+}
 function afterAnswer(){
   saveState();
   renderQuestion();
-  setTimeout(()=>{
-    if(cur<QUESTIONS.length-1){ cur++; renderQuestion(); }
-    else showResults();
-  }, 260);
+  setTimeout(goForward, 260);
 }
 function updateStatus(){
   const pool=computePool();
@@ -575,8 +621,8 @@ function updateStatus(){
   statProgress.style.width=Math.round(answeredCount()/QUESTIONS.length*100)+"%";
 }
 
-btnNext.onclick=()=>{ if(cur<QUESTIONS.length-1){ cur++; renderQuestion(); saveState(); } else showResults(); };
-btnSkip.onclick=()=>{ if(cur<QUESTIONS.length-1){ cur++; renderQuestion(); saveState(); } else showResults(); };
+btnNext.onclick=goForward;
+btnSkip.onclick=goForward;
 btnBack.onclick=()=>{ if(cur>0){ cur--; renderQuestion(); saveState(); } };
 document.getElementById("btnSeeResults").onclick=showResults;
 document.getElementById("jumpResults").onclick=showResults;
@@ -685,10 +731,24 @@ function buildReview(){
 
 // ---- language switch ----
 const langBtn=document.getElementById("langBtn");
+const smartBtn=document.getElementById("smartBtn");
+function paintSmartBtn(){
+  const s=STR[lang];
+  smartBtn.textContent = smartMode ? s.smartOn : s.smartOff;
+  smartBtn.title = s.smartTitle;
+  smartBtn.classList.toggle("off", !smartMode);
+}
+smartBtn.onclick=()=>{
+  smartMode=!smartMode;
+  paintSmartBtn();
+  if(dotsEl.children.length) paintDots();
+  saveState();
+};
 function setLang(l){
   lang=l;
   document.documentElement.setAttribute("lang",l);
   langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
+  paintSmartBtn();
   if(dotsEl.children.length) paintDots();
   if(screenQuiz.style.display!=="none") renderQuestion();
   if(screenResults.style.display!=="none") showResults();
