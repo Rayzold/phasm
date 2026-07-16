@@ -249,6 +249,8 @@ const STR = {
   reviewYes:"Ναι", reviewRuledOut:"Αποκλείστηκε",
   identified:"ΤΑΥΤΟΠΟΙΗΘΗΚΕ", plan:"📋 Σχέδιο:", photo:"📸 Πάρε τη ghost photo — λεφτά!",
   confirmRestart:"Καθαρισμός όλων των απαντήσεων και επανεκκίνηση;",
+  dashLink:"🔗 Άνοιγμα στο Dashboard",
+  dashLinkTitle:"Ανοίγει το κεντρικό dashboard με τα evidence, behaviors και sanity που απάντησες ήδη συμπληρωμένα",
  },
  en:{
   evidenceCheck:"Evidence check:",
@@ -266,6 +268,8 @@ const STR = {
   reviewYes:"Yes", reviewRuledOut:"Ruled out",
   identified:"IDENTIFIED", plan:"📋 Plan:", photo:"📸 Grab the ghost photo — money!",
   confirmRestart:"Clear all answers and start over?",
+  dashLink:"🔗 Open on Dashboard",
+  dashLinkTitle:"Opens the main dashboard with your evidence, behaviors and sanity already filled in",
  },
 };
 
@@ -471,6 +475,30 @@ function questionText(q){
   return q[lang];
 }
 
+// Ids κοινά ανάμεσα σε αυτό το QUESTIONS array και το BEHAVIORS array του dashboard —
+// ίδιο naming εξ αρχής, ώστε οι απαντήσεις να μεταφέρονται 1:1 χωρίς mapping table.
+const DASHBOARD_BEHAVIOR_IDS = ["salt","lightOn","breakerOn","breakerOff","earlyHunt","noPhoto","foundHide","male","airball","sbBreath","sixFinger","twinTouch","doorSlam"];
+
+// Κωδικοποιεί ό,τι απαντήθηκε στο ίδιο #s= share-link format που ήδη διαβάζει το dashboard —
+// evidence + κοινά behaviors πάντα, sanity/sf μόνο αν δόθηκε πραγματικό ποσοστό (όχι "not sure").
+function buildDashboardLink(){
+  const ev={};
+  EV.forEach(e=>{
+    const v=answers["ev_"+e.k];
+    ev[e.k] = (v===1||v===2) ? v : 0;
+  });
+  const bh={};
+  DASHBOARD_BEHAVIOR_IDS.forEach(id=>{ bh[id] = answers[id]===1 ? 1 : 0; });
+  const payload={ev, bh};
+  const sq=QUESTIONS.find(q=>q.id==="sanityHunt");
+  const sVal=answers[sq.id];
+  if(sVal && sq.options[sVal-1].sanity!==null){
+    payload.sanity=sq.options[sVal-1].sanity;
+    payload.sf=1;
+  }
+  return "index.html#s="+btoa(JSON.stringify(payload));
+}
+
 // ---- DOM refs ----
 const screenIntro=document.getElementById("screenIntro"), screenQuiz=document.getElementById("screenQuiz"), screenResults=document.getElementById("screenResults");
 const statCount=document.getElementById("statCount"), statProgress=document.getElementById("statProgress");
@@ -603,10 +631,12 @@ function showResults(){
 
   html+=`<div class="navrow" style="margin-top:16px">
     <button class="nav-btn primary" id="continueBtn">${answeredCount()<QUESTIONS.length?s.continueQ:s.reviewQ}</button>
+    <button class="nav-btn" id="dashLinkBtn" title="${s.dashLinkTitle}">${s.dashLink}</button>
   </div>`;
   html+=buildReview();
   panel.innerHTML=html;
   document.getElementById("continueBtn").onclick=()=>showQuiz();
+  document.getElementById("dashLinkBtn").onclick=()=>{ location.href=buildDashboardLink(); };
   panel.querySelectorAll("[data-jump]").forEach(b=>{
     b.onclick=()=>{ cur=Number(b.dataset.jump); showQuiz(); };
   });
