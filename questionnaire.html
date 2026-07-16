@@ -19,6 +19,8 @@
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   html,body{margin:0;padding:0}
+  html[lang=en] .l-el{display:none!important}
+  html:not([lang=en]) .l-en{display:none!important}
   body{
     background:var(--bg);
     background-image:radial-gradient(ellipse at 50% -10%, #16202b 0%, var(--bg) 55%);
@@ -38,12 +40,13 @@
     letter-spacing:1px;
     text-shadow:0 0 18px rgba(143,227,136,.25);
   }
-  .backLink{
+  .headerBtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .backLink,#langBtn{
     font-family:"Special Elite",monospace;font-size:12.5px;letter-spacing:1px;
     color:var(--muted);text-decoration:none;border:1px solid var(--line);
-    border-radius:20px;padding:6px 13px;white-space:nowrap;
+    border-radius:20px;padding:6px 13px;white-space:nowrap;background:none;cursor:pointer;
   }
-  .backLink:hover{border-color:var(--nv);color:var(--nv)}
+  .backLink:hover,#langBtn:hover{border-color:var(--nv);color:var(--nv)}
   .sub{color:var(--muted);font-size:14px;margin:2px 0 22px;max-width:640px;line-height:1.5}
   .panel{
     border:1px solid var(--line);
@@ -103,7 +106,6 @@
   .ans-btn.selected.yes{border-color:var(--nv);background:rgba(143,227,136,.1);box-shadow:0 0 10px rgba(143,227,136,.2)}
   .ans-btn.selected.no{border-color:var(--danger);background:rgba(225,91,91,.1);box-shadow:0 0 10px rgba(225,91,91,.2)}
   .ans-btn.selected.skip{border-color:var(--muted);color:var(--muted)}
-  .ans-btn .hint{display:block;font-size:12px;color:var(--muted);margin-top:3px;font-weight:400}
   .navrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .nav-btn{
     background:none;border:1px solid var(--line);color:var(--muted);
@@ -163,24 +165,27 @@
     <div class="htitle">
       <h1>GHOST QUESTIONNAIRE</h1>
     </div>
-    <a class="backLink" href="index.html">← Dashboard</a>
+    <div class="headerBtns">
+      <button id="langBtn" title="Ελληνικά / English">ΕΛ</button>
+      <a class="backLink" href="index.html"><span class="l-el">← Αρχική</span><span class="l-en">← Dashboard</span></a>
+    </div>
   </header>
-  <p class="sub">Answer questions one at a time about what you've seen and heard on the contract. The list of possible ghosts narrows live as you go — jump to results whenever you want, or answer everything for the fullest picture.</p>
+  <p class="sub"><span class="l-el">Απάντα ερωτήσεις μία-μία για ό,τι είδες και άκουσες στο contract. Η λίστα των πιθανών ghosts στενεύει live καθώς προχωράς — πήγαινε στα αποτελέσματα όποτε θες, ή απάντα τα πάντα για την πληρέστερη εικόνα.</span><span class="l-en">Answer questions one at a time about what you've seen and heard on the contract. The list of possible ghosts narrows live as you go — jump to results whenever you want, or answer everything for the fullest picture.</span></p>
 
   <div id="screenIntro" class="panel">
-    <div class="panel-label">Before you start</div>
-    <p class="intro-note">This is a <strong>step-by-step</strong> companion to the main Evidence Board — good for working through a contract from memory, out loud with teammates, or when you don't want to stare at a grid of toggles.</p>
-    <p class="intro-note">38 questions total, grouped into: <strong>Evidence</strong> (7), <strong>Common behaviors</strong> (7), <strong>Other observations</strong> (6), <strong>Advanced tells</strong> (17), and one <strong>speed</strong> question.</p>
-    <p class="intro-note">Only answer <strong>Yes</strong> when you're confident — a "No" or "Not sure" is treated as "no information," never as proof, except for the Evidence section where "Ruled out" is a real ✗. On <strong>Nightmare</strong> difficulty only 2 of 3 evidence are ever shown, so don't mark the third as "Ruled out" just because you haven't found it.</p>
-    <p class="intro-note">Your progress saves automatically — close the tab any time and pick up where you left off.</p>
-    <button class="startBtn" id="startBtn">▶ START</button>
+    <div class="panel-label"><span class="l-el">Πριν ξεκινήσεις</span><span class="l-en">Before you start</span></div>
+    <p class="intro-note"><span class="l-el">Αυτό είναι ένα βήμα-βήμα companion στο κεντρικό Evidence Board — καλό για να δουλέψεις ένα contract από μνήμης, φωναχτά με την ομάδα σου, ή όταν δεν θες να κοιτάς ένα πλέγμα από toggles.</span><span class="l-en">This is a <strong>step-by-step</strong> companion to the main Evidence Board — good for working through a contract from memory, out loud with teammates, or when you don't want to stare at a grid of toggles.</span></p>
+    <p class="intro-note"><span class="l-el">38 ερωτήσεις συνολικά, χωρισμένες σε: <strong>Evidence</strong> (7), <strong>Συνηθισμένες συμπεριφορές</strong> (7), <strong>Άλλες παρατηρήσεις</strong> (6), <strong>Προχωρημένα tells</strong> (17), και μία ερώτηση <strong>ταχύτητας</strong>.</span><span class="l-en">38 questions total, grouped into: <strong>Evidence</strong> (7), <strong>Common behaviors</strong> (7), <strong>Other observations</strong> (6), <strong>Advanced tells</strong> (17), and one <strong>speed</strong> question.</span></p>
+    <p class="intro-note"><span class="l-el">Απάντα <strong>Ναι</strong> μόνο όταν είσαι σίγουρος — ένα «Όχι» ή «Δεν είμαι σίγουρος» αντιμετωπίζεται σαν «καμία πληροφορία», ποτέ σαν απόδειξη, εκτός από το Evidence όπου το «Αποκλείστηκε» είναι πραγματικό ✗. Σε <strong>Nightmare</strong> δείχνονται μόνο 2 από τα 3 evidence, οπότε μην τσεκάρεις το τρίτο ως «Αποκλείστηκε» μόνο επειδή δεν το βρήκες ακόμα.</span><span class="l-en">Only answer <strong>Yes</strong> when you're confident — a "No" or "Not sure" is treated as "no information," never as proof, except for the Evidence section where "Ruled out" is a real ✗. On <strong>Nightmare</strong> difficulty only 2 of 3 evidence are ever shown, so don't mark the third as "Ruled out" just because you haven't found it.</span></p>
+    <p class="intro-note"><span class="l-el">Η πρόοδός σου αποθηκεύεται αυτόματα — κλείσε την καρτέλα όποτε θες και συνέχισε από εκεί που έμεινες.</span><span class="l-en">Your progress saves automatically — close the tab any time and pick up where you left off.</span></p>
+    <button class="startBtn" id="startBtn"><span class="l-el">▶ ΞΕΚΙΝΑ</span><span class="l-en">▶ START</span></button>
   </div>
 
   <div id="screenQuiz" style="display:none">
     <div class="statusbar">
-      <span class="status-count">Possible: <b id="statCount">29</b>/29</span>
+      <span class="status-count"><span class="l-el">Πιθανά</span><span class="l-en">Possible</span>: <b id="statCount">29</b>/29</span>
       <div class="status-progress"><div id="statProgress"></div></div>
-      <button class="status-btn" id="jumpResults">🔮 Results</button>
+      <button class="status-btn" id="jumpResults">🔮 <span class="l-el">Αποτελέσματα</span><span class="l-en">Results</span></button>
     </div>
     <div class="dots" id="dots"></div>
     <div class="panel">
@@ -191,71 +196,78 @@
       <div class="qtext" id="qText"></div>
       <div class="answers" id="qAnswers"></div>
       <div class="navrow">
-        <button class="nav-btn" id="btnBack">← Back</button>
-        <button class="nav-btn" id="btnSkip">Skip →</button>
-        <button class="nav-btn primary" id="btnNext" disabled>Next →</button>
-        <button class="nav-btn results" id="btnSeeResults">🔮 See results</button>
+        <button class="nav-btn" id="btnBack"><span class="l-el">← Πίσω</span><span class="l-en">← Back</span></button>
+        <button class="nav-btn" id="btnSkip"><span class="l-el">Παράλειψη →</span><span class="l-en">Skip →</span></button>
+        <button class="nav-btn primary" id="btnNext" disabled><span class="l-el">Επόμενο →</span><span class="l-en">Next →</span></button>
+        <button class="nav-btn results" id="btnSeeResults">🔮 <span class="l-el">Δες αποτελέσματα</span><span class="l-en">See results</span></button>
       </div>
     </div>
   </div>
 
   <div id="screenResults" style="display:none">
     <div class="statusbar">
-      <span class="status-count">Possible: <b id="statCountR">29</b>/29</span>
-      <button class="status-btn" id="backToQuiz">← Back to questions</button>
-      <button class="status-btn" id="restartBtn">↺ Start over</button>
+      <span class="status-count"><span class="l-el">Πιθανά</span><span class="l-en">Possible</span>: <b id="statCountR">29</b>/29</span>
+      <button class="status-btn" id="backToQuiz"><span class="l-el">← Πίσω στις ερωτήσεις</span><span class="l-en">← Back to questions</span></button>
+      <button class="status-btn" id="restartBtn"><span class="l-el">↺ Από την αρχή</span><span class="l-en">↺ Start over</span></button>
     </div>
     <div class="panel" id="resultsPanel"></div>
   </div>
 
-  <footer>Evidence data: Phasmophobia Wiki (July 2026, 29 ghosts) · Companion to the <a href="index.html" style="color:var(--nv-dim)">Ghost Journal dashboard</a></footer>
+  <footer><span class="l-el">Evidence data: Phasmophobia Wiki (Ιούλιος 2026, 29 ghosts) · Συνοδευτικό στο <a href="index.html" style="color:var(--nv-dim)">Ghost Journal dashboard</a></span><span class="l-en">Evidence data: Phasmophobia Wiki (July 2026, 29 ghosts) · Companion to the <a href="index.html" style="color:var(--nv-dim)">Ghost Journal dashboard</a></span></footer>
 </div>
+<script src="ghosts-data.js"></script>
 <script>
-// ---- ghost dataset (kept in sync with index.html's GHOSTS array) ----
-const EV = [
-  {k:"EMF", n:"EMF Level 5",    ic:"📡"},
-  {k:"DOTS",n:"D.O.T.S.",       ic:"💠"},
-  {k:"UV",  n:"Ultraviolet",    ic:"🖐️"},
-  {k:"FRZ", n:"Freezing Temps", ic:"❄️"},
-  {k:"ORB", n:"Ghost Orbs",     ic:"🔮"},
-  {k:"WRT", n:"Ghost Writing",  ic:"📖"},
-  {k:"SB",  n:"Spirit Box",     ic:"📻"},
-];
-const ITEM_OF = {EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Thermometer",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"};
+// EV.n / GHOSTS / TELL_EN / HUNT_EN / effEv() come from ghosts-data.js (shared with index.html).
+const ITEM_OF = {
+ el:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Θερμόμετρο",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
+ en:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Thermometer",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
+};
+function tellOf(g){ return lang==="en" ? (TELL_EN[g.name]||g.tell) : g.tell; }
+function huntOf(g){ return lang==="en" ? (HUNT_EN[g.name]||g.hunt) : g.hunt; }
 
-const GHOSTS = [
- {name:"Spirit", ev:["EMF","WRT","SB"], hunt:"50%", tell:"No obvious tell — the 'boring' ghost. Test: after incense/smudge it won't hunt for 180s (instead of 90s). If you count 2-3 quiet minutes after smudging → Spirit."},
- {name:"Wraith", ev:["DOTS","EMF","SB"], hunt:"50%", tell:"NEVER steps in salt — no footprints, ever. Drop salt in a doorway: if everything else shows activity but the salt stays untouched, big Wraith hint."},
- {name:"Phantom", ev:["DOTS","UV","SB"], hunt:"50%", tell:"Photograph it during a ghost event: if it does NOT appear in the photo → Phantom. Stays invisible longer during hunts. Don't look at it — it drains your sanity."},
- {name:"Poltergeist", ev:["WRT","UV","SB"], hunt:"50%", tell:"Throws many objects at once, and often. Leave a pile of small items in one room — if it launches them all together, Poltergeist."},
- {name:"Banshee", ev:["DOTS","ORB","UV"], hunt:"50% of its target", tell:"Targets ONE player (solo: you). Distinctive scream on the Parabolic Microphone. 'Visits' its target instead of roaming randomly."},
- {name:"Jinn", ev:["EMF","UV","FRZ"], hunt:"50%", tell:"With the breaker ON: fast from afar, normal up close. NEVER turns the breaker off itself. Counter: turn the breaker off yourself and it goes back to normal."},
- {name:"Mare", ev:["WRT","ORB","SB"], hunt:"60% dark / 40% light", tell:"Turns lights off the moment you switch them on, NEVER turns one on. Counter: keep the ghost room lit and it 'locks' at the 40% threshold."},
- {name:"Revenant", ev:["WRT","ORB","FRZ"], hunt:"50%", tell:"Two speeds: snail (1.0 m/s) when it can't see you, monster (3.0 m/s) when it can. Counter: hide IMMEDIATELY — once it loses your trail it crawls."},
- {name:"Shade", ev:["WRT","EMF","FRZ"], hunt:"35%", tell:"Shy: minimal activity while you're nearby, and it won't hunt if you're in the same room. If the house is 'dead' but there's a ghost, think Shade."},
- {name:"Demon", ev:["WRT","UV","FRZ"], hunt:"70% + hunts at ANY sanity (ability)", tell:"A hunt at full sanity = almost certainly Demon. Shortest cooldown between hunts. Counter: crucifix — it has a bigger range on Demons."},
- {name:"Yurei", ev:["DOTS","ORB","FRZ"], hunt:"50%", tell:"Slams doors FULLY shut with force. Counter: smudge INSIDE its room and it's pinned there for 90s — no roaming."},
- {name:"Oni", ev:["DOTS","EMF","FRZ"], hunt:"50%", tell:"Hyperactive when you're close, throws objects hard. NEVER does the 'airball' event. More clearly visible during hunts."},
- {name:"Yokai", ev:["DOTS","ORB","SB"], hunt:"50% / 80% if you talk near it", tell:"Your voice enrages it — if hunts start while you're talking, suspicious. Counter: during a hunt it only detects you within ~2.5m. Hide, shut up."},
- {name:"Hantu", ev:["ORB","UV","FRZ"], hunt:"50%", tell:"Faster the colder the room. Turns the breaker off, NEVER on. In a hunt with the breaker off it shows freezing breath. Counter: keep the house warm."},
- {name:"Goryo", ev:["DOTS","EMF","UV"], hunt:"50%", tell:"D.O.T.S. shows ONLY through a video camera, and only when nobody is in the room. Almost never wanders far from its ghost room."},
- {name:"Myling", ev:["WRT","EMF","UV"], hunt:"50%", tell:"During hunts its footsteps/voice are audible only from very close — a 'silent killer'. Heartbeat with no warning it was coming → Myling."},
- {name:"Onryo", ev:["ORB","FRZ","SB"], hunt:"60%", tell:"Blows out flames — every 3rd extinguished flame = hunt, regardless of sanity. Counter: a lit candle/firelight next to it works like a crucifix."},
- {name:"The Twins", ev:["EMF","FRZ","SB"], hunt:"50%", tell:"Interactions in TWO different spots almost simultaneously. Hunts at two slightly different speeds."},
- {name:"Raiju", ev:["DOTS","EMF","ORB"], hunt:"65% near electronics", tell:"Fast near ACTIVE equipment and hunts earlier next to it. Counter: turn off/collect your gear from the ghost room."},
- {name:"Obake", ev:["EMF","ORB","UV"], hunt:"50%", tell:"Fingerprints with 6 fingers or weird shapes = instant confirm. Its prints fade in half the time. Briefly shapeshifts during hunts."},
- {name:"The Mimic", ev:["UV","FRZ","SB"], mimic:true, hunt:"mimics others", tell:"ALWAYS shows fake Ghost Orbs as a 4th evidence. Changes behavior every few minutes. If the ghost 'changes personality', Mimic."},
- {name:"Moroi", ev:["WRT","FRZ","SB"], hunt:"50%", tell:"Curses you through the Spirit Box or Parabolic → your sanity drains faster afterwards. Counter: sanity pills clear the curse, smudge blinds it for longer."},
- {name:"Deogen", ev:["DOTS","WRT","SB"], hunt:"40%", tell:"Heavy, wheezing breath on the Spirit Box from up close. It ALWAYS finds you in hunts — don't hide! Counter: it gets very slow up close, loop around furniture."},
- {name:"Thaye", ev:["DOTS","WRT","ORB"], hunt:"75% fresh → 15% aged", tell:"It 'ages': starts hyperactive, fast and aggressive, and as time passes becomes slow and quiet. If the ghost 'got tired' → Thaye."},
- {name:"Dayan", ev:["EMF","ORB","SB"], hunt:"45% still / 60% moving", tell:"ALWAYS a female name & model. Near it (<10m): stand still and it slows down, run and it speeds up. Counter: freeze in place during hunts."},
- {name:"Gallu", ev:["EMF","UV","SB"], hunt:"50% (earlier when enraged)", tell:"Crucifix, incense and salt ENRAGE it → faster on the next hunt, then it 'exhausts' and defensive items work better."},
- {name:"Obambo", ev:["WRT","UV","DOTS"], hunt:"10% calm / 65% aggressive", tell:"Two 'moods' alternating every 2 minutes: calm = slow and harmless, aggressive = hunts from 65% sanity, faster. A ghost with mood swings = Obambo."},
- {name:"Aswang", ev:["DOTS","FRZ","WRT"], hunt:"50%", tell:"Accelerates VERY fast with line-of-sight. Unique: if it reaches you in an OFFICIAL hiding spot, the hunt ends instantly — but next hunt it goes straight there. Change spots!"},
- {name:"Kormos", ev:["ORB","SB","UV"], hunt:"50% / 70% if you sprint near it", tell:"BLIND — it tracks you by footstep sounds. Counter: stand COMPLETELY still during hunts. Careful: it kills within 1.5m even through walls/furniture."},
-];
-
-function effEv(g){ return g.mimic ? [...g.ev,"ORB"] : g.ev; }
+const SECTION_NAMES = {
+ evidence: {el:"Evidence", en:"Evidence"},
+ behavior: {el:"Συνηθισμένες συμπεριφορές", en:"Common behaviors"},
+ other:    {el:"Άλλες παρατηρήσεις", en:"Other observations"},
+ advanced: {el:"Προχωρημένα tells", en:"Advanced tells"},
+ speed:    {el:"Ταχύτητα", en:"Speed"},
+};
+const STR = {
+ el:{
+  evidenceCheck:"Έλεγχος evidence:",
+  evYes:"✅ Επιβεβαιώθηκε — το βρήκα", evNo:"❌ Αποκλείστηκε — το έλεγξα, δεν είναι αυτό", evSkip:"❔ Δεν το έλεγξα ακόμα",
+  yYes:"✅ Ναι", yNo:"❌ Όχι", ySkip:"🤷 Δεν είμαι σίγουρος / δεν το πρόσεξα",
+  qNum:(i,n)=>`Ερώτηση ${i} από ${n}`,
+  short:n=>`🔎 Έμειναν ${n} πιθανά ghosts`,
+  stillOpen:n=>`${n} ακόμα πιθανά`,
+  stillOpenNote:"Ακόμα αρκετά ανοιχτό — απάντα λίγες ακόμα ερωτήσεις για να στενέψει.",
+  none:"Κανένα ghost δεν ταιριάζει σε όλες τις απαντήσεις. Συνήθως αυτό σημαίνει ότι κάποια απάντηση ήταν λάθος — ένα evidence που πατήθηκε κατά λάθος, ή ένα «Ναι» σε κάτι που στην πραγματικότητα ήταν ψεύτικο tell άλλου ghost (το Mimic λατρεύει να ξεγελάει έτσι). Χρησιμοποίησε τη λίστα review παρακάτω για να γυρίσεις πίσω και να ξανατσεκάρεις.",
+  hintDone:"Έχεις ελέγξει όλα τα evidence που θα μπορούσαν ακόμα να χωρίσουν αυτή την ομάδα — το υπόλοιπο είναι θέμα συμπεριφοράς. Κοίτα τις κάρτες παραπάνω για διακριτικά tells.",
+  hintNext:(ic,item,cut,total)=>`🎯 Μετά, έλεγξε για ${ic} ${item} — ό,τι κι αν δείξει, κόβει τουλάχιστον ${cut} από τα ${total} που μένουν.`,
+  continueQ:"Συνέχισε τις ερωτήσεις →", reviewQ:"Ξαναδές τις ερωτήσεις →",
+  reviewHeader:"ΑΠΑΝΤΗΣΕΙΣ ΠΟΥ ΔΙΑΜΟΡΦΩΣΑΝ ΤΟ ΑΠΟΤΕΛΕΣΜΑ (κλικ για επαναφορά)",
+  reviewYes:"Ναι", reviewRuledOut:"Αποκλείστηκε",
+  identified:"ΤΑΥΤΟΠΟΙΗΘΗΚΕ", plan:"📋 Σχέδιο:", photo:"📸 Πάρε τη ghost photo — λεφτά!",
+  confirmRestart:"Καθαρισμός όλων των απαντήσεων και επανεκκίνηση;",
+ },
+ en:{
+  evidenceCheck:"Evidence check:",
+  evYes:"✅ Confirmed — found it", evNo:"❌ Ruled out — checked, not this", evSkip:"❔ Not tested yet",
+  yYes:"✅ Yes", yNo:"❌ No", ySkip:"🤷 Not sure / didn't check",
+  qNum:(i,n)=>`Question ${i} of ${n}`,
+  short:n=>`🔎 Down to ${n} possible ghosts`,
+  stillOpen:n=>`${n} still possible`,
+  stillOpenNote:"Still fairly open — answer a few more questions to narrow it down.",
+  none:"No ghost fits every answer. That usually means one answer was a slip — a mis-clicked evidence, or a \"Yes\" on something that was actually a different ghost's fake tell (the Mimic loves to trick this). Use the review list below to jump back and double-check.",
+  hintDone:"You've checked all the evidence that could still split this group — the rest comes down to behavior. Scroll through the cards above for distinguishing tells.",
+  hintNext:(ic,item,cut,total)=>`🎯 Next, check for ${ic} ${item} — whatever it shows, it cuts at least ${cut} of the ${total} still on the table.`,
+  continueQ:"Continue questions →", reviewQ:"Review questions →",
+  reviewHeader:"ANSWERS THAT SHAPED THIS RESULT (click to revisit)",
+  reviewYes:"Yes", reviewRuledOut:"Ruled out",
+  identified:"IDENTIFIED", plan:"📋 Plan:", photo:"📸 Grab the ghost photo — money!",
+  confirmRestart:"Clear all answers and start over?",
+ },
+};
 
 // ---- question bank ----
 // type "evidence": Confirmed/Ruled out/Not tested, tri-state, mirrors the dashboard's evidence board.
@@ -263,81 +275,123 @@ function effEv(g){ return g.mimic ? [...g.ev,"ORB"] : g.ev; }
 // because absence of a rare tell is not proof it didn't happen.
 // type "choice": pick one option, each option carries its own include list (or none for "not sure").
 const QUESTIONS = [
- ...EV.map(e=>({id:"ev_"+e.k, type:"evidence", code:e.k, section:"Evidence", icon:e.ic,
-   text:`Evidence check: ${e.n}`})),
+ ...EV.map(e=>({id:"ev_"+e.k, type:"evidence", code:e.k, section:"evidence", icon:e.ic, evName:e.n})),
 
- {id:"salt", type:"yesno", section:"Common behaviors", icon:"🧂", exclude:["Wraith"],
-  text:"Did the ghost leave a footprint after stepping in a pile of salt?"},
- {id:"lightOn", type:"yesno", section:"Common behaviors", icon:"💡", exclude:["Mare"],
-  text:"Did the ghost turn a light ON by itself?"},
- {id:"breakerOn", type:"yesno", section:"Common behaviors", icon:"🔋", exclude:["Hantu"],
-  text:"Did the ghost turn the fuse box breaker back ON?"},
- {id:"breakerOff", type:"yesno", section:"Common behaviors", icon:"🪫", exclude:["Jinn"],
-  text:"Did the ghost turn the breaker OFF?"},
- {id:"earlyHunt", type:"yesno", section:"Common behaviors", icon:"😱", include:["Demon","Yokai","Thaye","Onryo","The Mimic"],
-  text:"Did a hunt start while sanity was still above 70%?"},
- {id:"noPhoto", type:"yesno", section:"Common behaviors", icon:"📸", include:["Phantom","The Mimic"],
-  text:"Did the ghost fail to appear in a photo taken during a ghost event?"},
- {id:"foundHide", type:"yesno", section:"Common behaviors", icon:"🙈", include:["Deogen","Aswang","The Mimic"],
-  text:"Did the ghost come straight to your hiding spot with no searching around?"},
+ {id:"salt", type:"yesno", section:"behavior", icon:"🧂", exclude:["Wraith"],
+  en:"Did the ghost leave a footprint after stepping in a pile of salt?",
+  el:"Άφησε το ghost αποτύπωμα αφού πάτησε σε αλάτι;"},
+ {id:"lightOn", type:"yesno", section:"behavior", icon:"💡", exclude:["Mare"],
+  en:"Did the ghost turn a light ON by itself?",
+  el:"Άναψε το ghost μόνο του κάποιο φως;"},
+ {id:"breakerOn", type:"yesno", section:"behavior", icon:"🔋", exclude:["Hantu"],
+  en:"Did the ghost turn the fuse box breaker back ON?",
+  el:"Άνοιξε το ghost το breaker του πίνακα;"},
+ {id:"breakerOff", type:"yesno", section:"behavior", icon:"🪫", exclude:["Jinn"],
+  en:"Did the ghost turn the breaker OFF?",
+  el:"Έκλεισε το ghost το breaker;"},
+ {id:"earlyHunt", type:"yesno", section:"behavior", icon:"😱", include:["Demon","Yokai","Thaye","Onryo","The Mimic"],
+  en:"Did a hunt start while sanity was still above 70%?",
+  el:"Ξεκίνησε hunt ενώ το sanity ήταν ακόμα πάνω από 70%;"},
+ {id:"noPhoto", type:"yesno", section:"behavior", icon:"📸", include:["Phantom","The Mimic"],
+  en:"Did the ghost fail to appear in a photo taken during a ghost event?",
+  el:"Δεν εμφανίστηκε το ghost σε φωτογραφία που τραβήχτηκε κατά τη διάρκεια ενός ghost event;"},
+ {id:"foundHide", type:"yesno", section:"behavior", icon:"🙈", include:["Deogen","Aswang","The Mimic"],
+  en:"Did the ghost come straight to your hiding spot with no searching around?",
+  el:"Ήρθε το ghost κατευθείαν στην κρυψώνα σου, χωρίς να ψάξει γύρω;"},
 
- {id:"male", type:"yesno", section:"Other observations", icon:"♂️", exclude:["Banshee","Dayan"],
-  text:"Is the ghost's name/model clearly MALE?"},
- {id:"airball", type:"yesno", section:"Other observations", icon:"🌀", exclude:["Oni"],
-  text:"Did you witness the 'airball' ghost event (a ball rolling/thrown on its own)?"},
- {id:"sbBreath", type:"yesno", section:"Other observations", icon:"🌬️", include:["Deogen"],
-  text:"Did you hear heavy, wheezing breathing on the Spirit Box from close range?"},
- {id:"sixFinger", type:"yesno", section:"Other observations", icon:"🖖", include:["Obake"],
-  text:"Did a fingerprint show 6 fingers or an oddly-shaped hand?"},
- {id:"twinTouch", type:"yesno", section:"Other observations", icon:"👯", include:["The Twins","The Mimic"],
-  text:"Did two interactions happen in different spots almost at the same time?"},
- {id:"doorSlam", type:"yesno", section:"Other observations", icon:"🚪", include:["Yurei","The Mimic"],
-  text:"Did a door slam FULLY shut with real force — not just a light rattle?"},
+ {id:"male", type:"yesno", section:"other", icon:"♂️", exclude:["Banshee","Dayan"],
+  en:"Is the ghost's name/model clearly MALE?",
+  el:"Είναι το όνομα/μοντέλο του ghost ξεκάθαρα ΑΡΣΕΝΙΚΟ;"},
+ {id:"airball", type:"yesno", section:"other", icon:"🌀", exclude:["Oni"],
+  en:"Did you witness the 'airball' ghost event (a ball rolling/thrown on its own)?",
+  el:"Είδες το event «airball» (μια μπάλα να κυλάει/πετάγεται μόνη της);"},
+ {id:"sbBreath", type:"yesno", section:"other", icon:"🌬️", include:["Deogen"],
+  en:"Did you hear heavy, wheezing breathing on the Spirit Box from close range?",
+  el:"Άκουσες βαριά, λαχανιασμένη αναπνοή στο Spirit Box από κοντινή απόσταση;"},
+ {id:"sixFinger", type:"yesno", section:"other", icon:"🖖", include:["Obake"],
+  en:"Did a fingerprint show 6 fingers or an oddly-shaped hand?",
+  el:"Έδειξε κάποιο fingerprint 6 δάχτυλα ή περίεργο σχήμα χεριού;"},
+ {id:"twinTouch", type:"yesno", section:"other", icon:"👯", include:["The Twins","The Mimic"],
+  en:"Did two interactions happen in different spots almost at the same time?",
+  el:"Έγιναν δύο interactions σε διαφορετικά σημεία σχεδόν ταυτόχρονα;"},
+ {id:"doorSlam", type:"yesno", section:"other", icon:"🚪", include:["Yurei","The Mimic"],
+  en:"Did a door slam FULLY shut with real force — not just a light rattle?",
+  el:"Έκλεισε μια πόρτα ΤΕΛΕΙΩΣ με δύναμη — όχι απλό τρέμουλο;"},
 
- {id:"deogenSpeed", type:"yesno", section:"Advanced tells", icon:"🐌", include:["Deogen"],
-  text:"Did the ghost move painfully slowly right next to you, but seem much faster from a distance?"},
- {id:"revenantLos", type:"yesno", section:"Advanced tells", icon:"👀", include:["Revenant"],
-  text:"Did the ghost crawl when it lost sight of you, then instantly sprint the moment it saw you again?"},
- {id:"thayeAge", type:"yesno", section:"Advanced tells", icon:"⏳", include:["Thaye"],
-  text:"Did the ghost start out fast and aggressive, then clearly slow down and go quiet over time?"},
- {id:"raijuElec", type:"yesno", section:"Advanced tells", icon:"🔌", include:["Raiju"],
-  text:"Did the ghost move faster and hunt sooner specifically near powered-on electronic equipment?"},
- {id:"galluEnrage", type:"yesno", section:"Advanced tells", icon:"😡", include:["Gallu"],
-  text:"Did using a crucifix, incense, or salt seem to make the ghost MORE aggressive afterward?"},
- {id:"obamboMood", type:"yesno", section:"Advanced tells", icon:"🎭", include:["Obambo"],
-  text:"Did the ghost's behavior swing between calm and aggressive roughly every couple of minutes?"},
- {id:"aswangEnd", type:"yesno", section:"Advanced tells", icon:"🔚", include:["Aswang"],
-  text:"Did a hunt end abruptly the instant the ghost opened your locker or closet door, without killing you?"},
- {id:"aswangReturn", type:"yesno", section:"Advanced tells", icon:"🔁", include:["Aswang"],
-  text:"On a LATER hunt, did the ghost go straight to a hiding spot you'd used before?"},
- {id:"kormosWall", type:"yesno", section:"Advanced tells", icon:"🧱", include:["Kormos"],
-  text:"Were you killed during a hunt through a wall or piece of furniture, with no clear line of sight?"},
- {id:"kormosBlind", type:"yesno", section:"Advanced tells", icon:"🙉", include:["Kormos"],
-  text:"Did the ghost seem to ignore loud noises or thrown objects, but react only to footsteps or talking?"},
- {id:"goryoNaked", type:"yesno", section:"Advanced tells", icon:"👁️", exclude:["Goryo"],
-  text:"Did you see the D.O.T.S. projector's dots with your own eyes, without needing a video camera?"},
- {id:"wraithTeleport", type:"yesno", section:"Advanced tells", icon:"🌀", include:["Wraith"],
-  text:"Did the ghost appear right next to a player with absolutely no warning or footsteps?"},
- {id:"moroiCurse", type:"yesno", section:"Advanced tells", icon:"🔮", include:["Moroi"],
-  text:"Did your sanity seem to drain noticeably faster right after a Spirit Box or Parabolic interaction?"},
- {id:"onryoFlames", type:"yesno", section:"Advanced tells", icon:"🕯️", include:["Onryo"],
-  text:"Did lit candles or flames keep going out, with a hunt starting roughly every 3rd time?"},
- {id:"onryoFirelight", type:"yesno", section:"Advanced tells", icon:"🔥", include:["Onryo"],
-  text:"Did a lit candle or firelight seem to block a hunt the way a crucifix does?"},
- {id:"polterBurst", type:"yesno", section:"Advanced tells", icon:"💥", include:["Poltergeist"],
-  text:"Were many objects thrown or knocked over all at once, in a single dramatic burst?"},
- {id:"shadeDead", type:"yesno", section:"Advanced tells", icon:"😶", include:["Shade"],
-  text:"Was the house eerily 'dead' with almost no activity while someone was inside, even though a ghost is confirmed present?"},
+ {id:"deogenSpeed", type:"yesno", section:"advanced", icon:"🐌", include:["Deogen"],
+  en:"Did the ghost move painfully slowly right next to you, but seem much faster from a distance?",
+  el:"Κινούνταν το ghost εξαιρετικά αργά δίπλα σου, αλλά φαινόταν πολύ πιο γρήγορο από μακριά;"},
+ {id:"revenantLos", type:"yesno", section:"advanced", icon:"👀", include:["Revenant"],
+  en:"Did the ghost crawl when it lost sight of you, then instantly sprint the moment it saw you again?",
+  el:"Σερνόταν το ghost όταν σε έχανε, και μετά επιτάχυνε ακαριαία μόλις σε ξανάβλεπε;"},
+ {id:"thayeAge", type:"yesno", section:"advanced", icon:"⏳", include:["Thaye"],
+  en:"Did the ghost start out fast and aggressive, then clearly slow down and go quiet over time?",
+  el:"Ξεκίνησε το ghost γρήγορο και επιθετικό, και μετά επιβράδυνε και ηρέμησε με την ώρα;"},
+ {id:"raijuElec", type:"yesno", section:"advanced", icon:"🔌", include:["Raiju"],
+  en:"Did the ghost move faster and hunt sooner specifically near powered-on electronic equipment?",
+  el:"Κινούνταν πιο γρήγορα και έκανε hunt νωρίτερα ειδικά κοντά σε αναμμένο ηλεκτρονικό εξοπλισμό;"},
+ {id:"galluEnrage", type:"yesno", section:"advanced", icon:"😡", include:["Gallu"],
+  en:"Did using a crucifix, incense, or salt seem to make the ghost MORE aggressive afterward?",
+  el:"Φάνηκε η χρήση crucifix, incense ή αλατιού να κάνει το ghost πιο επιθετικό μετά;"},
+ {id:"obamboMood", type:"yesno", section:"advanced", icon:"🎭", include:["Obambo"],
+  en:"Did the ghost's behavior swing between calm and aggressive roughly every couple of minutes?",
+  el:"Εναλλασσόταν η συμπεριφορά του ghost μεταξύ ήρεμης και επιθετικής περίπου κάθε δύο λεπτά;"},
+ {id:"aswangEnd", type:"yesno", section:"advanced", icon:"🔚", include:["Aswang"],
+  en:"Did a hunt end abruptly the instant the ghost opened your locker or closet door, without killing you?",
+  el:"Τελείωσε ένα hunt απότομα τη στιγμή που το ghost άνοιξε το locker/ντουλάπι σου, χωρίς να σε σκοτώσει;"},
+ {id:"aswangReturn", type:"yesno", section:"advanced", icon:"🔁", include:["Aswang"],
+  en:"On a LATER hunt, did the ghost go straight to a hiding spot you'd used before?",
+  el:"Σε ΕΠΟΜΕΝΟ hunt, πήγε το ghost κατευθείαν σε κρυψώνα που είχες ξαναχρησιμοποιήσει;"},
+ {id:"kormosWall", type:"yesno", section:"advanced", icon:"🧱", include:["Kormos"],
+  en:"Were you killed during a hunt through a wall or piece of furniture, with no clear line of sight?",
+  el:"Σκοτώθηκες σε hunt μέσα από τοίχο ή έπιπλο, χωρίς καθαρή οπτική επαφή;"},
+ {id:"kormosBlind", type:"yesno", section:"advanced", icon:"🙉", include:["Kormos"],
+  en:"Did the ghost seem to ignore loud noises or thrown objects, but react only to footsteps or talking?",
+  el:"Φάνηκε το ghost να αγνοεί δυνατούς θορύβους ή αντικείμενα που πετάχτηκαν, αλλά να αντιδρά μόνο σε βήματα ή ομιλία;"},
+ {id:"goryoNaked", type:"yesno", section:"advanced", icon:"👁️", exclude:["Goryo"],
+  en:"Did you see the D.O.T.S. projector's dots with your own eyes, without needing a video camera?",
+  el:"Είδες τις κουκκίδες του D.O.T.S. με τα μάτια σου, χωρίς να χρειαστεί video camera;"},
+ {id:"wraithTeleport", type:"yesno", section:"advanced", icon:"🌀", include:["Wraith"],
+  en:"Did the ghost appear right next to a player with absolutely no warning or footsteps?",
+  el:"Εμφανίστηκε το ghost δίπλα σε παίκτη χωρίς καμία προειδοποίηση ή βήματα;"},
+ {id:"moroiCurse", type:"yesno", section:"advanced", icon:"🔮", include:["Moroi"],
+  en:"Did your sanity seem to drain noticeably faster right after a Spirit Box or Parabolic interaction?",
+  el:"Φάνηκε το sanity σου να πέφτει αισθητά πιο γρήγορα αμέσως μετά από interaction με Spirit Box ή Parabolic;"},
+ {id:"onryoFlames", type:"yesno", section:"advanced", icon:"🕯️", include:["Onryo"],
+  en:"Did lit candles or flames keep going out, with a hunt starting roughly every 3rd time?",
+  el:"Έσβηναν συνέχεια αναμμένα κεριά ή φλόγες, με hunt να ξεκινά περίπου κάθε 3η φορά;"},
+ {id:"onryoFirelight", type:"yesno", section:"advanced", icon:"🔥", include:["Onryo"],
+  en:"Did a lit candle or firelight seem to block a hunt the way a crucifix does?",
+  el:"Φάνηκε ένα αναμμένο κερί ή firelight να μπλοκάρει hunt όπως ένα crucifix;"},
+ {id:"polterBurst", type:"yesno", section:"advanced", icon:"💥", include:["Poltergeist"],
+  en:"Were many objects thrown or knocked over all at once, in a single dramatic burst?",
+  el:"Πετάχτηκαν ή έπεσαν πολλά αντικείμενα ταυτόχρονα, σε ένα εντυπωσιακό ξέσπασμα;"},
+ {id:"shadeDead", type:"yesno", section:"advanced", icon:"😶", include:["Shade"],
+  en:"Was the house eerily 'dead' with almost no activity while someone was inside, even though a ghost is confirmed present?",
+  el:"Ήταν το σπίτι ανησυχητικά «νεκρό» με σχεδόν καμία δραστηριότητα όσο κάποιος ήταν μέσα, αν και υπάρχει σίγουρα ghost;"},
 
- {id:"speedArchetype", type:"choice", section:"Speed", icon:"🏃",
-  text:"If you clocked the ghost's walking speed (footsteps or a stopwatch), which pattern fits best?",
+ {id:"speedArchetype", type:"choice", section:"speed", icon:"🏃",
+  en:"If you clocked the ghost's walking speed (footsteps or a stopwatch), which pattern fits best?",
+  el:"Αν χρονομέτρησες την ταχύτητα βαδίσματος του ghost (βήματα ή χρονόμετρο), ποιο μοτίβο ταιριάζει καλύτερα;",
   options:[
-   {label:"Very slow up close (~0.4 m/s), much faster from far away (~3.0 m/s)", include:["Deogen"]},
-   {label:"Crawls at ~1.0 m/s until it sees you, then sprints at ~3.0 m/s", include:["Revenant"]},
-   {label:"Noticeably faster the colder the room is", include:["Hantu"]},
-   {label:"Two clearly different fixed speeds mixed together", include:["The Twins"]},
-   {label:"Roughly one constant speed the whole time", include:null},
-   {label:"Didn't check / not sure", include:null},
+   {include:["Deogen"],
+    en:"Very slow up close (~0.4 m/s), much faster from far away (~3.0 m/s)",
+    el:"Πολύ αργό από κοντά (~0.4 m/s), πολύ πιο γρήγορο από μακριά (~3.0 m/s)"},
+   {include:["Revenant"],
+    en:"Crawls at ~1.0 m/s until it sees you, then sprints at ~3.0 m/s",
+    el:"Σέρνεται στο ~1.0 m/s μέχρι να σε δει, μετά επιταχύνει στο ~3.0 m/s"},
+   {include:["Hantu"],
+    en:"Noticeably faster the colder the room is",
+    el:"Αισθητά πιο γρήγορο όσο πιο κρύο είναι το δωμάτιο"},
+   {include:["The Twins"],
+    en:"Two clearly different fixed speeds mixed together",
+    el:"Δύο ξεκάθαρα διαφορετικές σταθερές ταχύτητες μαζί"},
+   {include:null,
+    en:"Roughly one constant speed the whole time",
+    el:"Περίπου μία σταθερή ταχύτητα σε όλη τη διάρκεια"},
+   {include:null,
+    en:"Didn't check / not sure",
+    el:"Δεν το έλεγξα / δεν είμαι σίγουρος"},
   ]},
 ];
 
@@ -345,6 +399,7 @@ const QUESTIONS = [
 const LS_KEY="phasmo-quiz-v1";
 const answers={}; // id -> 0 unanswered, 1 yes, 2 no  (choice: stores chosen option index+1, 0=unanswered)
 let cur=0;
+let lang="en";
 
 function loadState(){
   try{
@@ -352,11 +407,12 @@ function loadState(){
     if(!d) return;
     if(d.answers && typeof d.answers==="object") Object.assign(answers,d.answers);
     if(typeof d.cur==="number" && d.cur>=0 && d.cur<QUESTIONS.length) cur=d.cur;
+    if(d.lang==="en" || d.lang==="el") lang=d.lang;
     if(d.started) showQuiz();
   }catch(e){/* corrupt state, start fresh */}
 }
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({answers,cur,started:screenQuiz.style.display!=="none"||screenResults.style.display!=="none"})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({answers,cur,lang,started:screenQuiz.style.display!=="none"||screenResults.style.display!=="none"})); }catch(e){/* ignore */}
 }
 
 // ---- pool computation ----
@@ -386,6 +442,10 @@ function computePool(){
 function answeredCount(){
   return QUESTIONS.filter(q=>answers[q.id]).length;
 }
+function questionText(q){
+  if(q.type==="evidence") return `${STR[lang].evidenceCheck} ${q.evName}`;
+  return q[lang];
+}
 
 // ---- DOM refs ----
 const screenIntro=document.getElementById("screenIntro"), screenQuiz=document.getElementById("screenQuiz"), screenResults=document.getElementById("screenResults");
@@ -398,7 +458,7 @@ function buildDots(){
   dotsEl.innerHTML="";
   QUESTIONS.forEach((q,i)=>{
     const d=document.createElement("button");
-    d.type="button"; d.className="dot"; d.title=(i+1)+". "+q.text;
+    d.type="button"; d.className="dot"; d.title=(i+1)+". "+questionText(q);
     d.onclick=()=>{ cur=i; renderQuestion(); };
     dotsEl.appendChild(d);
   });
@@ -406,6 +466,7 @@ function buildDots(){
 function paintDots(){
   [...dotsEl.children].forEach((d,i)=>{
     const q=QUESTIONS[i], v=answers[q.id];
+    d.title=(i+1)+". "+questionText(q);
     d.classList.toggle("current", i===cur);
     d.classList.remove("answered-yes","answered-no","answered-choice");
     if(q.type==="choice"){ if(v) d.classList.add("answered-choice"); }
@@ -416,9 +477,9 @@ function paintDots(){
 
 function renderQuestion(){
   const q=QUESTIONS[cur];
-  qSection.textContent=q.section;
-  qNum.textContent="Question "+(cur+1)+" of "+QUESTIONS.length;
-  qText.innerHTML=`<span class="ic">${q.icon}</span>${q.text}`;
+  qSection.textContent=SECTION_NAMES[q.section][lang];
+  qNum.textContent=STR[lang].qNum(cur+1, QUESTIONS.length);
+  qText.innerHTML=`<span class="ic">${q.icon}</span>${questionText(q)}`;
   qAnswers.innerHTML="";
   const val=answers[q.id]||0;
 
@@ -426,14 +487,15 @@ function renderQuestion(){
     q.options.forEach((opt,i)=>{
       const b=document.createElement("button");
       b.type="button"; b.className="ans-btn"+(val===i+1?" selected yes":"");
-      b.textContent=opt.label;
+      b.textContent=opt[lang];
       b.onclick=()=>{ answers[q.id]=i+1; afterAnswer(); };
       qAnswers.appendChild(b);
     });
   } else {
+    const s=STR[lang];
     const labels = q.type==="evidence"
-      ? [["✅ Confirmed — found it","yes",1],["❌ Ruled out — checked, not this","no",2],["❔ Not tested yet","skip",3]]
-      : [["✅ Yes","yes",1],["❌ No","no",2],["🤷 Not sure / didn't check","skip",3]];
+      ? [[s.evYes,"yes",1],[s.evNo,"no",2],[s.evSkip,"skip",3]]
+      : [[s.yYes,"yes",1],[s.yNo,"no",2],[s.ySkip,"skip",3]];
     labels.forEach(([label,cls,v])=>{
       const b=document.createElement("button");
       b.type="button"; b.className="ans-btn "+cls+(val===v?" selected":"");
@@ -468,7 +530,7 @@ document.getElementById("btnSeeResults").onclick=showResults;
 document.getElementById("jumpResults").onclick=showResults;
 document.getElementById("backToQuiz").onclick=()=>{ showQuiz(); };
 document.getElementById("restartBtn").onclick=()=>{
-  if(!confirm("Clear all answers and start over?")) return;
+  if(!confirm(STR[lang].confirmRestart)) return;
   QUESTIONS.forEach(q=>delete answers[q.id]);
   cur=0;
   localStorage.removeItem(LS_KEY);
@@ -491,31 +553,32 @@ function showResults(){
   screenIntro.style.display="none";
   screenQuiz.style.display="none";
   screenResults.style.display="block";
-  document.getElementById("statCountR").textContent=computePool().length;
+  const s=STR[lang];
   const pool=computePool();
+  document.getElementById("statCountR").textContent=pool.length;
   const panel=document.getElementById("resultsPanel");
   let html="";
 
   if(pool.length===1){
     const g=pool[0];
     html+=`<div class="verdict">
-      <div class="v-label">IDENTIFIED</div>
+      <div class="v-label">${s.identified}</div>
       <div class="v-name">${g.name}</div>
-      <div class="v-plan"><b>📋 Plan:</b> ${g.tell}<br>👹 Hunt: <b>${g.hunt}</b> · 📸 Grab the ghost photo — money!</div>
+      <div class="v-plan"><b>${s.plan}</b> ${tellOf(g)}<br>👹 Hunt: <b>${huntOf(g)}</b> · ${s.photo}</div>
     </div>`;
   } else if(pool.length>=2 && pool.length<=6){
-    html+=`<div class="panel-label">🔎 Down to ${pool.length} possible ghosts</div>`;
-    pool.forEach(g=>{ html+=`<div class="short-card"><h3>${g.name}</h3><p>${g.tell}</p></div>`; });
+    html+=`<div class="panel-label">${s.short(pool.length)}</div>`;
+    pool.forEach(g=>{ html+=`<div class="short-card"><h3>${g.name}</h3><p>${tellOf(g)}</p></div>`; });
     html+=nextStepHint(pool);
   } else if(pool.length===0){
-    html+=`<div class="none-box"><strong>No ghost fits every answer.</strong> That usually means one answer was a slip — a mis-clicked evidence, or a "Yes" on something that was actually a different ghost's fake tell (the Mimic loves to trick this). Use the review list below to jump back and double-check.</div>`;
+    html+=`<div class="none-box"><strong>${s.none}</strong></div>`;
   } else {
-    html+=`<div class="panel-label">${pool.length} still possible</div><p class="intro-note">Still fairly open — answer a few more questions to narrow it down.</p>`;
+    html+=`<div class="panel-label">${s.stillOpen(pool.length)}</div><p class="intro-note">${s.stillOpenNote}</p>`;
     html+=nextStepHint(pool);
   }
 
   html+=`<div class="navrow" style="margin-top:16px">
-    <button class="nav-btn primary" id="continueBtn">${answeredCount()<QUESTIONS.length?"Continue questions →":"Review questions →"}</button>
+    <button class="nav-btn primary" id="continueBtn">${answeredCount()<QUESTIONS.length?s.continueQ:s.reviewQ}</button>
   </div>`;
   html+=buildReview();
   panel.innerHTML=html;
@@ -526,6 +589,7 @@ function showResults(){
 }
 
 function nextStepHint(pool){
+  const s=STR[lang];
   const untested=EV.filter(e=>{
     const q=QUESTIONS.find(q=>q.id==="ev_"+e.k);
     return !answers[q.id];
@@ -533,34 +597,49 @@ function nextStepHint(pool){
     const p=pool.filter(g=>effEv(g).includes(e.k)).length;
     return {e, cut:Math.min(p,pool.length-p)};
   }).filter(c=>c.cut>0).sort((a,b)=>b.cut-a.cut);
-  if(!untested.length) return `<div class="hint-box">You've checked all the evidence that could still split this group — the rest comes down to behavior. Scroll through the cards above for distinguishing tells.</div>`;
+  if(!untested.length) return `<div class="hint-box">${s.hintDone}</div>`;
   const top=untested[0];
-  return `<div class="hint-box">🎯 <b>Next, check for ${top.e.ic} ${ITEM_OF[top.e.k]}</b> — whatever it shows, it cuts at least ${top.cut} of the ${pool.length} still on the table.</div>`;
+  return `<div class="hint-box">${s.hintNext(top.e.ic, ITEM_OF[lang][top.e.k], top.cut, pool.length)}</div>`;
 }
 
 // Μόνο απαντήσεις που ΠΡΑΓΜΑΤΙΚΑ επηρέασαν το pool (yes σε yesno/choice, ή evidence yes/ruled-out) —
 // τα "No" σε yesno δεν κάνουν τίποτα λογικά, δεν αξίζει να θολώνουν τη λίστα review.
 function buildReview(){
+  const s=STR[lang];
   const answered=QUESTIONS.map((q,i)=>({q,i,v:answers[q.id]})).filter(x=>{
     if(!x.v || x.v===3) return false;
-    if(x.q.type==="evidence") return true; // yes ή ruled-out έχουν και τα δύο βαρος
+    if(x.q.type==="evidence") return true; // yes ή ruled-out έχουν και τα δύο βάρος
     if(x.q.type==="choice") return !!x.q.options[x.v-1].include;
     return x.v===1;
   });
   if(!answered.length) return "";
-  let html=`<div class="review-list"><div style="color:var(--nv-dim);margin-bottom:4px">ANSWERS THAT SHAPED THIS RESULT (click to revisit)</div>`;
+  let html=`<div class="review-list"><div style="color:var(--nv-dim);margin-bottom:4px">${s.reviewHeader}</div>`;
   answered.forEach(({q,i,v})=>{
     let label;
-    if(q.type==="choice") label=q.options[v-1].label;
-    else label = v===1 ? "Yes" : "Ruled out";
+    if(q.type==="choice") label=q.options[v-1][lang];
+    else label = v===1 ? s.reviewYes : s.reviewRuledOut;
     const cls = q.type==="choice" ? "" : (v===1?"ryes":"rno");
-    html+=`<button data-jump="${i}"><span class="${cls}">${v===1||q.type==="choice"?"✓":"✗"}</span> ${q.text} — <em>${label}</em></button>`;
+    html+=`<button data-jump="${i}"><span class="${cls}">${v===1||q.type==="choice"?"✓":"✗"}</span> ${questionText(q)} — <em>${label}</em></button>`;
   });
   html+=`</div>`;
   return html;
 }
 
+// ---- language switch ----
+const langBtn=document.getElementById("langBtn");
+function setLang(l){
+  lang=l;
+  document.documentElement.setAttribute("lang",l);
+  langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
+  if(dotsEl.children.length) paintDots();
+  if(screenQuiz.style.display!=="none") renderQuestion();
+  if(screenResults.style.display!=="none") showResults();
+  saveState();
+}
+langBtn.onclick=()=>setLang(lang==="el" ? "en" : "el");
+
 loadState();
+setLang(lang);
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").catch(()=>{/* offline mode unavailable, continue normally */});
 }
