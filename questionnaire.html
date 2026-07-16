@@ -175,7 +175,7 @@
   <div id="screenIntro" class="panel">
     <div class="panel-label"><span class="l-el">Πριν ξεκινήσεις</span><span class="l-en">Before you start</span></div>
     <p class="intro-note"><span class="l-el">Αυτό είναι ένα βήμα-βήμα companion στο κεντρικό Evidence Board — καλό για να δουλέψεις ένα contract από μνήμης, φωναχτά με την ομάδα σου, ή όταν δεν θες να κοιτάς ένα πλέγμα από toggles.</span><span class="l-en">This is a <strong>step-by-step</strong> companion to the main Evidence Board — good for working through a contract from memory, out loud with teammates, or when you don't want to stare at a grid of toggles.</span></p>
-    <p class="intro-note"><span class="l-el">38 ερωτήσεις συνολικά, χωρισμένες σε: <strong>Evidence</strong> (7), <strong>Συνηθισμένες συμπεριφορές</strong> (7), <strong>Άλλες παρατηρήσεις</strong> (6), <strong>Προχωρημένα tells</strong> (17), και μία ερώτηση <strong>ταχύτητας</strong>.</span><span class="l-en">38 questions total, grouped into: <strong>Evidence</strong> (7), <strong>Common behaviors</strong> (7), <strong>Other observations</strong> (6), <strong>Advanced tells</strong> (17), and one <strong>speed</strong> question.</span></p>
+    <p class="intro-note"><span class="l-el">39 ερωτήσεις συνολικά, χωρισμένες σε: <strong>Evidence</strong> (7), <strong>Συνηθισμένες συμπεριφορές</strong> (8), <strong>Άλλες παρατηρήσεις</strong> (6), <strong>Προχωρημένα tells</strong> (17), και μία ερώτηση <strong>ταχύτητας</strong>.</span><span class="l-en">39 questions total, grouped into: <strong>Evidence</strong> (7), <strong>Common behaviors</strong> (8), <strong>Other observations</strong> (6), <strong>Advanced tells</strong> (17), and one <strong>speed</strong> question.</span></p>
     <p class="intro-note"><span class="l-el">Απάντα <strong>Ναι</strong> μόνο όταν είσαι σίγουρος — ένα «Όχι» ή «Δεν είμαι σίγουρος» αντιμετωπίζεται σαν «καμία πληροφορία», ποτέ σαν απόδειξη, εκτός από το Evidence όπου το «Αποκλείστηκε» είναι πραγματικό ✗. Σε <strong>Nightmare</strong> δείχνονται μόνο 2 από τα 3 evidence, οπότε μην τσεκάρεις το τρίτο ως «Αποκλείστηκε» μόνο επειδή δεν το βρήκες ακόμα.</span><span class="l-en">Only answer <strong>Yes</strong> when you're confident — a "No" or "Not sure" is treated as "no information," never as proof, except for the Evidence section where "Ruled out" is a real ✗. On <strong>Nightmare</strong> difficulty only 2 of 3 evidence are ever shown, so don't mark the third as "Ruled out" just because you haven't found it.</span></p>
     <p class="intro-note"><span class="l-el">Η πρόοδός σου αποθηκεύεται αυτόματα — κλείσε την καρτέλα όποτε θες και συνέχισε από εκεί που έμεινες.</span><span class="l-en">Your progress saves automatically — close the tab any time and pick up where you left off.</span></p>
     <button class="startBtn" id="startBtn"><span class="l-el">▶ ΞΕΚΙΝΑ</span><span class="l-en">▶ START</span></button>
@@ -292,6 +292,19 @@ const QUESTIONS = [
  {id:"earlyHunt", type:"yesno", section:"behavior", icon:"😱", include:["Demon","Yokai","Thaye","Onryo","The Mimic"],
   en:"Did a hunt start while sanity was still above 70%?",
   el:"Ξεκίνησε hunt ενώ το sanity ήταν ακόμα πάνω από 70%;"},
+ {id:"sanityHunt", type:"sanity", section:"behavior", icon:"🧠",
+  en:"About what sanity % was it when a hunt most recently started? Pick the closest.",
+  el:"Σε τι sanity % ξεκίνησε το πιο πρόσφατο hunt; Διάλεξε το πλησιέστερο.",
+  options:[
+   {sanity:100, en:"100%", el:"100%"},
+   {sanity:70,  en:"70%",  el:"70%"},
+   {sanity:60,  en:"60%",  el:"60%"},
+   {sanity:50,  en:"50%",  el:"50%"},
+   {sanity:35,  en:"35%",  el:"35%"},
+   {sanity:25,  en:"25%",  el:"25%"},
+   {sanity:0,   en:"0%",   el:"0%"},
+   {sanity:null, en:"Not sure / no hunt yet", el:"Δεν είμαι σίγουρος / δεν έγινε hunt ακόμα"},
+  ]},
  {id:"noPhoto", type:"yesno", section:"behavior", icon:"📸", include:["Phantom","The Mimic"],
   en:"Did the ghost fail to appear in a photo taken during a ghost event?",
   el:"Δεν εμφανίστηκε το ghost σε φωτογραφία που τραβήχτηκε κατά τη διάρκεια ενός ghost event;"},
@@ -419,8 +432,12 @@ function saveState(){
 // val: 0/undefined = unanswered, 1 = yes/confirmed, 2 = no/ruled-out, 3 = explicit skip.
 // Both "unanswered" and "skip" mean the same thing to the filter: no information yet.
 function passesQuestion(g, q, val){
-  if(!val || val===3) return true;
+  if(!val) return true; // unanswered
+  // val=3 means "explicit skip" ONLY for yesno/evidence (their fixed 3-button scheme).
+  // choice/sanity reuse val as a 1-based option index, where 3 is a real, valid pick —
+  // their own "not sure" option (include:null / sanity:null) already no-ops correctly below.
   if(q.type==="evidence"){
+    if(val===3) return true;
     const has=effEv(g).includes(q.code);
     return val===1 ? has : !has;
   }
@@ -433,6 +450,13 @@ function passesQuestion(g, q, val){
     const opt=q.options[val-1];
     if(!opt || !opt.include) return true;
     return opt.include.includes(g.name);
+  }
+  if(q.type==="sanity"){
+    // Ίδια λογική με το sanity filter του dashboard: variableTh (Mimic) περνάει πάντα —
+    // μιμείται και thresholds — αλλιώς το ghost πρέπει να μπορεί να κάνει hunt σε αυτό το sanity.
+    const opt=q.options[val-1];
+    if(!opt || opt.sanity===null) return true;
+    return g.variableTh || g.thMax >= opt.sanity;
   }
   return true;
 }
@@ -469,7 +493,7 @@ function paintDots(){
     d.title=(i+1)+". "+questionText(q);
     d.classList.toggle("current", i===cur);
     d.classList.remove("answered-yes","answered-no","answered-choice");
-    if(q.type==="choice"){ if(v) d.classList.add("answered-choice"); }
+    if(q.type==="choice"||q.type==="sanity"){ if(v) d.classList.add("answered-choice"); }
     else if(v===1) d.classList.add("answered-yes");
     else if(v===2) d.classList.add("answered-no");
   });
@@ -483,7 +507,7 @@ function renderQuestion(){
   qAnswers.innerHTML="";
   const val=answers[q.id]||0;
 
-  if(q.type==="choice"){
+  if(q.type==="choice"||q.type==="sanity"){
     q.options.forEach((opt,i)=>{
       const b=document.createElement("button");
       b.type="button"; b.className="ans-btn"+(val===i+1?" selected yes":"");
@@ -606,20 +630,24 @@ function nextStepHint(pool){
 // τα "No" σε yesno δεν κάνουν τίποτα λογικά, δεν αξίζει να θολώνουν τη λίστα review.
 function buildReview(){
   const s=STR[lang];
+  // val=3 σημαίνει "skip" μόνο για yesno/evidence· για choice/sanity είναι έγκυρος
+  // δείκτης 3ης επιλογής, γι' αυτό ελέγχεται ξεχωριστά ανά τύπο, όχι με ένα γενικό !==3.
   const answered=QUESTIONS.map((q,i)=>({q,i,v:answers[q.id]})).filter(x=>{
-    if(!x.v || x.v===3) return false;
-    if(x.q.type==="evidence") return true; // yes ή ruled-out έχουν και τα δύο βάρος
+    if(!x.v) return false;
+    if(x.q.type==="evidence") return x.v!==3;
     if(x.q.type==="choice") return !!x.q.options[x.v-1].include;
-    return x.v===1;
+    if(x.q.type==="sanity") return x.q.options[x.v-1].sanity!==null;
+    return x.v===1; // yesno: μόνο το "yes" έχει βάρος
   });
   if(!answered.length) return "";
   let html=`<div class="review-list"><div style="color:var(--nv-dim);margin-bottom:4px">${s.reviewHeader}</div>`;
   answered.forEach(({q,i,v})=>{
+    const isPick = q.type==="choice"||q.type==="sanity";
     let label;
-    if(q.type==="choice") label=q.options[v-1][lang];
+    if(isPick) label=q.options[v-1][lang];
     else label = v===1 ? s.reviewYes : s.reviewRuledOut;
-    const cls = q.type==="choice" ? "" : (v===1?"ryes":"rno");
-    html+=`<button data-jump="${i}"><span class="${cls}">${v===1||q.type==="choice"?"✓":"✗"}</span> ${questionText(q)} — <em>${label}</em></button>`;
+    const cls = isPick ? "" : (v===1?"ryes":"rno");
+    html+=`<button data-jump="${i}"><span class="${cls}">${v===1||isPick?"✓":"✗"}</span> ${questionText(q)} — <em>${label}</em></button>`;
   });
   html+=`</div>`;
   return html;
