@@ -524,6 +524,30 @@ function buildCmdHelp(){
   el.innerHTML=html;
 }
 
+// ---- soft "not recognized" cue: synthesized, no audio file, so a hands-free miss isn't silent ----
+let audioCtx=null;
+function ensureAudioCtx(){
+  try{
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+  }catch(e){/* audio unavailable, ignore */}
+}
+function playNoMatchCue(){
+  if(muted || !audioCtx) return;
+  try{
+    const t=audioCtx.currentTime;
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type="sine";
+    o.frequency.setValueAtTime(340,t);
+    o.frequency.exponentialRampToValueAtTime(230,t+0.16);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.09,t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.19);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t+0.2);
+  }catch(e){/* ignore */}
+}
+
 // ---- speech recognition ----
 const micBtn=document.getElementById("micBtn"), micStatus=document.getElementById("micStatus"), interimText=document.getElementById("interimText");
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -550,6 +574,7 @@ function handleResult(e){
     interimText.textContent="";
     const action=matchCommand(final.trim());
     if(action) applyCommand(action);
+    else playNoMatchCue();
     addLog(final.trim(), action);
   }
 }
@@ -558,7 +583,7 @@ function doStart(){
   recognition.lang = lang==="el" ? "el-GR" : "en-US";
   try{ recognition.start(); listening=true; paintMic(); }catch(e){/* already running */}
 }
-function startListening(){ shouldListen=true; doStart(); }
+function startListening(){ ensureAudioCtx(); shouldListen=true; doStart(); }
 function stopListening(){ shouldListen=false; if(recognition) recognition.stop(); listening=false; paintMic(); }
 micBtn.onclick=()=>{ (listening||shouldListen) ? stopListening() : startListening(); };
 function paintMic(){
