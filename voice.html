@@ -567,6 +567,24 @@ function playNoMatchCue(){
     o.start(t); o.stop(t+0.2);
   }catch(e){/* ignore */}
 }
+// ---- push-to-talk start/stop cues: the whole point of the hotkey is not looking at the screen ----
+function playToneCue(f1,f2){
+  if(muted || !audioCtx) return;
+  try{
+    const t=audioCtx.currentTime;
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type="sine";
+    o.frequency.setValueAtTime(f1,t);
+    o.frequency.exponentialRampToValueAtTime(f2,t+0.09);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.08,t+0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.11);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t+0.12);
+  }catch(e){/* ignore */}
+}
+function playRecStartCue(){ playToneCue(520,760); }
+function playRecStopCue(){ playToneCue(760,480); }
 
 // ---- AI recognition (Whisper, in-browser via transformers.js) ----
 // Opt-in, offline, free alternative to the browser's built-in recognizer: better accuracy on
@@ -627,6 +645,7 @@ async function startAiRecording(){
     mediaRecorder.onstop = transcribeRecording;
     mediaRecorder.start();
     isRecording=true;
+    playRecStartCue();
     paintMic();
   }catch(err){
     micStatus.textContent = STR[lang].aiMicError;
@@ -635,6 +654,7 @@ async function startAiRecording(){
 function stopAiRecording(){
   if(!isRecording || !mediaRecorder) return;
   isRecording=false;
+  playRecStopCue();
   mediaRecorder.stop();
   paintMic();
 }
@@ -675,6 +695,14 @@ aiToggle.onchange=async ()=>{
     if(isRecording) stopAiRecording();
     paintMic();
   }
+};
+// ---- global hotkey bridge: the companion browser extension (see voice-ptt-extension/) calls
+// this directly in the page's main world, since a plain web page can't register a hotkey that
+// fires while a fullscreen game has OS focus. No-ops until AI mode is armed and the model is
+// loaded, so a stray press before setup can't kick off an unwanted download or recording.
+window.pttHotkeyToggle=function(){
+  if(!aiMode || !aiReady || aiLoading) return;
+  if(isRecording) stopAiRecording(); else startAiRecording();
 };
 
 // ---- speech recognition ----
