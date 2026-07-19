@@ -77,6 +77,11 @@
   }
   .ctrl-btn:hover{border-color:var(--nv);color:var(--nv)}
   .ctrl-btn.active{border-color:var(--nv);color:var(--nv)}
+  .voice-select{
+    background:#0c1118;border:1px solid var(--line);color:#B9C2CE;
+    border-radius:8px;padding:7px 10px;font-family:inherit;font-size:13px;max-width:220px;
+  }
+  .voice-select:focus{border-color:var(--nv)}
   /* ---------- status / result ---------- */
   .status-count{font-family:"Special Elite",monospace;font-size:16px;color:var(--nv);margin-bottom:8px}
   .status-count b{font-size:22px}
@@ -148,6 +153,10 @@
       <button class="ctrl-btn" id="undoBtn">↩ <span class="l-el">Αναίρεση</span><span class="l-en">Undo</span></button>
       <button class="ctrl-btn" id="resetBtn">🔄 <span class="l-el">Reset</span><span class="l-en">Reset</span></button>
     </div>
+    <div class="mic-controls">
+      <select id="voiceSelect" class="voice-select" title="Voice"></select>
+      <button class="ctrl-btn" id="testVoiceBtn">🔉 <span class="l-el">Δοκιμή</span><span class="l-en">Test</span></button>
+    </div>
   </div>
 
   <div class="panel" id="statusPanel">
@@ -197,7 +206,7 @@ function restore(s){ Object.assign(state,s.state); Object.assign(bhState,s.bhSta
 // ---- persistence: survive an accidental reload mid-contract ----
 const LS_KEY="phasmo-voice-v1";
 function saveVoiceState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({state,bhState,sanity,sanFilterOn,lang,muted})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({state,bhState,sanity,sanFilterOn,lang,muted,chosenVoice})); }catch(e){/* ignore */}
 }
 function loadVoiceState(){
   try{
@@ -209,6 +218,7 @@ function loadVoiceState(){
     if(typeof d.sanFilterOn==="boolean") sanFilterOn=d.sanFilterOn;
     if(d.lang==="en"||d.lang==="el") lang=d.lang;
     if(typeof d.muted==="boolean") muted=d.muted;
+    if(d.chosenVoice && typeof d.chosenVoice==="object") chosenVoice=Object.assign({en:null,el:null},d.chosenVoice);
   }catch(e){/* corrupt state, start fresh */}
 }
 
@@ -237,14 +247,45 @@ function computePool(){
 
 // ---- Text-to-speech ----
 let lastSpoken="";
+// ---- voice picker: browsers expose whatever voices the OS has installed, loaded async ----
+let voices=[]; // all SpeechSynthesisVoice objects the browser reports
+let chosenVoice={en:null, el:null}; // remembered voice NAME per language (objects aren't serializable)
+const FEMALE_HINTS=["female","zira","hazel","susan","samantha","victoria","karen","moira","tessa","fiona","eva","kore","maria","helena","paulina","catherine","jenny","aria","sara","θηλυκ"];
+function refreshVoices(){
+  voices = ("speechSynthesis" in window) ? speechSynthesis.getVoices() : [];
+  populateVoiceSelect();
+}
+function voicesForLang(l){
+  const prefix = l==="el" ? "el" : "en";
+  const match = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith(prefix));
+  return match.length ? match : voices; // αν δεν υπάρχουν φωνές για τη γλώσσα, δείξε ό,τι υπάρχει
+}
+function guessFemaleVoice(list){
+  return list.find(v=>FEMALE_HINTS.some(h=>v.name.toLowerCase().includes(h))) || null;
+}
+function activeVoice(){
+  const list=voicesForLang(lang);
+  const wanted=chosenVoice[lang];
+  if(wanted){ const found=list.find(v=>v.name===wanted); if(found) return found; }
+  return guessFemaleVoice(list) || list[0] || null;
+}
+function populateVoiceSelect(){
+  const sel=document.getElementById("voiceSelect");
+  if(!sel) return;
+  const list=voicesForLang(lang);
+  const active=activeVoice();
+  sel.innerHTML = list.map(v=>`<option value="${v.name}"${active&&v.name===active.name?" selected":""}>${v.name}</option>`).join("")
+    || `<option value="">${STR[lang].voiceNone}</option>`;
+}
 function speak(text){
   lastSpoken=text;
   if(muted || !("speechSynthesis" in window)) return;
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text);
-    u.lang = lang==="el" ? "el-GR" : "en-US";
-    u.rate = 1.05;
+    const v=activeVoice();
+    if(v){ u.voice=v; u.lang=v.lang; } else u.lang = lang==="el" ? "el-GR" : "en-US";
+    u.rate=0.98; u.pitch=1.08; // ελαφρώς πιο αργό/ψηλό — πιο ζεστό, λιγότερο ρομποτικό
     speechSynthesis.speak(u);
   }catch(e){/* TTS unavailable, ignore */}
 }
@@ -263,6 +304,7 @@ const STR={
   micIdle:"Πάτα το μικρόφωνο για να ξεκινήσεις",
   micOn:"Ακούω…", micOff:"Σταμάτησε",
   muteOn:"🔊 Φωνή: ON", muteOff:"🔇 Φωνή: OFF",
+  voiceNone:"Καμία διαθέσιμη φωνή", testPhrase:"Γεια! Έτσι θα ακούγομαι.",
   speechId:"Ταυτοποιήθηκε:", speechHunt:"Hunt στο", speechPossible:"πιθανά",
   speechNone:"Καμία αντιστοιχία — δοκίμασε αναίρεση.",
   logNoMatch:"δεν αναγνωρίστηκε",
@@ -277,6 +319,7 @@ const STR={
   micIdle:"Tap the mic to start",
   micOn:"Listening…", micOff:"Stopped",
   muteOn:"🔊 Voice: ON", muteOff:"🔇 Voice: OFF",
+  voiceNone:"No voices available", testPhrase:"Hi! This is how I'll sound.",
   speechId:"Identified:", speechHunt:"Hunt at", speechPossible:"possible",
   speechNone:"No match — try undo.",
   logNoMatch:"not recognized",
@@ -519,9 +562,15 @@ if(!SR){
 }
 
 // ---- controls ----
-document.getElementById("muteBtn").onclick=()=>{ muted=!muted; paintMute(); };
+document.getElementById("muteBtn").onclick=()=>{ muted=!muted; paintMute(); saveVoiceState(); };
 document.getElementById("undoBtn").onclick=()=>applyCommand({t:"undo"});
 document.getElementById("resetBtn").onclick=()=>applyCommand({t:"reset"});
+document.getElementById("voiceSelect").onchange=(e)=>{ chosenVoice[lang]=e.target.value; saveVoiceState(); };
+document.getElementById("testVoiceBtn").onclick=()=>{
+  const wasMuted=muted; muted=false;
+  speak(STR[lang].testPhrase);
+  muted=wasMuted;
+};
 document.getElementById("dashLinkBtn").onclick=()=>{
   const payload={ev:state, bh:bhState, sanity, sf:sanFilterOn?1:0};
   location.href="index.html#s="+btoa(JSON.stringify(payload));
@@ -533,12 +582,14 @@ function setLang(l){
   lang=l;
   document.documentElement.setAttribute("lang",l);
   langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
-  paintMic(); paintMute(); buildCmdHelp(); render();
+  paintMic(); paintMute(); buildCmdHelp(); populateVoiceSelect(); render();
   saveVoiceState();
 }
 langBtn.onclick=()=>setLang(lang==="el"?"en":"el");
 
 loadVoiceState();
+refreshVoices();
+if("speechSynthesis" in window) speechSynthesis.onvoiceschanged=refreshVoices; // πολλά browsers φορτώνουν τις φωνές async
 setLang(lang);
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js").catch(()=>{/* offline mode unavailable, continue normally */});
