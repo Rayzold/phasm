@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phasmo Journal — Voice Assistant</title>
+<meta name="theme-color" content="#0A0D12">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0D12; --bg2:#11161f;
+    --paper:#EDE4CE;
+    --nv:#8FE388; --nv-dim:#57996b;
+    --danger:#E15B5B; --warn:#F0C674; --muted:#8A93A3; --line:#232b38;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html[lang=en] .l-el{display:none!important}
+  html:not([lang=en]) .l-en{display:none!important}
+  body{
+    background:var(--bg);
+    background-image:radial-gradient(ellipse at 50% -10%, #16202b 0%, var(--bg) 55%);
+    color:#D7DCE4;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    min-height:100vh;
+    padding:20px 14px 60px;
+  }
+  .wrap{max-width:720px;margin:0 auto}
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px;justify-content:space-between}
+  h1{
+    font-family:"Special Elite","Courier New",monospace;
+    font-size:clamp(22px,5vw,34px);color:var(--nv);margin:0;letter-spacing:1px;
+    text-shadow:0 0 18px rgba(143,227,136,.25);
+  }
+  .headerBtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .backLink,#langBtn{
+    font-family:"Special Elite",monospace;font-size:12.5px;letter-spacing:1px;
+    color:var(--muted);text-decoration:none;border:1px solid var(--line);
+    border-radius:20px;padding:6px 13px;white-space:nowrap;background:none;cursor:pointer;
+  }
+  .backLink:hover,#langBtn:hover{border-color:var(--nv);color:var(--nv)}
+  .sub{color:var(--muted);font-size:14px;margin:2px 0 22px;line-height:1.5}
+  .panel{
+    border:1px solid var(--line);
+    background:linear-gradient(180deg,var(--bg2),#0d1219);
+    border-radius:10px;padding:18px;margin-bottom:18px;
+  }
+  .panel-label{
+    font-family:"Special Elite",monospace;font-size:12px;letter-spacing:3px;color:var(--nv-dim);
+    text-transform:uppercase;margin-bottom:12px;
+  }
+  .warn-box{
+    border:1px dashed var(--warn);border-radius:8px;padding:12px 14px;
+    background:rgba(240,198,116,.06);font-size:13.5px;color:#F0DDB0;line-height:1.6;margin-bottom:16px;
+  }
+  .warn-box a{color:var(--nv)}
+  /* ---------- mic ---------- */
+  .mic-row{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .mic-btn{
+    width:76px;height:76px;border-radius:50%;flex:none;
+    border:2px solid var(--nv-dim);background:#0c1118;color:var(--nv);
+    font-size:30px;cursor:pointer;transition:all .15s ease;
+  }
+  .mic-btn:hover{box-shadow:0 0 14px rgba(143,227,136,.3)}
+  .mic-btn.on{border-color:var(--danger);color:var(--danger);background:rgba(225,91,91,.1);animation:pulse 1.6s infinite}
+  .mic-btn:disabled{opacity:.4;cursor:default;animation:none}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(225,91,91,.5)}50%{box-shadow:0 0 0 14px rgba(225,91,91,0)}}
+  .mic-info{flex:1;min-width:180px}
+  .mic-status{font-family:"Special Elite",monospace;font-size:15px;color:var(--nv);margin-bottom:4px}
+  .interim-text{font-size:13px;color:var(--muted);min-height:18px;font-style:italic}
+  .mic-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .ctrl-btn{
+    background:none;border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;
+  }
+  .ctrl-btn:hover{border-color:var(--nv);color:var(--nv)}
+  .ctrl-btn.active{border-color:var(--nv);color:var(--nv)}
+  /* ---------- status / result ---------- */
+  .status-count{font-family:"Special Elite",monospace;font-size:16px;color:var(--nv);margin-bottom:8px}
+  .status-count b{font-size:22px}
+  .verdict{text-align:center;padding:6px 4px}
+  .v-label{font-family:"Special Elite",monospace;font-size:11px;letter-spacing:4px;color:var(--nv-dim);margin-bottom:4px}
+  .v-name{
+    font-family:"Special Elite",monospace;font-size:clamp(28px,7vw,42px);color:var(--nv);
+    letter-spacing:3px;line-height:1.1;text-transform:uppercase;
+    text-shadow:0 0 24px rgba(143,227,136,.35);margin-bottom:10px;
+  }
+  .v-plan{font-size:13.5px;color:#C7CEDA;line-height:1.6;text-align:left;border-top:1px dashed var(--nv-dim);padding-top:10px}
+  .v-plan b{color:var(--nv)}
+  .short-card{border:1px solid var(--line);border-radius:8px;padding:10px 13px;margin-bottom:8px;background:#0c1119}
+  .short-card h3{font-family:"Special Elite",monospace;font-size:15px;color:var(--nv);margin:0 0 4px}
+  .short-card p{font-size:13px;color:#C7CEDA;line-height:1.5;margin:0}
+  /* ---------- log ---------- */
+  .log-area{max-height:220px;overflow-y:auto;font-size:13px;line-height:1.7;display:flex;flex-direction:column-reverse}
+  .log-empty{color:var(--muted);font-style:italic}
+  .log-entry{border-bottom:1px solid #171d27;padding:5px 0}
+  .log-entry .ltime{color:var(--muted);font-size:11px;margin-right:6px}
+  .log-entry.matched .lheard{color:#C7CEDA}
+  .log-entry.matched .laction{color:var(--nv)}
+  .log-entry.unmatched .lheard{color:var(--muted);font-style:italic}
+  /* ---------- command help ---------- */
+  .cmd-cat{font-family:"Special Elite",monospace;font-size:11.5px;letter-spacing:1.5px;color:var(--nv-dim);text-transform:uppercase;margin:12px 0 6px}
+  .cmd-cat:first-child{margin-top:0}
+  .cmd-list{display:flex;flex-wrap:wrap;gap:6px}
+  .cmd-chip{
+    font-size:12px;border:1px solid var(--line);border-radius:14px;padding:3px 10px;color:#B9C2CE;background:#0c1118;
+  }
+  .navrow{display:flex;gap:10px;flex-wrap:wrap}
+  .nav-btn{
+    background:none;border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;padding:9px 16px;font-size:13.5px;cursor:pointer;font-family:inherit;
+  }
+  .nav-btn:hover{border-color:var(--nv);color:var(--nv)}
+  footer{margin-top:34px;color:#5b6473;font-size:12px;text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>VOICE ASSISTANT</h1>
+    <div class="headerBtns">
+      <button id="langBtn" title="Ελληνικά / English">ΕΛ</button>
+      <a class="backLink" href="questionnaire.html">📋 <span class="l-el">Ερωτηματολόγιο</span><span class="l-en">Quiz</span></a>
+      <a class="backLink" href="index.html"><span class="l-el">← Αρχική</span><span class="l-en">← Dashboard</span></a>
+    </div>
+  </header>
+  <p class="sub"><span class="l-el">Μίλα ό,τι βλέπεις και ακούς στο contract — evidence, συμπεριφορές, sanity — και το pool στενεύει live, με φωνητική επιβεβαίωση. Ιδανικό όταν τα χέρια σου είναι απασχολημένα.</span><span class="l-en">Say what you see and hear on the contract — evidence, behaviors, sanity — and the pool narrows live, with spoken confirmation. Good for when your hands are busy.</span></p>
+
+  <div class="warn-box"><span class="l-el">🎙️ Η αναγνώριση φωνής χρειάζεται σύνδεση στο internet και δουλεύει σε Chrome/Edge (όχι Firefox/Safari αξιόπιστα). Το Dashboard και το Questionnaire δουλεύουν πλήρως offline αν προτιμάς εκείνα.</span><span class="l-en">🎙️ Speech recognition needs an internet connection and works in Chrome/Edge (not reliably in Firefox/Safari). The Dashboard and Questionnaire work fully offline if you'd rather use those.</span></div>
+
+  <div class="panel" id="unsupportedBox" style="display:none">
+    <div class="panel-label"><span class="l-el">Μη διαθέσιμο</span><span class="l-en">Not available</span></div>
+    <p class="sub" style="margin:0"><span class="l-el">Η αναγνώριση φωνής δεν υποστηρίζεται σε αυτόν τον browser. Δοκίμασε Chrome ή Edge, ή χρησιμοποίησε το <a href="index.html" style="color:var(--nv)">Dashboard</a> ή το <a href="questionnaire.html" style="color:var(--nv)">Questionnaire</a> αντί αυτού.</span><span class="l-en">Speech recognition isn't supported in this browser. Try Chrome or Edge, or use the <a href="index.html" style="color:var(--nv)">Dashboard</a> or <a href="questionnaire.html" style="color:var(--nv)">Questionnaire</a> instead.</span></p>
+  </div>
+
+  <div class="panel" id="micPanel">
+    <div class="mic-row">
+      <button id="micBtn" class="mic-btn">🎤</button>
+      <div class="mic-info">
+        <div class="mic-status" id="micStatus"></div>
+        <div class="interim-text" id="interimText"></div>
+      </div>
+    </div>
+    <div class="mic-controls">
+      <button class="ctrl-btn active" id="muteBtn"></button>
+      <button class="ctrl-btn" id="undoBtn">↩ <span class="l-el">Αναίρεση</span><span class="l-en">Undo</span></button>
+      <button class="ctrl-btn" id="resetBtn">🔄 <span class="l-el">Reset</span><span class="l-en">Reset</span></button>
+    </div>
+  </div>
+
+  <div class="panel" id="statusPanel">
+    <div class="status-count"><span class="l-el">Πιθανά</span><span class="l-en">Possible</span>: <b id="cnt">29</b>/29</div>
+    <div id="resultArea"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label"><span class="l-el">Ιστορικό εντολών</span><span class="l-en">Command log</span></div>
+    <div class="log-area" id="logArea"><div class="log-empty"><span class="l-el">Ακόμα τίποτα — πάτα το μικρόφωνο και μίλα.</span><span class="l-en">Nothing yet — tap the mic and speak.</span></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label"><span class="l-el">Τι μπορείς να πεις (παραδείγματα)</span><span class="l-en">What you can say (examples)</span></div>
+    <div id="cmdHelp"></div>
+  </div>
+
+  <div class="navrow">
+    <button class="nav-btn" id="dashLinkBtn">🔗 <span class="l-el">Άνοιγμα στο Dashboard</span><span class="l-en">Open on Dashboard</span></button>
+  </div>
+
+  <footer><span class="l-el">Evidence data: Phasmophobia Wiki (Ιούλιος 2026, 29 ghosts) · Συνοδευτικό στο <a href="index.html" style="color:var(--nv-dim)">Ghost Journal dashboard</a></span><span class="l-en">Evidence data: Phasmophobia Wiki (July 2026, 29 ghosts) · Companion to the <a href="index.html" style="color:var(--nv-dim)">Ghost Journal dashboard</a></span></footer>
+</div>
+<script src="ghosts-data.js"></script>
+<script>
+// EV / GHOSTS / TELL_EN / HUNT_EN / BEHAVIOR_RULES / effEv() come from ghosts-data.js.
+const ITEM_OF = {
+ el:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Θερμόμετρο",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
+ en:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Thermometer",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
+};
+function tellOf(g){ return lang==="en" ? (TELL_EN[g.name]||g.tell) : g.tell; }
+function huntOf(g){ return lang==="en" ? (HUNT_EN[g.name]||g.hunt) : g.hunt; }
+
+let lang="en";
+let muted=false;
+
+// ---- board state: same shape as the dashboard's state/bhState, so the #s= handoff is direct ----
+const state={}; EV.forEach(e=>state[e.k]=0);      // 0 unknown, 1 confirmed, 2 ruled out
+const bhState={}; BEHAVIOR_RULES.forEach(b=>bhState[b.id]=0); // 0 off, 1 on
+let sanity=50;
+let sanFilterOn=false;
+const undoStack=[];
+function snapshot(){ return {state:{...state}, bhState:{...bhState}, sanity, sanFilterOn}; }
+function pushUndo(){ undoStack.push(snapshot()); if(undoStack.length>25) undoStack.shift(); }
+function restore(s){ Object.assign(state,s.state); Object.assign(bhState,s.bhState); sanity=s.sanity; sanFilterOn=s.sanFilterOn; }
+
+// ---- persistence: survive an accidental reload mid-contract ----
+const LS_KEY="phasmo-voice-v1";
+function saveVoiceState(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({state,bhState,sanity,sanFilterOn,lang,muted})); }catch(e){/* ignore */}
+}
+function loadVoiceState(){
+  try{
+    const d=JSON.parse(localStorage.getItem(LS_KEY)||"null");
+    if(!d) return;
+    if(d.state) EV.forEach(e=>{ const v=d.state[e.k]; if(v===1||v===2) state[e.k]=v; });
+    if(d.bhState) BEHAVIOR_RULES.forEach(b=>{ if(d.bhState[b.id]===1) bhState[b.id]=1; });
+    if(typeof d.sanity==="number" && d.sanity>=0 && d.sanity<=100) sanity=d.sanity;
+    if(typeof d.sanFilterOn==="boolean") sanFilterOn=d.sanFilterOn;
+    if(d.lang==="en"||d.lang==="el") lang=d.lang;
+    if(typeof d.muted==="boolean") muted=d.muted;
+  }catch(e){/* corrupt state, start fresh */}
+}
+
+function passesBehaviors(g){
+  return BEHAVIOR_RULES.every(b=>{
+    if(!bhState[b.id]) return true;
+    if(b.include) return b.include.includes(g.name);
+    return !b.exclude.includes(g.name);
+  });
+}
+function passesSanity(g){
+  return !sanFilterOn || g.variableTh || g.thMax>=sanity;
+}
+function computePool(){
+  return GHOSTS.filter(g=>{
+    const ev=effEv(g);
+    const evOk = EV.every(e=>{
+      const v=state[e.k];
+      if(v===1) return ev.includes(e.k);
+      if(v===2) return !ev.includes(e.k);
+      return true;
+    });
+    return evOk && passesBehaviors(g) && passesSanity(g);
+  });
+}
+
+// ---- Text-to-speech ----
+let lastSpoken="";
+function speak(text){
+  lastSpoken=text;
+  if(muted || !("speechSynthesis" in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang = lang==="el" ? "el-GR" : "en-US";
+    u.rate = 1.05;
+    speechSynthesis.speak(u);
+  }catch(e){/* TTS unavailable, ignore */}
+}
+function statusSpeech(){
+  const pool=computePool();
+  const s=STR[lang];
+  if(pool.length===1) return `${s.speechId} ${pool[0].name}. ${tellOf(pool[0])} ${s.speechHunt} ${huntOf(pool[0])}.`;
+  if(pool.length===0) return s.speechNone;
+  if(pool.length<=6) return `${pool.length} ${s.speechPossible}: ${pool.map(g=>g.name).join(", ")}.`;
+  return `${pool.length} ${s.speechPossible}.`;
+}
+
+// ---- UI strings ----
+const STR={
+ el:{
+  micIdle:"Πάτα το μικρόφωνο για να ξεκινήσεις",
+  micOn:"Ακούω…", micOff:"Σταμάτησε",
+  muteOn:"🔊 Φωνή: ON", muteOff:"🔇 Φωνή: OFF",
+  speechId:"Ταυτοποιήθηκε:", speechHunt:"Hunt στο", speechPossible:"πιθανά",
+  speechNone:"Καμία αντιστοιχία — δοκίμασε αναίρεση.",
+  logNoMatch:"δεν αναγνωρίστηκε",
+  evConfirmed:g=>`${g} επιβεβαιώθηκε`, evRuledOut:g=>`${g} αποκλείστηκε`,
+  bhNoted:"σημειώθηκε", sanityNoted:v=>`sanity ${v}%`, huntNoted:v=>`hunt στο ${v}%`,
+  resetDone:"Καθαρίστηκε όλο το board", undoDone:"Αναιρέθηκε η τελευταία εντολή", undoNothing:"Τίποτα να αναιρεθεί",
+  identified:"ΤΑΥΤΟΠΟΙΗΘΗΚΕ", plan:"📋 Σχέδιο:", photo:"📸 Πάρε τη ghost photo — λεφτά!",
+  down:n=>`🔎 Έμειναν ${n} πιθανά`, stillOpen:n=>`${n} ακόμα πιθανά`, none:"Καμία αντιστοιχία — δοκίμασε «αναίρεση».",
+  hintNext:(ic,item,cut,total)=>`🎯 Έλεγξε για ${ic} ${item} — κόβει τουλάχιστον ${cut} από τα ${total}.`,
+ },
+ en:{
+  micIdle:"Tap the mic to start",
+  micOn:"Listening…", micOff:"Stopped",
+  muteOn:"🔊 Voice: ON", muteOff:"🔇 Voice: OFF",
+  speechId:"Identified:", speechHunt:"Hunt at", speechPossible:"possible",
+  speechNone:"No match — try undo.",
+  logNoMatch:"not recognized",
+  evConfirmed:g=>`${g} confirmed`, evRuledOut:g=>`${g} ruled out`,
+  bhNoted:"noted", sanityNoted:v=>`sanity ${v}%`, huntNoted:v=>`hunt at ${v}%`,
+  resetDone:"Board reset", undoDone:"Undid last command", undoNothing:"Nothing to undo",
+  identified:"IDENTIFIED", plan:"📋 Plan:", photo:"📸 Grab the ghost photo — money!",
+  down:n=>`🔎 Down to ${n} possible`, stillOpen:n=>`${n} still possible`, none:"No match — try \"undo\".",
+  hintNext:(ic,item,cut,total)=>`🎯 Check for ${ic} ${item} — cuts at least ${cut} of ${total}.`,
+ },
+};
+
+// ---- voice commands: ordered so negations are checked before their positive counterpart ----
+const EV_NAMES={EMF:"EMF",DOTS:"D.O.T.S.",UV:"Ultraviolet",FRZ:"Freezing",ORB:"Ghost Orbs",WRT:"Ghost Writing",SB:"Spirit Box"};
+const COMMANDS=[
+ {apply:{t:"ev",code:"EMF",val:2}, en:["no emf","not emf","ruled out emf"], el:["όχι emf","δεν βρήκα emf","αποκλείστηκε emf"]},
+ {apply:{t:"ev",code:"EMF",val:1}, en:["emf five","emf level five","emf level 5","got emf","emf hit five"], el:["emf πέντε","βρήκα emf","έχω emf"]},
+ {apply:{t:"ev",code:"DOTS",val:2}, en:["no dots","not dots","ruled out dots"], el:["όχι dots","δεν βρήκα dots"]},
+ {apply:{t:"ev",code:"DOTS",val:1}, en:["dots","d o t s","got dots","found dots"], el:["dots","βρήκα dots","έχω dots"]},
+ {apply:{t:"ev",code:"UV",val:2}, en:["no ultraviolet","no uv","not ultraviolet","no fingerprints"], el:["όχι ultraviolet","όχι uv","δεν βρήκα fingerprints"]},
+ {apply:{t:"ev",code:"UV",val:1}, en:["ultraviolet","fingerprints","got fingerprints","u v light","u v"], el:["ultraviolet","fingerprints","βρήκα fingerprints"]},
+ {apply:{t:"ev",code:"FRZ",val:2}, en:["no freezing","not freezing","not cold","no cold"], el:["όχι freezing","δεν είναι κρύο","όχι κρύο"]},
+ {apply:{t:"ev",code:"FRZ",val:1}, en:["freezing","freezing temperatures","its cold","room is cold","got freezing"], el:["freezing","κρύο δωμάτιο","είναι κρύο"]},
+ {apply:{t:"ev",code:"ORB",val:2}, en:["no orbs","not orbs","no ghost orbs"], el:["όχι orbs","δεν βρήκα orbs"]},
+ {apply:{t:"ev",code:"ORB",val:1}, en:["orbs","ghost orbs","got orbs","saw orbs"], el:["orbs","βρήκα orbs","είδα orbs"]},
+ {apply:{t:"ev",code:"WRT",val:2}, en:["no writing","not writing","no ghost writing"], el:["όχι writing","δεν βρήκα writing"]},
+ {apply:{t:"ev",code:"WRT",val:1}, en:["writing","ghost writing","got writing","found writing"], el:["writing","βρήκα writing"]},
+ {apply:{t:"ev",code:"SB",val:2}, en:["no spirit box","not spirit box"], el:["όχι spirit box","δεν βρήκα spirit box"]},
+ {apply:{t:"ev",code:"SB",val:1}, en:["spirit box","got spirit box","spirit box response"], el:["spirit box","βρήκα spirit box"]},
+
+ {apply:{t:"bh",id:"salt"}, en:["stepped in salt","footprint in salt","salt footprint"], el:["πάτησε αλάτι","αποτύπωμα στο αλάτι"]},
+ {apply:{t:"bh",id:"lightOn"}, en:["turned on a light","turned on the light","light on"], el:["άναψε φως","άναψε το φως"]},
+ {apply:{t:"bh",id:"breakerOn"}, en:["turned on the breaker","breaker on"], el:["άνοιξε το breaker","άνοιξε breaker"]},
+ {apply:{t:"bh",id:"breakerOff"}, en:["turned off the breaker","breaker off"], el:["έκλεισε το breaker","έκλεισε breaker"]},
+ {apply:{t:"bh",id:"earlyHunt"}, en:["early hunt","hunted at high sanity","hunt at high sanity"], el:["νωρίς hunt","hunt σε υψηλό sanity"]},
+ {apply:{t:"bh",id:"noPhoto"}, en:["invisible in photo","no photo","didnt show in the photo"], el:["αόρατο σε φωτογραφία","δεν φάνηκε στη φωτογραφία"]},
+ {apply:{t:"bh",id:"foundHide"}, en:["found my hiding spot","found the hiding spot","came straight to me"], el:["βρήκε την κρυψώνα","ήρθε ίσια σε μένα"]},
+ {apply:{t:"bh",id:"male"}, en:["male ghost","male name"], el:["αρσενικό ghost","αρσενικό όνομα"]},
+ {apply:{t:"bh",id:"airball"}, en:["airball","saw airball","saw the airball"], el:["airball","είδα airball"]},
+ {apply:{t:"bh",id:"sbBreath"}, en:["heavy breathing","breathing on spirit box"], el:["βαριά αναπνοή","αναπνοή στο spirit box"]},
+ {apply:{t:"bh",id:"sixFinger"}, en:["six fingers","six finger print","six finger fingerprint"], el:["έξι δάχτυλα"]},
+ {apply:{t:"bh",id:"twinTouch"}, en:["two interactions","twin touch","double interaction"], el:["δύο interactions","διπλό interaction"]},
+ {apply:{t:"bh",id:"doorSlam"}, en:["door slam","door slammed","slammed the door"], el:["έκλεισε πόρτα","χτύπησε η πόρτα"]},
+
+ {apply:{t:"reset"}, en:["reset","start over","clear everything","clear the board"], el:["reset","από την αρχή","καθάρισε τα πάντα"]},
+ {apply:{t:"undo"}, en:["undo","undo that","undo last"], el:["undo","ακύρωσε","ακύρωσε το τελευταίο"]},
+ {apply:{t:"status"}, en:["status","results","whats left","what is left","how many left"], el:["status","αποτελέσματα","τι έμεινε","πόσα έμειναν"]},
+ {apply:{t:"repeat"}, en:["repeat","say again","repeat that"], el:["επανάλαβε","πες το ξανά"]},
+ {apply:{t:"mute"}, en:["mute","stop talking","be quiet"], el:["σίγαση","σταμάτα να μιλάς"]},
+ {apply:{t:"unmute"}, en:["unmute","start talking","speak again","talk again"], el:["ενεργοποίησε ήχο","μίλα ξανά"]},
+ {apply:{t:"stoplisten"}, en:["stop listening","pause listening"], el:["σταμάτα να ακούς","παύση ακρόασης"]},
+];
+const SANITY_PRESETS=[100,70,60,50,35,25,0];
+const SANITY_WORDS_EN={hundred:100,seventy:70,sixty:60,fifty:50,"thirty five":35,"twenty five":25,zero:0};
+const SANITY_WORDS_EL={"εκατό":100,"εβδομήντα":70,"εξήντα":60,"πενήντα":50,"τριάντα πέντε":35,"είκοσι πέντε":25,"μηδέν":0};
+function parseSanityCommand(norm){
+  if(!norm.includes("sanity")) return null;
+  const isHunt=norm.includes("hunt");
+  for(const p of SANITY_PRESETS) if(norm.includes(String(p))) return {t:"sanity",value:p,filter:isHunt};
+  const words = lang==="el" ? SANITY_WORDS_EL : SANITY_WORDS_EN;
+  for(const w in words) if(norm.includes(w)) return {t:"sanity",value:words[w],filter:isHunt};
+  return null;
+}
+function normalize(t){ return t.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").replace(/\s+/g," ").trim(); }
+function matchCommand(text){
+  const norm=normalize(text);
+  for(const cmd of COMMANDS){
+    const phrases = lang==="el" ? cmd.el : cmd.en;
+    if(phrases.some(p=>norm.includes(p))) return cmd.apply;
+  }
+  return parseSanityCommand(norm);
+}
+
+// ---- applying a matched command ----
+function applyCommand(action){
+  const s=STR[lang];
+  if(action.t==="status"){ speak(statusSpeech()); return; }
+  if(action.t==="repeat"){ speak(lastSpoken); return; }
+  if(action.t==="mute"){ muted=true; paintMute(); saveVoiceState(); return; }
+  if(action.t==="unmute"){ muted=false; paintMute(); speak(s.muteOn); saveVoiceState(); return; }
+  if(action.t==="stoplisten"){ stopListening(); return; }
+  if(action.t==="undo"){
+    if(!undoStack.length){ speak(s.undoNothing); return; }
+    restore(undoStack.pop());
+    render();
+    speak(s.undoDone+". "+statusSpeech());
+    saveVoiceState();
+    return;
+  }
+  if(action.t==="reset"){
+    pushUndo();
+    EV.forEach(e=>state[e.k]=0);
+    BEHAVIOR_RULES.forEach(b=>bhState[b.id]=0);
+    sanity=50; sanFilterOn=false;
+    render();
+    speak(s.resetDone);
+    saveVoiceState();
+    return;
+  }
+  pushUndo();
+  let said="";
+  if(action.t==="ev"){
+    state[action.code]=action.val;
+    said = action.val===1 ? s.evConfirmed(EV_NAMES[action.code]) : s.evRuledOut(EV_NAMES[action.code]);
+  } else if(action.t==="bh"){
+    bhState[action.id]=1;
+    said = s.bhNoted;
+  } else if(action.t==="sanity"){
+    sanity=action.value;
+    if(action.filter) sanFilterOn=true;
+    said = action.filter ? s.huntNoted(action.value) : s.sanityNoted(action.value);
+  }
+  render();
+  speak(said+". "+statusSpeech());
+  saveVoiceState();
+  return said;
+}
+
+// ---- log ----
+const logArea=document.getElementById("logArea");
+function addLog(heard, action){
+  if(logArea.querySelector(".log-empty")) logArea.innerHTML="";
+  const s=STR[lang];
+  const div=document.createElement("div");
+  const matched=!!action;
+  div.className="log-entry "+(matched?"matched":"unmatched");
+  const time=new Date().toLocaleTimeString(lang==="el"?"el-GR":"en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  const actionLabel = matched ? describeAction(action) : s.logNoMatch;
+  div.innerHTML=`<span class="ltime">${time}</span><span class="lheard">"${heard}"</span> — <span class="laction">${actionLabel}</span>`;
+  logArea.insertBefore(div, logArea.firstChild);
+}
+function describeAction(a){
+  if(a.t==="ev") return a.val===1?"✓ "+EV_NAMES[a.code]:"✗ "+EV_NAMES[a.code];
+  if(a.t==="bh") return "✓ "+a.id;
+  if(a.t==="sanity") return (a.filter?"hunt @ ":"sanity ")+a.value+"%";
+  return a.t;
+}
+
+// ---- rendering ----
+function render(){
+  const pool=computePool();
+  document.getElementById("cnt").textContent=pool.length;
+  const s=STR[lang];
+  const area=document.getElementById("resultArea");
+  if(pool.length===1){
+    const g=pool[0];
+    area.innerHTML=`<div class="verdict"><div class="v-label">${s.identified}</div><div class="v-name">${g.name}</div><div class="v-plan"><b>${s.plan}</b> ${tellOf(g)}<br>👹 Hunt: <b>${huntOf(g)}</b> · ${s.photo}</div></div>`;
+  } else if(pool.length>=2 && pool.length<=6){
+    let html=`<div class="panel-label">${s.down(pool.length)}</div>`;
+    pool.forEach(g=>{ html+=`<div class="short-card"><h3>${g.name}</h3><p>${tellOf(g)}</p></div>`; });
+    html+=nextHint(pool);
+    area.innerHTML=html;
+  } else if(pool.length===0){
+    area.innerHTML=`<div class="warn-box" style="margin:0">${s.none}</div>`;
+  } else {
+    area.innerHTML=`<div class="panel-label">${s.stillOpen(pool.length)}</div>${nextHint(pool)}`;
+  }
+}
+function nextHint(pool){
+  const s=STR[lang];
+  const untested=EV.filter(e=>!state[e.k]).map(e=>{
+    const p=pool.filter(g=>effEv(g).includes(e.k)).length;
+    return {e, cut:Math.min(p,pool.length-p)};
+  }).filter(c=>c.cut>0).sort((a,b)=>b.cut-a.cut);
+  if(!untested.length) return "";
+  const top=untested[0];
+  return `<div class="warn-box" style="border-color:var(--nv-dim);background:rgba(143,227,136,.04);color:#B9C2CE">${s.hintNext(top.e.ic, ITEM_OF[lang][top.e.k], top.cut, pool.length)}</div>`;
+}
+
+// ---- command help (auto-generated from COMMANDS so it never drifts) ----
+function buildCmdHelp(){
+  const el=document.getElementById("cmdHelp");
+  const cats=[
+   {label:lang==="el"?"Evidence":"Evidence", filter:c=>c.apply.t==="ev"},
+   {label:lang==="el"?"Συμπεριφορές":"Behaviors", filter:c=>c.apply.t==="bh"},
+   {label:lang==="el"?"Sanity":"Sanity", filter:c=>false, extra:lang==="el"?["\"sanity πενήντα\"","\"hunt στο εβδομήντα\""]:["\"sanity fifty\"","\"hunt at seventy\""]},
+   {label:lang==="el"?"Έλεγχος":"Control", filter:c=>["reset","undo","status","repeat","mute","unmute","stoplisten"].includes(c.apply.t)},
+  ];
+  let html="";
+  cats.forEach(cat=>{
+    const phrases=[];
+    COMMANDS.filter(cat.filter).forEach(c=>{ const arr=lang==="el"?c.el:c.en; if(arr[0]) phrases.push(arr[0]); });
+    if(cat.extra) phrases.push(...cat.extra);
+    html+=`<div class="cmd-cat">${cat.label}</div><div class="cmd-list">${phrases.map(p=>`<span class="cmd-chip">"${p}"</span>`).join("")}</div>`;
+  });
+  el.innerHTML=html;
+}
+
+// ---- speech recognition ----
+const micBtn=document.getElementById("micBtn"), micStatus=document.getElementById("micStatus"), interimText=document.getElementById("interimText");
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition=null, listening=false, shouldListen=false;
+function initRecognition(){
+  const r=new SR();
+  r.continuous=true; r.interimResults=true;
+  r.onresult=handleResult;
+  r.onerror=()=>{};
+  r.onend=()=>{
+    listening=false; paintMic();
+    if(shouldListen) setTimeout(()=>{ if(shouldListen) doStart(); }, 300);
+  };
+  return r;
+}
+function handleResult(e){
+  let interim="", final="";
+  for(let i=e.resultIndex;i<e.results.length;i++){
+    const t=e.results[i][0].transcript;
+    if(e.results[i].isFinal) final+=t; else interim+=t;
+  }
+  interimText.textContent=interim;
+  if(final.trim()){
+    interimText.textContent="";
+    const action=matchCommand(final.trim());
+    if(action) applyCommand(action);
+    addLog(final.trim(), action);
+  }
+}
+function doStart(){
+  if(!recognition) recognition=initRecognition();
+  recognition.lang = lang==="el" ? "el-GR" : "en-US";
+  try{ recognition.start(); listening=true; paintMic(); }catch(e){/* already running */}
+}
+function startListening(){ shouldListen=true; doStart(); }
+function stopListening(){ shouldListen=false; if(recognition) recognition.stop(); listening=false; paintMic(); }
+micBtn.onclick=()=>{ (listening||shouldListen) ? stopListening() : startListening(); };
+function paintMic(){
+  const s=STR[lang];
+  micBtn.classList.toggle("on", listening);
+  micStatus.textContent = listening ? s.micOn : (shouldListen ? s.micOn : s.micIdle);
+}
+function paintMute(){
+  const btn=document.getElementById("muteBtn");
+  btn.textContent = muted ? STR[lang].muteOff : STR[lang].muteOn;
+  btn.classList.toggle("active", !muted);
+}
+
+if(!SR){
+  document.getElementById("unsupportedBox").style.display="block";
+  micBtn.disabled=true;
+}
+
+// ---- controls ----
+document.getElementById("muteBtn").onclick=()=>{ muted=!muted; paintMute(); };
+document.getElementById("undoBtn").onclick=()=>applyCommand({t:"undo"});
+document.getElementById("resetBtn").onclick=()=>applyCommand({t:"reset"});
+document.getElementById("dashLinkBtn").onclick=()=>{
+  const payload={ev:state, bh:bhState, sanity, sf:sanFilterOn?1:0};
+  location.href="index.html#s="+btoa(JSON.stringify(payload));
+};
+
+// ---- language ----
+const langBtn=document.getElementById("langBtn");
+function setLang(l){
+  lang=l;
+  document.documentElement.setAttribute("lang",l);
+  langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
+  paintMic(); paintMute(); buildCmdHelp(); render();
+  saveVoiceState();
+}
+langBtn.onclick=()=>setLang(lang==="el"?"en":"el");
+
+loadVoiceState();
+setLang(lang);
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(()=>{/* offline mode unavailable, continue normally */});
+}
+</script>
+</body>
+</html>

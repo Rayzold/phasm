@@ -89,3 +89,21 @@ const HUNT_EN = {
 };
 
 function effEv(g){ return g.mimic ? [...g.ev,"ORB"] : g.ev; }
+
+// Κανόνες συμπεριφοράς (χωρίς UI labels — αυτά μένουν per-page): ίδια 13 ids με το
+// BEHAVIORS array του index.html και τα αντίστοιχα ids στο questionnaire.html.
+const BEHAVIOR_RULES = [
+ {id:"salt",       exclude:["Wraith"]},
+ {id:"lightOn",    exclude:["Mare"]},
+ {id:"breakerOn",  exclude:["Hantu"]},
+ {id:"breakerOff", exclude:["Jinn"]},
+ {id:"earlyHunt",  include:["Demon","Yokai","Thaye","Onryo","The Mimic"]},
+ {id:"noPhoto",    include:["Phantom","The Mimic"]},
+ {id:"foundHide",  include:["Deogen","Aswang","The Mimic"]},
+ {id:"male",       exclude:["Banshee","Dayan"]},
+ {id:"airball",    exclude:["Oni"]},
+ {id:"sbBreath",   include:["Deogen"]},
+ {id:"sixFinger",  include:["Obake"]},
+ {id:"twinTouch",  include:["The Twins","The Mimic"]},
+ {id:"doorSlam",   include:["Yurei","The Mimic"]},
+];

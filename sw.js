@@ -5,7 +5,7 @@
 // (π.χ. αφαίρεσες ένα core αρχείο) — ο browser έτσι κι αλλιώς εντοπίζει νέο SW σε κάθε αλλαγή
 // αυτού του ίδιου του αρχείου (sw.js) και τρέχει activate/cleanup μόνος του.
 const CACHE = "phasmo-journal-static";
-const CORE = ["./", "./index.html", "./questionnaire.html", "./ghosts-data.js", "./manifest.json", "./icon.svg"];
+const CORE = ["./", "./index.html", "./questionnaire.html", "./voice.html", "./ghosts-data.js", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", e => {
   self.skipWaiting();
