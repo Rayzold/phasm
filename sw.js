@@ -22,6 +22,10 @@ self.addEventListener("activate", e => {
 
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET" || !e.request.url.startsWith("http")) return;
+  // Cross-origin requests (e.g. the optional in-browser AI voice model, ~hundreds of MB from a
+  // CDN/HuggingFace) are left alone — that library manages its own cache, and mirroring it into
+  // CACHE here would double the storage and bloat a cache our activate handler never prunes.
+  if (!e.request.url.startsWith(self.location.origin)) return;
   e.respondWith(
     fetch(e.request)
       .then(r => {

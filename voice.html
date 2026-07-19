@@ -66,6 +66,7 @@
   .mic-btn:hover{box-shadow:0 0 14px rgba(143,227,136,.3)}
   .mic-btn.on{border-color:var(--danger);color:var(--danger);background:rgba(225,91,91,.1);animation:pulse 1.6s infinite}
   .mic-btn:disabled{opacity:.4;cursor:default;animation:none}
+  .mic-btn.ai-mode{touch-action:none}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(225,91,91,.5)}50%{box-shadow:0 0 0 14px rgba(225,91,91,0)}}
   .mic-info{flex:1;min-width:180px}
   .mic-status{font-family:"Special Elite",monospace;font-size:15px;color:var(--nv);margin-bottom:4px}
@@ -82,6 +83,10 @@
     border-radius:8px;padding:7px 10px;font-family:inherit;font-size:13px;max-width:220px;
   }
   .voice-select:focus{border-color:var(--nv)}
+  .ai-row{align-items:center}
+  .ai-toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
+  .ai-toggle input{accent-color:var(--nv)}
+  .ai-status{font-size:12px;color:var(--nv-dim)}
   /* ---------- status / result ---------- */
   .status-count{font-family:"Special Elite",monospace;font-size:16px;color:var(--nv);margin-bottom:8px}
   .status-count b{font-size:22px}
@@ -156,6 +161,13 @@
     <div class="mic-controls">
       <select id="voiceSelect" class="voice-select" title="Voice"></select>
       <button class="ctrl-btn" id="testVoiceBtn">🔉 <span class="l-el">Δοκιμή</span><span class="l-en">Test</span></button>
+    </div>
+    <div class="mic-controls ai-row">
+      <label class="ai-toggle">
+        <input type="checkbox" id="aiToggle">
+        <span class="l-el">AI φωνή (offline, πιο ακριβής — κράτα πατημένο το μικρόφωνο)</span><span class="l-en">AI voice (offline, more accurate — hold the mic to talk)</span>
+      </label>
+      <span id="aiStatus" class="ai-status"></span>
     </div>
   </div>
 
@@ -304,6 +316,9 @@ const STR={
  el:{
   micIdle:"Πάτα το μικρόφωνο για να ξεκινήσεις",
   micOn:"Ακούω…", micOff:"Σταμάτησε",
+  micHoldIdle:"Κράτα πατημένο και μίλα", micRecording:"Καταγραφή… άφησε για να σταματήσει", micTranscribing:"Μεταγραφή…",
+  aiStatusLoading:"Λήψη μοντέλου AI…", aiStatusReady:"Μοντέλο AI έτοιμο", aiStatusError:"Αποτυχία φόρτωσης μοντέλου AI",
+  aiMicError:"Δεν δόθηκε πρόσβαση στο μικρόφωνο",
   muteOn:"🔊 Φωνή: ON", muteOff:"🔇 Φωνή: OFF",
   voiceNone:"Καμία διαθέσιμη φωνή", testPhrase:"Γεια! Έτσι θα ακούγομαι.",
   speechId:"Ταυτοποιήθηκε:", speechHunt:"Hunt στο", speechPossible:"πιθανά",
@@ -319,6 +334,9 @@ const STR={
  en:{
   micIdle:"Tap the mic to start",
   micOn:"Listening…", micOff:"Stopped",
+  micHoldIdle:"Hold and speak", micRecording:"Recording… release to stop", micTranscribing:"Transcribing…",
+  aiStatusLoading:"Downloading AI model…", aiStatusReady:"AI model ready", aiStatusError:"AI model failed to load",
+  aiMicError:"Microphone access was denied",
   muteOn:"🔊 Voice: ON", muteOff:"🔇 Voice: OFF",
   voiceNone:"No voices available", testPhrase:"Hi! This is how I'll sound.",
   speechId:"Identified:", speechHunt:"Hunt at", speechPossible:"possible",
@@ -550,6 +568,115 @@ function playNoMatchCue(){
   }catch(e){/* ignore */}
 }
 
+// ---- AI recognition (Whisper, in-browser via transformers.js) ----
+// Opt-in, offline, free alternative to the browser's built-in recognizer: better accuracy on
+// tricky phrases, no cost, no server, but push-to-talk only (Whisper transcribes clips, it
+// doesn't stream continuously the way SpeechRecognition does).
+let aiMode=false, aiLoading=false, aiReady=false, transcriber=null, transformersMod=null;
+let mediaStream=null, mediaRecorder=null, recChunks=[], isRecording=false, isTranscribing=false;
+const aiToggle=document.getElementById("aiToggle"), aiStatusEl=document.getElementById("aiStatus");
+function onModelProgress(data){
+  if(data.status!=="progress") return;
+  const pct = typeof data.progress==="number" ? Math.round(data.progress) : null;
+  aiStatusEl.textContent = pct!=null ? `${STR[lang].aiStatusLoading} ${pct}%` : STR[lang].aiStatusLoading;
+}
+async function ensureTranscriber(){
+  if(transcriber) return transcriber;
+  aiLoading=true; aiToggle.disabled=true; paintMic();
+  aiStatusEl.textContent=STR[lang].aiStatusLoading;
+  try{
+    // Pinned to 3.2.4: the 4.0.1 release currently on the CDN fails to create a Whisper
+    // inference session at all (missing dequant scale for decoder.embed_tokens, reproduced
+    // across every dtype including fp32) — verified working end-to-end at 3.2.4.
+    if(!transformersMod) transformersMod = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.2.4");
+    transcriber = await transformersMod.pipeline("automatic-speech-recognition","Xenova/whisper-small",{
+      dtype:"q8", // quantized: much smaller/faster download, negligible accuracy loss for Whisper
+      progress_callback:onModelProgress,
+    });
+    aiReady=true;
+    aiStatusEl.textContent=STR[lang].aiStatusReady;
+  }catch(err){
+    aiMode=false; aiReady=false; transcriber=null;
+    aiToggle.checked=false;
+    aiStatusEl.textContent=STR[lang].aiStatusError;
+  }finally{
+    aiLoading=false; aiToggle.disabled=false; paintMic();
+  }
+  return transcriber;
+}
+async function decodeTo16kMono(arrayBuffer){
+  const tmpCtx=new (window.AudioContext||window.webkitAudioContext)();
+  const decoded=await tmpCtx.decodeAudioData(arrayBuffer);
+  tmpCtx.close();
+  const offline=new OfflineAudioContext(1, Math.ceil(decoded.duration*16000), 16000);
+  const src=offline.createBufferSource();
+  src.buffer=decoded;
+  src.connect(offline.destination);
+  src.start(0);
+  const rendered=await offline.startRendering();
+  return rendered.getChannelData(0);
+}
+async function startAiRecording(){
+  if(isRecording || isTranscribing) return;
+  try{
+    ensureAudioCtx();
+    if(!mediaStream) mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    recChunks=[];
+    mediaRecorder = new MediaRecorder(mediaStream);
+    mediaRecorder.ondataavailable = e=>{ if(e.data.size>0) recChunks.push(e.data); };
+    mediaRecorder.onstop = transcribeRecording;
+    mediaRecorder.start();
+    isRecording=true;
+    paintMic();
+  }catch(err){
+    micStatus.textContent = STR[lang].aiMicError;
+  }
+}
+function stopAiRecording(){
+  if(!isRecording || !mediaRecorder) return;
+  isRecording=false;
+  mediaRecorder.stop();
+  paintMic();
+}
+async function transcribeRecording(){
+  isTranscribing=true; paintMic();
+  try{
+    const blob=new Blob(recChunks, {type: mediaRecorder.mimeType||"audio/webm"});
+    if(blob.size>0){
+      const float32=await decodeTo16kMono(await blob.arrayBuffer());
+      const t=await ensureTranscriber();
+      const out=await t(float32, {
+        language: lang==="el" ? "greek" : "english",
+        task:"transcribe", chunk_length_s:30, stride_length_s:5,
+      });
+      const text=(out&&out.text)?out.text.trim():"";
+      if(text){
+        const action=matchCommand(text);
+        if(action) applyCommand(action); else playNoMatchCue();
+        addLog(text, action);
+      } else {
+        playNoMatchCue();
+      }
+    }
+  }catch(err){
+    playNoMatchCue();
+  }finally{
+    isTranscribing=false; paintMic();
+  }
+}
+aiToggle.onchange=async ()=>{
+  if(aiToggle.checked){
+    aiMode=true;
+    stopListening(); // continuous browser recognition and push-to-talk AI mode don't run together
+    paintMic();
+    await ensureTranscriber();
+  } else {
+    aiMode=false;
+    if(isRecording) stopAiRecording();
+    paintMic();
+  }
+};
+
 // ---- speech recognition ----
 const micBtn=document.getElementById("micBtn"), micStatus=document.getElementById("micStatus"), interimText=document.getElementById("interimText");
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -587,9 +714,30 @@ function doStart(){
 }
 function startListening(){ ensureAudioCtx(); shouldListen=true; doStart(); }
 function stopListening(){ shouldListen=false; if(recognition) recognition.stop(); listening=false; paintMic(); }
-micBtn.onclick=()=>{ (listening||shouldListen) ? stopListening() : startListening(); };
+micBtn.onclick=()=>{
+  if(aiMode) return; // push-to-talk in AI mode is handled by the pointer handlers below
+  (listening||shouldListen) ? stopListening() : startListening();
+};
+micBtn.addEventListener("pointerdown", e=>{
+  if(!aiMode || aiLoading || isTranscribing || isRecording) return;
+  e.preventDefault();
+  try{ micBtn.setPointerCapture(e.pointerId); }catch(err){/* ignore */}
+  startAiRecording();
+});
+["pointerup","pointercancel","pointerleave"].forEach(evt=>{
+  micBtn.addEventListener(evt, ()=>{ if(aiMode && isRecording) stopAiRecording(); });
+});
 function paintMic(){
   const s=STR[lang];
+  micBtn.classList.toggle("ai-mode", aiMode);
+  if(aiMode){
+    micBtn.classList.toggle("on", isRecording);
+    if(aiLoading) micStatus.textContent = s.aiStatusLoading;
+    else if(isTranscribing) micStatus.textContent = s.micTranscribing;
+    else if(isRecording) micStatus.textContent = s.micRecording;
+    else micStatus.textContent = s.micHoldIdle;
+    return;
+  }
   micBtn.classList.toggle("on", listening);
   micStatus.textContent = listening ? s.micOn : (shouldListen ? s.micOn : s.micIdle);
 }
@@ -626,6 +774,8 @@ function setLang(l){
   document.documentElement.setAttribute("lang",l);
   langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
   paintMic(); paintMute(); buildCmdHelp(); populateVoiceSelect(); renderLog(); render();
+  if(aiLoading) aiStatusEl.textContent=STR[lang].aiStatusLoading;
+  else if(aiReady) aiStatusEl.textContent=STR[lang].aiStatusReady;
   saveVoiceState();
 }
 langBtn.onclick=()=>setLang(lang==="el"?"en":"el");
