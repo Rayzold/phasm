@@ -206,7 +206,7 @@ function restore(s){ Object.assign(state,s.state); Object.assign(bhState,s.bhSta
 // ---- persistence: survive an accidental reload mid-contract ----
 const LS_KEY="phasmo-voice-v1";
 function saveVoiceState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({state,bhState,sanity,sanFilterOn,lang,muted,chosenVoice})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({state,bhState,sanity,sanFilterOn,lang,muted,chosenVoice,logEntries})); }catch(e){/* ignore */}
 }
 function loadVoiceState(){
   try{
@@ -219,6 +219,7 @@ function loadVoiceState(){
     if(d.lang==="en"||d.lang==="el") lang=d.lang;
     if(typeof d.muted==="boolean") muted=d.muted;
     if(d.chosenVoice && typeof d.chosenVoice==="object") chosenVoice=Object.assign({en:null,el:null},d.chosenVoice);
+    if(Array.isArray(d.logEntries)) logEntries=d.logEntries.filter(e=>e && typeof e.heard==="string").slice(-LOG_CAP);
   }catch(e){/* corrupt state, start fresh */}
 }
 
@@ -414,6 +415,7 @@ function applyCommand(action){
     EV.forEach(e=>state[e.k]=0);
     BEHAVIOR_RULES.forEach(b=>bhState[b.id]=0);
     sanity=50; sanFilterOn=false;
+    logEntries=[]; renderLog(); // notepad backlog: only Reset clears it
     render();
     speak(s.resetDone);
     saveVoiceState();
@@ -439,23 +441,37 @@ function applyCommand(action){
 }
 
 // ---- log ----
+// ---- notepad: κάθε φράση που ακούστηκε (matched ή όχι), σε μόνιμη λίστα μέχρι reset ----
 const logArea=document.getElementById("logArea");
+let logEntries=[]; // {heard, action|null, time} — πηγή αλήθειας· το DOM πάντα ξαναχτίζεται από εδώ
+const LOG_CAP=200; // αρκετό για μια ολόκληρη βάρδια, χωρίς απεριόριστη μεγέθυνση του localStorage
 function addLog(heard, action){
-  if(logArea.querySelector(".log-empty")) logArea.innerHTML="";
-  const s=STR[lang];
-  const div=document.createElement("div");
-  const matched=!!action;
-  div.className="log-entry "+(matched?"matched":"unmatched");
-  const time=new Date().toLocaleTimeString(lang==="el"?"el-GR":"en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  const actionLabel = matched ? describeAction(action) : s.logNoMatch;
-  div.innerHTML=`<span class="ltime">${time}</span><span class="lheard">"${heard}"</span> — <span class="laction">${actionLabel}</span>`;
-  logArea.insertBefore(div, logArea.firstChild);
+  logEntries.push({heard, action: action||null, time: Date.now()});
+  if(logEntries.length>LOG_CAP) logEntries.shift();
+  renderLog();
+  saveVoiceState();
 }
 function describeAction(a){
   if(a.t==="ev") return a.val===1?"✓ "+EV_NAMES[a.code]:"✗ "+EV_NAMES[a.code];
   if(a.t==="bh") return "✓ "+a.id;
   if(a.t==="sanity") return (a.filter?"hunt @ ":"sanity ")+a.value+"%";
   return a.t;
+}
+function renderLog(){
+  const s=STR[lang];
+  if(!logEntries.length){
+    logArea.innerHTML=`<div class="log-empty"><span class="l-el">Ακόμα τίποτα — πάτα το μικρόφωνο και μίλα.</span><span class="l-en">Nothing yet — tap the mic and speak.</span></div>`;
+    return;
+  }
+  const locale = lang==="el" ? "el-GR" : "en-US";
+  let html="";
+  for(let i=logEntries.length-1;i>=0;i--){
+    const e=logEntries[i];
+    const time=new Date(e.time).toLocaleTimeString(locale,{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    const actionLabel = e.action ? describeAction(e.action) : s.logNoMatch;
+    html+=`<div class="log-entry ${e.action?"matched":"unmatched"}"><span class="ltime">${time}</span><span class="lheard">"${e.heard}"</span> — <span class="laction">${actionLabel}</span></div>`;
+  }
+  logArea.innerHTML=html;
 }
 
 // ---- rendering ----
@@ -582,7 +598,7 @@ function setLang(l){
   lang=l;
   document.documentElement.setAttribute("lang",l);
   langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
-  paintMic(); paintMute(); buildCmdHelp(); populateVoiceSelect(); render();
+  paintMic(); paintMute(); buildCmdHelp(); populateVoiceSelect(); renderLog(); render();
   saveVoiceState();
 }
 langBtn.onclick=()=>setLang(lang==="el"?"en":"el");
