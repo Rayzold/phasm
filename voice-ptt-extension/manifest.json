@@ -4,10 +4,11 @@
   "version": "1.0.0",
   "description": "Global hotkey that starts/stops the AI push-to-talk mic on the Phasmo Journal voice assistant page, so it works while Phasmophobia has window focus.",
   "permissions": ["scripting", "tabs"],
-  "host_permissions": ["https://rayzold.github.io/phasm/*"],
+  "host_permissions": ["https://rayzold.github.io/*"],
   "background": {
     "service_worker": "background.js"
   },
+  "action": {},
   "commands": {
     "ptt-toggle": {
       "suggested_key": {
