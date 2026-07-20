@@ -557,18 +557,22 @@ function ensureAudioCtx(){
   }catch(e){/* audio unavailable, ignore */}
 }
 function playNoMatchCue(){
+  // Deliberately louder/harsher than the start/stop chirps (square wave, ~3x the peak gain,
+  // doubled) — this is the cue that most needs to cut through game audio, since it's the one
+  // telling you to just repeat yourself.
   if(muted || !audioCtx) return;
   try{
     const t=audioCtx.currentTime;
-    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-    o.type="sine";
-    o.frequency.setValueAtTime(340,t);
-    o.frequency.exponentialRampToValueAtTime(230,t+0.16);
-    g.gain.setValueAtTime(0.0001,t);
-    g.gain.exponentialRampToValueAtTime(0.09,t+0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001,t+0.19);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(t); o.stop(t+0.2);
+    [0,0.15].forEach(off=>{
+      const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.type="square";
+      o.frequency.setValueAtTime(180,t+off);
+      g.gain.setValueAtTime(0.0001,t+off);
+      g.gain.exponentialRampToValueAtTime(0.3,t+off+0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+off+0.13);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t+off); o.stop(t+off+0.14);
+    });
   }catch(e){/* ignore */}
 }
 // ---- push-to-talk start/stop cues: the whole point of the hotkey is not looking at the screen ----
