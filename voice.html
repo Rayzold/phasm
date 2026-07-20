@@ -165,8 +165,9 @@
     <div class="mic-controls ai-row">
       <label class="ai-toggle">
         <input type="checkbox" id="aiToggle">
-        <span class="l-el">AI φωνή (offline, πιο ακριβής — κράτα πατημένο το μικρόφωνο)</span><span class="l-en">AI voice (offline, more accurate — hold the mic to talk)</span>
+        <span class="l-el">AI φωνή (offline — κράτα πατημένο το μικρόφωνο)</span><span class="l-en">AI voice (offline — hold the mic to talk)</span>
       </label>
+      <select id="aiModelSelect" class="voice-select" title="AI model speed/accuracy"></select>
       <span id="aiStatus" class="ai-status"></span>
     </div>
   </div>
@@ -218,7 +219,7 @@ function restore(s){ Object.assign(state,s.state); Object.assign(bhState,s.bhSta
 // ---- persistence: survive an accidental reload mid-contract ----
 const LS_KEY="phasmo-voice-v1";
 function saveVoiceState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({state,bhState,sanity,sanFilterOn,lang,muted,chosenVoice,logEntries})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({state,bhState,sanity,sanFilterOn,lang,muted,chosenVoice,logEntries,aiModelChoice})); }catch(e){/* ignore */}
 }
 function loadVoiceState(){
   try{
@@ -232,6 +233,7 @@ function loadVoiceState(){
     if(typeof d.muted==="boolean") muted=d.muted;
     if(d.chosenVoice && typeof d.chosenVoice==="object") chosenVoice=Object.assign({en:null,el:null},d.chosenVoice);
     if(Array.isArray(d.logEntries)) logEntries=d.logEntries.filter(e=>e && typeof e.heard==="string").slice(-LOG_CAP);
+    if(d.aiModelChoice==="fast"||d.aiModelChoice==="accurate") aiModelChoice=d.aiModelChoice;
   }catch(e){/* corrupt state, start fresh */}
 }
 
@@ -319,6 +321,7 @@ const STR={
   micHoldIdle:"Κράτα πατημένο και μίλα", micRecording:"Καταγραφή… άφησε για να σταματήσει", micTranscribing:"Μεταγραφή…",
   aiStatusLoading:"Λήψη μοντέλου AI…", aiStatusReady:"Μοντέλο AI έτοιμο", aiStatusError:"Αποτυχία φόρτωσης μοντέλου AI",
   aiMicError:"Δεν δόθηκε πρόσβαση στο μικρόφωνο",
+  aiModelFast:"⚡ Γρήγορο", aiModelAccurate:"🎯 Ακριβές",
   muteOn:"🔊 Φωνή: ON", muteOff:"🔇 Φωνή: OFF",
   voiceNone:"Καμία διαθέσιμη φωνή", testPhrase:"Γεια! Έτσι θα ακούγομαι.",
   speechId:"Ταυτοποιήθηκε:", speechHunt:"Hunt στο", speechPossible:"πιθανά",
@@ -337,6 +340,7 @@ const STR={
   micHoldIdle:"Hold and speak", micRecording:"Recording… release to stop", micTranscribing:"Transcribing…",
   aiStatusLoading:"Downloading AI model…", aiStatusReady:"AI model ready", aiStatusError:"AI model failed to load",
   aiMicError:"Microphone access was denied",
+  aiModelFast:"⚡ Fast", aiModelAccurate:"🎯 Accurate",
   muteOn:"🔊 Voice: ON", muteOff:"🔇 Voice: OFF",
   voiceNone:"No voices available", testPhrase:"Hi! This is how I'll sound.",
   speechId:"Identified:", speechHunt:"Hunt at", speechPossible:"possible",
@@ -590,35 +594,46 @@ function playRecStopCue(){ playToneCue(760,480); }
 // Opt-in, offline, free alternative to the browser's built-in recognizer: better accuracy on
 // tricky phrases, no cost, no server, but push-to-talk only (Whisper transcribes clips, it
 // doesn't stream continuously the way SpeechRecognition does).
-let aiMode=false, aiLoading=false, aiReady=false, transcriber=null, transformersMod=null;
+// Two model choices trade accuracy for speed — whisper-small is noticeably more accurate but
+// ran ~3x slower than whisper-base in testing, too slow for a live game session, so "base" is
+// the default and "small" is opt-in for whoever wants to trade latency for accuracy.
+const AI_MODELS={ fast:{id:"Xenova/whisper-base", dtype:"q8"}, accurate:{id:"Xenova/whisper-small", dtype:"q8"} };
+let aiMode=false, aiLoading=false, aiReady=false, transcriber=null, loadedModel=null, transformersMod=null;
+let aiModelChoice="fast";
 let mediaStream=null, mediaRecorder=null, recChunks=[], isRecording=false, isTranscribing=false;
-const aiToggle=document.getElementById("aiToggle"), aiStatusEl=document.getElementById("aiStatus");
+const aiToggle=document.getElementById("aiToggle"), aiStatusEl=document.getElementById("aiStatus"), aiModelSelect=document.getElementById("aiModelSelect");
+function populateModelSelect(){
+  const s=STR[lang];
+  aiModelSelect.innerHTML = `<option value="fast"${aiModelChoice==="fast"?" selected":""}>${s.aiModelFast}</option><option value="accurate"${aiModelChoice==="accurate"?" selected":""}>${s.aiModelAccurate}</option>`;
+}
 function onModelProgress(data){
   if(data.status!=="progress") return;
   const pct = typeof data.progress==="number" ? Math.round(data.progress) : null;
   aiStatusEl.textContent = pct!=null ? `${STR[lang].aiStatusLoading} ${pct}%` : STR[lang].aiStatusLoading;
 }
 async function ensureTranscriber(){
-  if(transcriber) return transcriber;
-  aiLoading=true; aiToggle.disabled=true; paintMic();
+  if(transcriber && loadedModel===aiModelChoice) return transcriber;
+  aiReady=false; aiLoading=true; aiToggle.disabled=true; aiModelSelect.disabled=true; paintMic();
   aiStatusEl.textContent=STR[lang].aiStatusLoading;
   try{
     // Pinned to 3.2.4: the 4.0.1 release currently on the CDN fails to create a Whisper
     // inference session at all (missing dequant scale for decoder.embed_tokens, reproduced
     // across every dtype including fp32) — verified working end-to-end at 3.2.4.
     if(!transformersMod) transformersMod = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.2.4");
-    transcriber = await transformersMod.pipeline("automatic-speech-recognition","Xenova/whisper-small",{
-      dtype:"q8", // quantized: much smaller/faster download, negligible accuracy loss for Whisper
+    const spec=AI_MODELS[aiModelChoice];
+    transcriber = await transformersMod.pipeline("automatic-speech-recognition", spec.id, {
+      dtype:spec.dtype, // quantized: much smaller/faster download, negligible accuracy loss for Whisper
       progress_callback:onModelProgress,
     });
+    loadedModel=aiModelChoice;
     aiReady=true;
     aiStatusEl.textContent=STR[lang].aiStatusReady;
   }catch(err){
-    aiMode=false; aiReady=false; transcriber=null;
+    aiMode=false; aiReady=false; transcriber=null; loadedModel=null;
     aiToggle.checked=false;
     aiStatusEl.textContent=STR[lang].aiStatusError;
   }finally{
-    aiLoading=false; aiToggle.disabled=false; paintMic();
+    aiLoading=false; aiToggle.disabled=false; aiModelSelect.disabled=false; paintMic();
   }
   return transcriber;
 }
@@ -695,6 +710,11 @@ aiToggle.onchange=async ()=>{
     if(isRecording) stopAiRecording();
     paintMic();
   }
+};
+aiModelSelect.onchange=async ()=>{
+  aiModelChoice=aiModelSelect.value;
+  saveVoiceState();
+  if(aiMode && !isRecording && !isTranscribing) await ensureTranscriber(); // switch models right away if armed
 };
 // ---- global hotkey bridge: the companion browser extension (see voice-ptt-extension/) calls
 // this directly in the page's main world, since a plain web page can't register a hotkey that
@@ -801,7 +821,7 @@ function setLang(l){
   lang=l;
   document.documentElement.setAttribute("lang",l);
   langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
-  paintMic(); paintMute(); buildCmdHelp(); populateVoiceSelect(); renderLog(); render();
+  paintMic(); paintMute(); buildCmdHelp(); populateVoiceSelect(); populateModelSelect(); renderLog(); render();
   if(aiLoading) aiStatusEl.textContent=STR[lang].aiStatusLoading;
   else if(aiReady) aiStatusEl.textContent=STR[lang].aiStatusReady;
   saveVoiceState();
