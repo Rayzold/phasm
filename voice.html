@@ -165,7 +165,7 @@
     <div class="mic-controls ai-row">
       <label class="ai-toggle">
         <input type="checkbox" id="aiToggle">
-        <span class="l-el">AI φωνή (offline — κράτα πατημένο το μικρόφωνο)</span><span class="l-en">AI voice (offline — hold the mic to talk)</span>
+        <span class="l-el">AI φωνή (offline — μίλα, σταματά μόνο του)</span><span class="l-en">AI voice (offline — just talk, it auto-stops)</span>
       </label>
       <select id="aiModelSelect" class="voice-select" title="AI model speed/accuracy"></select>
       <span id="aiStatus" class="ai-status"></span>
@@ -318,7 +318,7 @@ const STR={
  el:{
   micIdle:"Πάτα το μικρόφωνο για να ξεκινήσεις",
   micOn:"Ακούω…", micOff:"Σταμάτησε",
-  micHoldIdle:"Κράτα πατημένο και μίλα", micRecording:"Καταγραφή… άφησε για να σταματήσει", micTranscribing:"Μεταγραφή…",
+  micHoldIdle:"Πάτα και μίλα", micRecording:"Καταγραφή… σταματά μόνο του όταν σιωπήσεις", micTranscribing:"Μεταγραφή…",
   aiStatusLoading:"Λήψη μοντέλου AI…", aiStatusReady:"Μοντέλο AI έτοιμο", aiStatusError:"Αποτυχία φόρτωσης μοντέλου AI",
   aiMicError:"Δεν δόθηκε πρόσβαση στο μικρόφωνο",
   aiModelFast:"⚡ Γρήγορο", aiModelAccurate:"🎯 Ακριβές",
@@ -337,7 +337,7 @@ const STR={
  en:{
   micIdle:"Tap the mic to start",
   micOn:"Listening…", micOff:"Stopped",
-  micHoldIdle:"Hold and speak", micRecording:"Recording… release to stop", micTranscribing:"Transcribing…",
+  micHoldIdle:"Tap and speak", micRecording:"Recording… auto-stops when you go quiet", micTranscribing:"Transcribing…",
   aiStatusLoading:"Downloading AI model…", aiStatusReady:"AI model ready", aiStatusError:"AI model failed to load",
   aiMicError:"Microphone access was denied",
   aiModelFast:"⚡ Fast", aiModelAccurate:"🎯 Accurate",
@@ -649,6 +649,44 @@ async function decodeTo16kMono(arrayBuffer){
   const rendered=await offline.startRendering();
   return rendered.getChannelData(0);
 }
+// Auto-stop: a single hotkey press is enough, no need to press again mid-game. Watches mic
+// volume and stops once you've gone quiet for AI_SILENCE_MS (adapts to phrase length instead of
+// waiting a fixed window either way), with AI_MAX_RECORD_MS as a hard safety cap in case the
+// room/game audio never actually goes quiet. Pressing the hotkey again still stops it early manually.
+const AI_MAX_RECORD_MS=8000, AI_MIN_RECORD_MS=500, AI_SILENCE_MS=900, AI_SILENCE_LEVEL=0.02;
+let audioAnalyser=null, audioAnalyserSource=null, silenceCheckHandle=null;
+function ensureAnalyser(){
+  if(audioAnalyser) return;
+  audioAnalyser=audioCtx.createAnalyser();
+  audioAnalyser.fftSize=1024;
+  audioAnalyserSource=audioCtx.createMediaStreamSource(mediaStream);
+  audioAnalyserSource.connect(audioAnalyser);
+}
+function watchForSilence(){
+  // setInterval, not requestAnimationFrame: rAF fully stops firing on a hidden/backgrounded tab
+  // (verified: zero callbacks while backgrounded), and this tab is *meant* to sit in the
+  // background while the game has focus — rAF would silently make auto-stop never fire there.
+  const buf=new Uint8Array(audioAnalyser.fftSize);
+  const startedAt=performance.now();
+  let quietSince=null;
+  silenceCheckHandle=setInterval(()=>{
+    if(!isRecording){ clearInterval(silenceCheckHandle); silenceCheckHandle=null; return; }
+    audioAnalyser.getByteTimeDomainData(buf);
+    let sumSq=0;
+    for(let i=0;i<buf.length;i++){ const v=(buf[i]-128)/128; sumSq+=v*v; }
+    const rms=Math.sqrt(sumSq/buf.length);
+    const elapsed=performance.now()-startedAt;
+    if(elapsed>=AI_MAX_RECORD_MS){ stopAiRecording(); return; }
+    if(elapsed>=AI_MIN_RECORD_MS){
+      if(rms<AI_SILENCE_LEVEL){
+        if(quietSince===null) quietSince=performance.now();
+        else if(performance.now()-quietSince>=AI_SILENCE_MS){ stopAiRecording(); return; }
+      } else {
+        quietSince=null;
+      }
+    }
+  }, 150);
+}
 async function startAiRecording(){
   if(isRecording || isTranscribing) return;
   try{
@@ -662,11 +700,14 @@ async function startAiRecording(){
     isRecording=true;
     playRecStartCue();
     paintMic();
+    ensureAnalyser();
+    watchForSilence();
   }catch(err){
     micStatus.textContent = STR[lang].aiMicError;
   }
 }
 function stopAiRecording(){
+  if(silenceCheckHandle){ clearInterval(silenceCheckHandle); silenceCheckHandle=null; }
   if(!isRecording || !mediaRecorder) return;
   isRecording=false;
   playRecStopCue();
