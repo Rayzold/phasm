@@ -42,6 +42,7 @@ const GHOSTS = [
  {name:"Obambo", ev:["WRT","UV","DOTS"], hunt:"10% calm / 65% aggressive", thMax:65, tell:"Δύο «διαθέσεις» που εναλλάσσονται κάθε 2 λεπτά: calm = αργό και ακίνδυνο, aggressive = hunt από 65% sanity, πιο γρήγορο, αλλά 20% πιο σύντομο hunt. Ghost με mood swings = Obambo."},
  {name:"Aswang", ev:["DOTS","FRZ","WRT"], hunt:"50%", thMax:50, tell:"Επιταχύνει ΠΟΛΥ γρήγορα με line-of-sight (max speed σε ~9s αντί 13s) και προτιμά να κυνηγά παρά να ψάχνει. Unique: αν σε φτάσει σε ΕΠΙΣΗΜΟ hiding spot (locker/closet), το hunt τελειώνει αμέσως — αλλά στο επόμενο πάει κατευθείαν εκεί. Άλλαξε κρυψώνα!"},
  {name:"Kormos", ev:["ORB","SB","UV"], hunt:"50% / 70% αν τρέχεις κοντά του", thMax:70, tell:"ΤΥΦΛΟ — σε εντοπίζει από ήχους βημάτων. Counter: σε hunt μείνε τελείως ΑΚΙΝΗΤΟΣ (δεν χρειάζεσαι locker). Προσοχή: σκοτώνει σε 1.5m ακόμα και μέσα από τοίχους/έπιπλα, οπότε όχι ακίνητος δίπλα στο path του. Sprint = θάνατος."},
+ {name:"Deildegast", ev:["EMF","WRT","DOTS"], hunt:"50%", thMax:50, tell:"Ξεκινά στα 3.0 m/s (σαν Revenant) και ΔΕΝ επιταχύνει με line-of-sight — σταθερό εκτός αν το επιβραδύνεις εσύ. Κάθε μοναδικό αντικείμενο που μετακίνησες/πέταξες από το τελευταίο hunt του ρίχνει την ταχύτητα κατά 0.1 m/s (ελάχιστο 0.4 m/s στα ~30 αντικείμενα) — μετράνε και οι νεκροί παίκτες. Counter: πέτα αντικείμενα ΠΡΙΝ το hunt — μηδενίζεται μετά από κάθε hunt, οπότε ξαναπιάσε δουλειά."},
 ];
 // Αγγλικές μεταφράσεις για tells & hunt strings (ό,τι λείπει πέφτει πίσω στα ελληνικά).
 const TELL_EN = {
@@ -74,6 +75,7 @@ const TELL_EN = {
  "Obambo":"Two 'moods' alternating every 2 minutes: calm = slow and harmless, aggressive = hunts from 65% sanity, faster, but 20% shorter hunts. A ghost with mood swings = Obambo.",
  "Aswang":"Accelerates VERY fast with line-of-sight (max speed in ~9s instead of 13s) and prefers chasing over searching. Unique: if it reaches you in an OFFICIAL hiding spot (locker/closet), the hunt ends instantly — but next hunt it goes straight there. Change spots!",
  "Kormos":"BLIND — it tracks you by footstep sounds. Counter: stand COMPLETELY still during hunts (no locker needed). Careful: it kills within 1.5m even through walls/furniture, so don't freeze next to its path. Sprinting = death.",
+ "Deildegast":"Starts at 3.0 m/s (like a Revenant) and does NOT speed up with line-of-sight — constant unless you slow it down yourself. Every unique item you've moved/thrown since its last hunt drops its speed by 0.1 m/s (floor of 0.4 m/s at ~30 items) — dead players count too. Counter: throw items BEFORE the hunt — it resets after every hunt, so get back to work.",
 };
 const HUNT_EN = {
  "Banshee":"50% of its target",

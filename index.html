@@ -449,7 +449,7 @@
     <div class="ev-grid" id="otGrid"></div>
     <div class="mimic-warn" id="mimicWarn"><span class="l-el">⚠ <strong>The Mimic:</strong> δείχνει <em>πάντα</em> ψεύτικα Ghost Orbs επιπλέον των κανονικών του evidence (Spirit Box, Ultraviolet, Freezing). Με Orbs στο ταμπλό, μην το ξεγράφεις μέχρι να αποκλείσεις κάποιο από αυτά τα τρία.</span><span class="l-en">⚠ <strong>The Mimic:</strong> <em>always</em> shows fake Ghost Orbs on top of its real evidence (Spirit Box, Ultraviolet, Freezing). With Orbs on the board, don't write it off until you've excluded one of those three.</span></div>
     <div class="toolbar">
-      <span class="count"><span class="l-el">Πιθανά</span><span class="l-en">Possible</span>: <b id="cnt">29</b>/29</span>
+      <span class="count"><span class="l-el">Πιθανά</span><span class="l-en">Possible</span>: <b id="cnt">30</b>/30</span>
       <span class="hint" id="hintTxt"></span>
     </div>
     <div class="shortlist" id="shortlistBox">
@@ -797,12 +797,12 @@
     <div class="panel-label"><span class="l-el">Ability Index — τι είδες → ποιο ghost το κάνει</span><span class="l-en">Ability Index — what you saw → which ghost does it</span></div>
     <div id="abilGrid"></div>
   </div>
-  <footer><span class="l-el">Evidence data: Phasmophobia Wiki (Ιούλιος 2026, 29 ghosts)</span><span class="l-en">Evidence data: Phasmophobia Wiki (July 2026, 29 ghosts)</span> · <span id="verTxt"></span></footer>
+  <footer><span class="l-el">Evidence data: Phasmophobia Wiki (Ιούλιος 2026, 30 ghosts)</span><span class="l-en">Evidence data: Phasmophobia Wiki (July 2026, 30 ghosts)</span> · <span id="verTxt"></span></footer>
   <button class="toTop" id="toTop" title="Πάνω" aria-label="Επιστροφή στην κορυφή">↑</button>
 </div>
 <script src="ghosts-data.js"></script>
 <script>
-const APP_VERSION = "1.28.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.29.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -889,6 +889,7 @@ const ABILITY_CATS = [
   {el:"Πιάνει max ταχύτητα με line-of-sight σχεδόν αμέσως (~9s)", en:"Hits max line-of-sight speed almost instantly (~9s)", g:"Aswang"},
   {el:"EMF μακριά από το ghost room χωρίς λόγο (τηλεμεταφορά σε παίκτη)", en:"EMF far from the ghost room for no reason (teleport to a player)", g:"Wraith"},
   {el:"Ταχύτερο όσο πέφτει το sanity σου", en:"Faster as your sanity drops", g:"Moroi"},
+  {el:"Κάθε αντικείμενο που μετακίνησες το κάνει πιο αργό (μετράνε κι οι νεκροί)", en:"Every item you moved makes it slower (dead players count too)", g:"Deildegast"},
  ]},
  {ic:"👹", el:"Hunts", en:"Hunts", rows:[
   {el:"Hunt με sanity ακόμα στο 90–100%", en:"A hunt with sanity still at 90–100%", g:"Demon"},
@@ -1393,6 +1394,7 @@ document.getElementById("huntReset").onclick=()=>huntTimer.reset();
 // Σχέση της κοινότητας (tybayn cheat sheet): βήμα κάθε (1/v − 0.075)s ⇒ v = bpm / (60 + 0.075·bpm)
 const SPEED_REF=[
  {min:0.40,max:3.00,label:"Deogen",note:"0.4 κοντά σου → 3.0 μακριά",noteEn:"0.4 near you → 3.0 far away"},
+ {min:0.40,max:3.00,label:"Deildegast",note:"3.0 αρχικά → 0.4 μετά από ~30 μετακινημένα αντικείμενα",noteEn:"3.0 at first → 0.4 after ~30 items moved"},
  {min:1.00,max:1.00,label:"Revenant (δεν σε βλέπει) / Thaye (γερασμένο)",labelEn:"Revenant (doesn't see you) / Thaye (aged)",note:"σταθερό",noteEn:"constant"},
  {min:1.40,max:2.70,label:"Hantu",note:"πιο γρήγορο στο κρύο, χωρίς LoS accel",noteEn:"faster in the cold, no LoS accel"},
  {min:1.50,max:2.25,label:"Moroi",note:"πιο γρήγορο όσο πέφτει το sanity σου",noteEn:"faster as your sanity drops"},
@@ -1425,6 +1427,7 @@ const SPEED_OF={ // εύρη m/s ανά ghost όπου διαφέρουν (με 
  "The Twins":[[1.53,3.09]],
  "Thaye":[[1.0,2.75]],
  "Dayan":[[1.0,2.8]],
+ "Deildegast":[[0.4,3.0]],
 };
 function passesSpeed(g){
   if(speedFilter===null || g.variableTh) return true; // Mimic: μιμείται και ταχύτητες
