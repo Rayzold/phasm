@@ -802,7 +802,7 @@
 </div>
 <script src="ghosts-data.js"></script>
 <script>
-const APP_VERSION = "1.29.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.29.1"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -1394,7 +1394,7 @@ document.getElementById("huntReset").onclick=()=>huntTimer.reset();
 // Σχέση της κοινότητας (tybayn cheat sheet): βήμα κάθε (1/v − 0.075)s ⇒ v = bpm / (60 + 0.075·bpm)
 const SPEED_REF=[
  {min:0.40,max:3.00,label:"Deogen",note:"0.4 κοντά σου → 3.0 μακριά",noteEn:"0.4 near you → 3.0 far away"},
- {min:0.40,max:3.00,label:"Deildegast",note:"3.0 αρχικά → 0.4 μετά από ~30 μετακινημένα αντικείμενα",noteEn:"3.0 at first → 0.4 after ~30 items moved"},
+ {min:0.40,max:3.00,label:"Deildegast",note:"3.0 αρχικά → 0.4 μετά από ~26 αντικείμενα (όχι ο εξοπλισμός σου)",noteEn:"3.0 at first → 0.4 after ~26 items (not your own equipment)"},
  {min:1.00,max:1.00,label:"Revenant (δεν σε βλέπει) / Thaye (γερασμένο)",labelEn:"Revenant (doesn't see you) / Thaye (aged)",note:"σταθερό",noteEn:"constant"},
  {min:1.40,max:2.70,label:"Hantu",note:"πιο γρήγορο στο κρύο, χωρίς LoS accel",noteEn:"faster in the cold, no LoS accel"},
  {min:1.50,max:2.25,label:"Moroi",note:"πιο γρήγορο όσο πέφτει το sanity σου",noteEn:"faster as your sanity drops"},
