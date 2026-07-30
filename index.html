@@ -537,6 +537,18 @@
         </div>
         <div class="speed-rows" id="speedRows"></div>
         <div class="smudge-note"><span class="l-el">Χτύπα ρυθμικά μαζί με τα βήματα του ghost στο hunt (5+ taps για ακρίβεια — παύση 5s μηδενίζει). Οι γραμμές που ταιριάζουν με τη μετρημένη ταχύτητα ανάβουν πράσινες. Το κουμπί φίλτρου κόβει από το ταμπλό όσα ghosts δεν κινούνται ποτέ έτσι — προσεγγιστικό όμως, μην αποκλείεις μόνο από αυτό.</span><span class="l-en">Tap along with the ghost's footsteps during a hunt (5+ taps for accuracy — a 5s pause resets). Rows matching the measured speed light up green. The filter button cuts ghosts that never move at this speed from the board — approximate though, don't exclude on it alone.</span></div>
+        <div class="tool-title" style="margin-top:14px">🧺 <span class="l-el">Μετρητής αντικειμένων Deildegast</span><span class="l-en">Deildegast Item Counter</span></div>
+        <div class="drain-row" style="align-items:center">
+          <button class="preset" id="itemMinus" style="font-size:16px;padding:3px 12px">−</button>
+          <span id="itemCount" style="font-family:'Special Elite',monospace;font-size:19px;color:var(--nv);min-width:22px;text-align:center">0</span>
+          <button class="preset" id="itemPlus" style="font-size:16px;padding:3px 12px">+</button>
+          <span id="itemSpeedReadout" style="color:var(--muted);font-variant-numeric:tabular-nums">≈ 3.00 m/s</span>
+        </div>
+        <div class="smudge-btns" style="margin-top:8px">
+          <button class="btn" id="itemFilterApply"><span class="l-el">🔗 Φίλτραρε με αυτή την ταχύτητα</span><span class="l-en">🔗 Filter by this speed</span></button>
+          <button class="btn" id="itemReset"><span class="l-el">Reset (νέο hunt)</span><span class="l-en">Reset (new hunt)</span></button>
+        </div>
+        <div class="smudge-note"><span class="l-el">Κάθε μοναδικό αντικείμενο (ΟΧΙ ο δικός σου εξοπλισμός) που μετακίνησες/πέταξες από το τελευταίο hunt του <strong>Deildegast</strong> ρίχνει την ταχύτητά του κατά 0.1 m/s (min 0.4 στα ~26). Μηδενίζεται μετά από κάθε hunt.</span><span class="l-en">Every unique item (NOT your own equipment) you've moved/thrown since <strong>Deildegast</strong>'s last hunt drops its speed by 0.1 m/s (floor 0.4 at ~26). Resets after every hunt.</span></div>
       </div>
       <div class="tool-col">
         <div class="tool-title">Hunt Countdown</div>
@@ -663,6 +675,11 @@
         Ask questions (location, bone, age…) — every answer costs sanity.
         <br><span class="danger">ALWAYS say "Goodbye"</span> at the end, or it's a cursed hunt. Asking "hide and seek" starts a cursed hunt immediately.
         </div>
+        <div class="smudge-btns" style="margin-top:8px">
+          <button class="btn primary" id="ouijaStart"><span class="l-el">▶ Ξεκίνα session</span><span class="l-en">▶ Start session</span></button>
+          <button class="btn" id="ouijaDone" style="display:none"><span class="l-el">✓ Είπα «Goodbye»</span><span class="l-en">✓ Said "Goodbye"</span></button>
+        </div>
+        <div id="ouijaWarn" class="mimic-warn" style="margin-top:8px"><span class="l-el">🔮 Ουίζα ενεργή — <strong>ΜΗΝ ΚΛΕΙΣΕΙΣ</strong> χωρίς να πεις «Goodbye» στο τέλος!</span><span class="l-en">🔮 Ouija active — <strong>DON'T CLOSE</strong> without saying "Goodbye" at the end!</span></div>
       </div>
       <div class="cp">
         <h3>🪞 Haunted Mirror</h3>
@@ -685,6 +702,14 @@
         Light all 5 candles (~16% sanity each) → the ghost appears pinned in the circle for a few seconds — ideal for a photo/evidence.
         <br><span class="danger">A cursed hunt starts right after</span> — have an escape ready before lighting the 5th.
         </div>
+        <div class="drain-row" style="margin-top:8px">
+          <button class="preset" id="circleMinus" style="font-size:16px;padding:3px 12px">−</button>
+          <span id="circleCount" style="font-family:'Special Elite',monospace;font-size:18px;color:var(--nv);min-width:14px;text-align:center">0</span>
+          <span class="l-el">/5 κεριά</span><span class="l-en">/5 candles</span>
+          <button class="preset" id="circlePlus" style="font-size:16px;padding:3px 12px">+</button>
+          <button class="btn" id="circleReset">Reset</button>
+        </div>
+        <div id="circleWarn" class="mimic-warn" style="margin-top:8px"><span class="l-el">🕯️ Όλα τα κεριά αναμμένα — <strong>cursed hunt</strong> έρχεται. Ετοίμασε διαφυγή ΤΩΡΑ.</span><span class="l-en">🕯️ All candles lit — a <strong>cursed hunt</strong> is coming. Get your escape ready NOW.</span></div>
       </div>
       <div class="cp">
         <h3>🪆 Voodoo Doll</h3>
@@ -802,7 +827,7 @@
 </div>
 <script src="ghosts-data.js"></script>
 <script>
-const APP_VERSION = "1.30.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.31.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -1444,6 +1469,47 @@ speedApply.onclick=()=>{
 };
 speedClear.onclick=()=>{ speedFilter=null; speedClear.style.display="none"; render(); };
 
+// ---- Deildegast item counter: same speedFilter the footstep tapper uses, just a different
+// way of arriving at a measured speed (3.0 m/s base, -0.1 per unique item, floor 0.4 at ~26) ----
+let itemsMoved=0;
+const itemCountEl=document.getElementById("itemCount"), itemSpeedEl=document.getElementById("itemSpeedReadout");
+function deildegastSpeedFor(n){ return Math.max(0.4, Math.min(3.0, 3.0 - 0.1*n)); }
+function paintItemCounter(){
+  itemCountEl.textContent=itemsMoved;
+  itemSpeedEl.textContent="≈ "+deildegastSpeedFor(itemsMoved).toFixed(2)+" m/s";
+}
+document.getElementById("itemMinus").onclick=()=>{ itemsMoved=Math.max(0,itemsMoved-1); paintItemCounter(); saveState(); };
+document.getElementById("itemPlus").onclick=()=>{ itemsMoved=Math.min(30,itemsMoved+1); paintItemCounter(); saveState(); };
+document.getElementById("itemReset").onclick=()=>{ itemsMoved=0; paintItemCounter(); saveState(); };
+document.getElementById("itemFilterApply").onclick=()=>{
+  speedFilter=deildegastSpeedFor(itemsMoved);
+  speedClear.textContent="✕ "+speedFilter.toFixed(2)+" m/s";
+  speedClear.style.display="inline-block";
+  render();
+};
+
+// ---- Summoning Circle candle counter ----
+let circleCount=0;
+const circleCountEl=document.getElementById("circleCount"), circleWarnEl=document.getElementById("circleWarn");
+function paintCircle(){
+  circleCountEl.textContent=circleCount;
+  circleWarnEl.classList.toggle("show", circleCount>=5);
+}
+document.getElementById("circleMinus").onclick=()=>{ circleCount=Math.max(0,circleCount-1); paintCircle(); saveState(); };
+document.getElementById("circlePlus").onclick=()=>{ circleCount=Math.min(5,circleCount+1); paintCircle(); saveState(); };
+document.getElementById("circleReset").onclick=()=>{ circleCount=0; paintCircle(); saveState(); };
+
+// ---- Ouija "say Goodbye" reminder ----
+let ouijaActive=false;
+const ouijaStartBtn=document.getElementById("ouijaStart"), ouijaDoneBtn=document.getElementById("ouijaDone"), ouijaWarnEl=document.getElementById("ouijaWarn");
+function paintOuija(){
+  ouijaWarnEl.classList.toggle("show", ouijaActive);
+  ouijaStartBtn.style.display = ouijaActive ? "none" : "inline-block";
+  ouijaDoneBtn.style.display = ouijaActive ? "inline-block" : "none";
+}
+ouijaStartBtn.onclick=()=>{ ouijaActive=true; paintOuija(); saveState(); };
+ouijaDoneBtn.onclick=()=>{ ouijaActive=false; paintOuija(); saveState(); };
+
 const tapCalib=document.getElementById("tapCalib"), tapCalibVal=document.getElementById("tapCalibVal");
 function paintCalib(){ tapCalibVal.textContent=(calibOffset>=0?"+":"")+calibOffset.toFixed(2); }
 tapCalib.addEventListener("input",()=>{
@@ -1495,7 +1561,7 @@ document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.rem
 // ---- persistence (refresh-proof evidence board & sanity) ----
 const LS_KEY="phasmo-journal-v1";
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang,sf:sanFilter.checked?1:0,min:minimalMode?1:0,wk:wakeManual?1:0,cc:customCfg,bm:bloodMoon.checked?1:0,cal:calibOffset,mo:[...manualOut]})); }catch(e){/* ignore */}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ev:state,bh:bhState,sanity,diff,lang,sf:sanFilter.checked?1:0,min:minimalMode?1:0,wk:wakeManual?1:0,cc:customCfg,bm:bloodMoon.checked?1:0,cal:calibOffset,mo:[...manualOut],im:itemsMoved,ci:circleCount,oa:ouijaActive?1:0})); }catch(e){/* ignore */}
 }
 (function loadState(){
   try{
@@ -1515,6 +1581,9 @@ function saveState(){
     if(d.bm===1) bloodMoon.checked=true;
     if(typeof d.cal==="number" && d.cal>=-1 && d.cal<=1) calibOffset=d.cal;
     if(Array.isArray(d.mo)) d.mo.forEach(n=>{ if(GHOSTS.some(g=>g.name===n)) manualOut.add(n); });
+    if(typeof d.im==="number" && d.im>=0 && d.im<=30) itemsMoved=d.im;
+    if(typeof d.ci==="number" && d.ci>=0 && d.ci<=5) circleCount=d.ci;
+    if(d.oa===1) ouijaActive=true;
   }catch(e){/* corrupt state, start fresh */}
 })();
 
@@ -1668,6 +1737,7 @@ applyMin();
 applyWakeBtn();
 if(wakeManual) wake.acquire();
 tapCalib.value=calibOffset; paintCalib();
+paintItemCounter(); paintCircle(); paintOuija();
 spy();
 
 // ---- PWA: offline cache & εγκατάσταση σε κινητό ----

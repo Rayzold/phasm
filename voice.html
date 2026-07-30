@@ -178,7 +178,10 @@
   </div>
 
   <div class="panel">
-    <div class="panel-label"><span class="l-el">Ιστορικό εντολών</span><span class="l-en">Command log</span></div>
+    <div class="panel-label" style="display:flex;justify-content:space-between;align-items:center">
+      <span><span class="l-el">Ιστορικό εντολών</span><span class="l-en">Command log</span></span>
+      <button class="ctrl-btn" id="copyLogBtn" style="margin:0">📋 <span class="l-el">Αντιγραφή</span><span class="l-en">Copy</span></button>
+    </div>
     <div class="log-area" id="logArea"><div class="log-empty"><span class="l-el">Ακόμα τίποτα — πάτα το μικρόφωνο και μίλα.</span><span class="l-en">Nothing yet — tap the mic and speak.</span></div></div>
   </div>
 
@@ -329,6 +332,7 @@ const STR={
   identified:"ΤΑΥΤΟΠΟΙΗΘΗΚΕ", plan:"📋 Σχέδιο:", photo:"📸 Πάρε τη ghost photo — λεφτά!",
   down:n=>`🔎 Έμειναν ${n} πιθανά`, stillOpen:n=>`${n} ακόμα πιθανά`, none:"Καμία αντιστοιχία — δοκίμασε «αναίρεση».",
   hintNext:(ic,item,cut,total)=>`🎯 Έλεγξε για ${ic} ${item} — κόβει τουλάχιστον ${cut} από τα ${total}.`,
+  copied:"✓ Αντιγράφηκε!", logEmptyExport:"(κενό)",
  },
  en:{
   micIdle:"Tap the mic to start",
@@ -348,6 +352,7 @@ const STR={
   identified:"IDENTIFIED", plan:"📋 Plan:", photo:"📸 Grab the ghost photo — money!",
   down:n=>`🔎 Down to ${n} possible`, stillOpen:n=>`${n} still possible`, none:"No match — try \"undo\".",
   hintNext:(ic,item,cut,total)=>`🎯 Check for ${ic} ${item} — cuts at least ${cut} of ${total}.`,
+  copied:"✓ Copied!", logEmptyExport:"(empty)",
  },
 };
 
@@ -501,6 +506,19 @@ function renderLog(){
   }
   logArea.innerHTML=html;
 }
+document.getElementById("copyLogBtn").onclick=()=>{
+  const s=STR[lang];
+  const locale = lang==="el" ? "el-GR" : "en-US";
+  const text = logEntries.map(e=>{
+    const time=new Date(e.time).toLocaleTimeString(locale,{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    const actionLabel = e.action ? describeAction(e.action) : s.logNoMatch;
+    return `[${time}] "${e.heard}" — ${actionLabel}`;
+  }).join("\n") || s.logEmptyExport;
+  const btn=document.getElementById("copyLogBtn");
+  const done=()=>{ const keep=btn.innerHTML; btn.textContent=s.copied; setTimeout(()=>{ btn.innerHTML=keep; },1500); };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(()=>prompt("Log:",text));
+  else prompt("Log:",text);
+};
 
 // ---- rendering ----
 function render(){
@@ -773,6 +791,12 @@ window.pttHotkeyToggle=function(){
   if(!aiMode || !aiReady || aiLoading) return;
   if(isRecording) stopAiRecording(); else startAiRecording();
 };
+// Mute/undo don't touch AI mode or the mic at all, so unlike pttHotkeyToggle they work
+// regardless of whether AI voice is armed — reuse the exact same code path as their on-screen
+// buttons/voice commands so the hotkey behaves identically (e.g. unmuting still speaks a
+// confirmation, since that's the only feedback you get without looking at the screen).
+window.muteHotkeyToggle=function(){ applyCommand({t: muted ? "unmute" : "mute"}); };
+window.undoHotkeyToggle=function(){ applyCommand({t:"undo"}); };
 
 // ---- speech recognition ----
 const micBtn=document.getElementById("micBtn"), micStatus=document.getElementById("micStatus"), interimText=document.getElementById("interimText");
