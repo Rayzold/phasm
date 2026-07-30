@@ -802,7 +802,7 @@
 </div>
 <script src="ghosts-data.js"></script>
 <script>
-const APP_VERSION = "1.29.1"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.30.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -821,7 +821,6 @@ const STR = {
   statusSafe:"Ασφαλές — κανένα πιθανό ghost δεν κάνει hunt εδώ",
   statusHunt:n=>n+" πιθανά ghosts κάνουν ήδη hunt σε αυτό το sanity",
   hintClose:"Κοντεύεις — κοίτα τα tells για να ξεχωρίσεις τα τελευταία.",
-  items:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Θερμόμετρο",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
   sugNext:(a,c,n)=>`🎯 Επόμενο item: ${a} — <span class="dim">ό,τι κι αν δείξει, κόβει τουλάχιστον ${c} από τα ${n} πιθανά.</span>`,
   sugEither:(a,b,c,n)=>`🎯 Πάρε είτε ${a} είτε ${b} — <span class="dim">όποιο από τα δύο κι αν δοκιμάσεις, κόβει τουλάχιστον ${c} από τα ${n} πιθανά.</span>`,
   sugFirst:(a,c,n,b,c2)=>`🎯 Πάρε πρώτα ${a} — <span class="dim">ό,τι κι αν δείξει, κόβει τουλάχιστον ${c} από τα ${n} πιθανά.</span> Μετά αξίζει το ${b} <span class="dim">(κόβει τουλάχιστον ${c2})</span>.`,
@@ -850,7 +849,6 @@ const STR = {
   statusSafe:"Safe — no possible ghost can hunt here",
   statusHunt:n=>n+" possible ghosts can already hunt at this sanity",
   hintClose:"Getting close — check the tells to split the last few.",
-  items:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Thermometer",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
   sugNext:(a,c,n)=>`🎯 Next item: ${a} — <span class="dim">whatever it shows, it cuts at least ${c} of the ${n} possible.</span>`,
   sugEither:(a,b,c,n)=>`🎯 Grab either ${a} or ${b} — <span class="dim">whichever you test, it cuts at least ${c} of the ${n} possible.</span>`,
   sugFirst:(a,c,n,b,c2)=>`🎯 Grab ${a} first — <span class="dim">whatever it shows, it cuts at least ${c} of the ${n} possible.</span> Then ${b} is worth it <span class="dim">(cuts at least ${c2})</span>.`,
@@ -1163,7 +1161,7 @@ function updateSuggestion(pool){
   }).filter(c=>c.cut>0).sort((a,b)=>b.cut-a.cut||b.exp-a.exp);
   if(!cands.length){ box.classList.remove("show"); return; }
   const s=STR[lang];
-  const nameOf=c=>`<b>${c.e.ic} ${s.items[c.e.k]}</b>`;
+  const nameOf=c=>`<b>${c.e.ic} ${ITEM_OF[lang][c.e.k]}</b>`;
   const one=cands[0], two=cands[1];
   let html;
   if(!two){

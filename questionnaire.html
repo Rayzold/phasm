@@ -178,7 +178,7 @@
   <div id="screenIntro" class="panel">
     <div class="panel-label"><span class="l-el">Πριν ξεκινήσεις</span><span class="l-en">Before you start</span></div>
     <p class="intro-note"><span class="l-el">Αυτό είναι ένα βήμα-βήμα companion στο κεντρικό Evidence Board — καλό για να δουλέψεις ένα contract από μνήμης, φωναχτά με την ομάδα σου, ή όταν δεν θες να κοιτάς ένα πλέγμα από toggles.</span><span class="l-en">This is a <strong>step-by-step</strong> companion to the main Evidence Board — good for working through a contract from memory, out loud with teammates, or when you don't want to stare at a grid of toggles.</span></p>
-    <p class="intro-note"><span class="l-el">39 ερωτήσεις συνολικά, χωρισμένες σε: <strong>Evidence</strong> (7), <strong>Συνηθισμένες συμπεριφορές</strong> (8), <strong>Άλλες παρατηρήσεις</strong> (6), <strong>Προχωρημένα tells</strong> (17), και μία ερώτηση <strong>ταχύτητας</strong>.</span><span class="l-en">39 questions total, grouped into: <strong>Evidence</strong> (7), <strong>Common behaviors</strong> (8), <strong>Other observations</strong> (6), <strong>Advanced tells</strong> (17), and one <strong>speed</strong> question.</span></p>
+    <p class="intro-note"><span class="l-el">40 ερωτήσεις συνολικά, χωρισμένες σε: <strong>Evidence</strong> (7), <strong>Συνηθισμένες συμπεριφορές</strong> (8), <strong>Άλλες παρατηρήσεις</strong> (6), <strong>Προχωρημένα tells</strong> (18), και μία ερώτηση <strong>ταχύτητας</strong>.</span><span class="l-en">40 questions total, grouped into: <strong>Evidence</strong> (7), <strong>Common behaviors</strong> (8), <strong>Other observations</strong> (6), <strong>Advanced tells</strong> (18), and one <strong>speed</strong> question.</span></p>
     <p class="intro-note"><span class="l-el">Απάντα <strong>Ναι</strong> μόνο όταν είσαι σίγουρος — ένα «Όχι» ή «Δεν είμαι σίγουρος» αντιμετωπίζεται σαν «καμία πληροφορία», ποτέ σαν απόδειξη, εκτός από το Evidence όπου το «Αποκλείστηκε» είναι πραγματικό ✗. Σε <strong>Nightmare</strong> δείχνονται μόνο 2 από τα 3 evidence, οπότε μην τσεκάρεις το τρίτο ως «Αποκλείστηκε» μόνο επειδή δεν το βρήκες ακόμα.</span><span class="l-en">Only answer <strong>Yes</strong> when you're confident — a "No" or "Not sure" is treated as "no information," never as proof, except for the Evidence section where "Ruled out" is a real ✗. On <strong>Nightmare</strong> difficulty only 2 of 3 evidence are ever shown, so don't mark the third as "Ruled out" just because you haven't found it.</span></p>
     <p class="intro-note"><span class="l-el">Η πρόοδός σου αποθηκεύεται αυτόματα — κλείσε την καρτέλα όποτε θες και συνέχισε από εκεί που έμεινες.</span><span class="l-en">Your progress saves automatically — close the tab any time and pick up where you left off.</span></p>
     <button class="startBtn" id="startBtn"><span class="l-el">▶ ΞΕΚΙΝΑ</span><span class="l-en">▶ START</span></button>
@@ -221,11 +221,7 @@
 </div>
 <script src="ghosts-data.js"></script>
 <script>
-// EV.n / GHOSTS / TELL_EN / HUNT_EN / effEv() come from ghosts-data.js (shared with index.html).
-const ITEM_OF = {
- el:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Θερμόμετρο",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
- en:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Thermometer",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
-};
+// EV.n / GHOSTS / TELL_EN / HUNT_EN / ITEM_OF / effEv() come from ghosts-data.js (shared with index.html).
 function tellOf(g){ return lang==="en" ? (TELL_EN[g.name]||g.tell) : g.tell; }
 function huntOf(g){ return lang==="en" ? (HUNT_EN[g.name]||g.hunt) : g.hunt; }
 
@@ -394,6 +390,9 @@ const QUESTIONS = [
  {id:"shadeDead", type:"yesno", section:"advanced", icon:"😶", include:["Shade"],
   en:"Was the house eerily 'dead' with almost no activity while someone was inside, even though a ghost is confirmed present?",
   el:"Ήταν το σπίτι ανησυχητικά «νεκρό» με σχεδόν καμία δραστηριότητα όσο κάποιος ήταν μέσα, αν και υπάρχει σίγουρα ghost;"},
+ {id:"deildegastItems", type:"yesno", section:"advanced", icon:"📦", include:["Deildegast"],
+  en:"Did the ghost seem to move slower during hunts the more objects had been moved or thrown around beforehand — regardless of distance or line of sight?",
+  el:"Φάνηκε το ghost να κινείται πιο αργά σε hunts όσα περισσότερα αντικείμενα είχαν μετακινηθεί ή πεταχτεί πριν — ανεξάρτητα από απόσταση ή οπτική επαφή;"},
 
  {id:"speedArchetype", type:"choice", section:"speed", icon:"🏃",
   en:"If you clocked the ghost's walking speed (footsteps or a stopwatch), which pattern fits best?",
@@ -408,6 +407,9 @@ const QUESTIONS = [
    {include:["Hantu"],
     en:"Noticeably faster the colder the room is",
     el:"Αισθητά πιο γρήγορο όσο πιο κρύο είναι το δωμάτιο"},
+   {include:["Deildegast"],
+    en:"Started fast (~3.0 m/s) but got noticeably slower the more objects had been moved/thrown around since the last hunt",
+    el:"Ξεκίνησε γρήγορο (~3.0 m/s) αλλά έγινε αισθητά πιο αργό όσο περισσότερα αντικείμενα είχαν μετακινηθεί/πεταχτεί από το τελευταίο hunt"},
    {include:["The Twins"],
     en:"Two clearly different fixed speeds mixed together",
     el:"Δύο ξεκάθαρα διαφορετικές σταθερές ταχύτητες μαζί"},

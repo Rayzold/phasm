@@ -20,12 +20,21 @@ self.addEventListener("activate", e => {
   );
 });
 
+// Hosts for the optional in-browser AI voice model (~hundreds of MB) — left alone entirely,
+// since transformers.js manages its own cache and mirroring that into CACHE would double the
+// storage and bloat a cache our activate handler never prunes. Everything else cross-origin
+// (e.g. Google Fonts) is small and still worth caching for real offline use in the van — an
+// earlier version of this file excluded ALL cross-origin requests, which silently broke the
+// "Special Elite" font offline as a side effect; don't widen this list without noticing that.
+const SKIP_CACHE_HOSTS = ["cdn.jsdelivr.net", "huggingface.co"];
+function isSkippedHost(url) {
+  const h = new URL(url).hostname;
+  return SKIP_CACHE_HOSTS.some(skip => h === skip || h.endsWith("." + skip));
+}
+
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET" || !e.request.url.startsWith("http")) return;
-  // Cross-origin requests (e.g. the optional in-browser AI voice model, ~hundreds of MB from a
-  // CDN/HuggingFace) are left alone — that library manages its own cache, and mirroring it into
-  // CACHE here would double the storage and bloat a cache our activate handler never prunes.
-  if (!e.request.url.startsWith(self.location.origin)) return;
+  if (isSkippedHost(e.request.url)) return;
   e.respondWith(
     fetch(e.request)
       .then(r => {

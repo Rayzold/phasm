@@ -9,6 +9,12 @@ const EV = [
   {k:"WRT", n:"Ghost Writing",   ic:"📖"},
   {k:"SB",  n:"Spirit Box",      ic:"📻"},
 ];
+// Equipment display name per evidence code, per language — was copy-pasted identically across
+// all three pages; centralized here so it only needs updating in one place.
+const ITEM_OF = {
+ el:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Θερμόμετρο",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
+ en:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Thermometer",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
+};
 // thMax = ανώτατο sanity % στο οποίο το ghost μπορεί ακόμα να κάνει hunt (για ταξινόμηση/quick lookup).
 // isAny = μπορεί να κάνει hunt σε ΟΠΟΙΟΔΗΠΟΤΕ sanity μέσω ability.
 // variableTh = threshold που αλλάζει ανάλογα με behavior (π.χ. Mimic μιμείται άλλο ghost).

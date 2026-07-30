@@ -195,11 +195,7 @@
 </div>
 <script src="ghosts-data.js"></script>
 <script>
-// EV / GHOSTS / TELL_EN / HUNT_EN / BEHAVIOR_RULES / effEv() come from ghosts-data.js.
-const ITEM_OF = {
- el:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Θερμόμετρο",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
- en:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Thermometer",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
-};
+// EV / GHOSTS / TELL_EN / HUNT_EN / BEHAVIOR_RULES / ITEM_OF / effEv() come from ghosts-data.js.
 function tellOf(g){ return lang==="en" ? (TELL_EN[g.name]||g.tell) : g.tell; }
 function huntOf(g){ return lang==="en" ? (HUNT_EN[g.name]||g.hunt) : g.hunt; }
 
@@ -367,7 +363,7 @@ const COMMANDS=[
  {apply:{t:"ev",code:"FRZ",val:2}, en:["no freezing","not freezing","not cold","no cold"], el:["όχι freezing","δεν είναι κρύο","όχι κρύο"]},
  {apply:{t:"ev",code:"FRZ",val:1}, en:["freezing","freezing temperatures","its cold","it s cold","room is cold","got freezing"], el:["freezing","κρύο δωμάτιο","είναι κρύο"]},
  {apply:{t:"ev",code:"ORB",val:2}, en:["no orbs","not orbs","no ghost orbs","no orb"], el:["όχι orbs","δεν βρήκα orbs","όχι orb"]},
- {apply:{t:"ev",code:"ORB",val:1}, en:["orbs","ghost orbs","got orbs","saw orbs","orb"], el:["orbs","βρήκα orbs","είδα orbs","orb"]},
+ {apply:{t:"ev",code:"ORB",val:1}, en:["orbs","ghost orbs","got orbs","saw orbs","orb","norbs"], el:["orbs","βρήκα orbs","είδα orbs","orb"]},
  {apply:{t:"ev",code:"WRT",val:2}, en:["no writing","not writing","no ghost writing"], el:["όχι writing","δεν βρήκα writing"]},
  {apply:{t:"ev",code:"WRT",val:1}, en:["writing","ghost writing","got writing","found writing"], el:["writing","βρήκα writing"]},
  {apply:{t:"ev",code:"SB",val:2}, en:["no spirit box","not spirit box"], el:["όχι spirit box","δεν βρήκα spirit box"]},
@@ -408,12 +404,20 @@ function parseSanityCommand(norm){
   for(const w in words) if(norm.includes(w)) return {t:"sanity",value:words[w],filter:isHunt};
   return null;
 }
-function normalize(t){ return t.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").replace(/\s+/g," ").trim(); }
+function normalize(t){ return t.normalize("NFC").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").replace(/\s+/g," ").trim(); }
+function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
+// Left-boundary only: a plain substring check would let "female ghost" fire the "male ghost"
+// trigger, or "absorbs" fire bare "orb" — both real, confirmed false positives. But the right
+// side has to stay loose, since real transcripts fuse things like "emf5" or "norbs" with no
+// space at all, and requiring a boundary there would break those on-purpose loose matches.
+function phraseMatches(norm, phrase){
+  return new RegExp("(?:^|[^\\p{L}\\p{N}])"+escapeRegex(phrase),"u").test(norm);
+}
 function matchCommand(text){
   const norm=normalize(text);
   for(const cmd of COMMANDS){
     const phrases = lang==="el" ? cmd.el : cmd.en;
-    if(phrases.some(p=>norm.includes(p))) return cmd.apply;
+    if(phrases.some(p=>phraseMatches(norm,p))) return cmd.apply;
   }
   return parseSanityCommand(norm);
 }
