@@ -75,12 +75,14 @@
   #wakeBtn.on{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.1);box-shadow:0 0 10px rgba(143,227,136,.2)}
   /* ---------- minimal mode: μόνο evidence, sanity/smudge και ghosts ---------- */
   body.minimal #hunt-toolkit,
+  body.minimal #hunt-behaviors,
   body.minimal #survival,
   body.minimal #cursed,
   body.minimal #thresholds,
   body.minimal #photos,
   body.minimal #abilities,
   body.minimal .jumpnav a[href="#hunt-toolkit"],
+  body.minimal .jumpnav a[href="#hunt-behaviors"],
   body.minimal .jumpnav a[href="#survival"],
   body.minimal .jumpnav a[href="#cursed"],
   body.minimal .jumpnav a[href="#thresholds"],
@@ -390,6 +392,7 @@
     <a href="#evidence">Evidence</a>
     <a href="#sanity-smudge">Sanity &amp; Smudge</a>
     <a href="#hunt-toolkit">Hunt Toolkit</a>
+    <a href="#hunt-behaviors"><span class="l-el">Hunt Συμπεριφορές</span><span class="l-en">Hunt Behaviors</span></a>
     <a href="#survival">Survival</a>
     <a href="#cursed">Cursed Items</a>
     <a href="#thresholds">Thresholds</a>
@@ -447,6 +450,8 @@
     <div class="ev-grid" id="bhGrid"></div>
     <div class="panel-label" style="margin-top:16px"><span class="l-el">Other — ό,τι άλλο πρόσεξες</span><span class="l-en">Other — anything else you noticed</span></div>
     <div class="ev-grid" id="otGrid"></div>
+    <div class="panel-label" style="margin-top:16px">🎯 <span class="l-el">Hunt-only — τι είδες ΣΕ hunt; (προαιρετικά φίλτρα)</span><span class="l-en">Hunt-only — what did you see DURING a hunt? (optional filters)</span></div>
+    <div class="ev-grid" id="huntBhGrid"></div>
     <div class="mimic-warn" id="mimicWarn"><span class="l-el">⚠ <strong>The Mimic:</strong> δείχνει <em>πάντα</em> ψεύτικα Ghost Orbs επιπλέον των κανονικών του evidence (Spirit Box, Ultraviolet, Freezing). Με Orbs στο ταμπλό, μην το ξεγράφεις μέχρι να αποκλείσεις κάποιο από αυτά τα τρία.</span><span class="l-en">⚠ <strong>The Mimic:</strong> <em>always</em> shows fake Ghost Orbs on top of its real evidence (Spirit Box, Ultraviolet, Freezing). With Orbs on the board, don't write it off until you've excluded one of those three.</span></div>
     <div class="toolbar">
       <span class="count"><span class="l-el">Πιθανά</span><span class="l-en">Possible</span>: <b id="cnt">30</b>/30</span>
@@ -502,6 +507,7 @@
         <div class="drain-row">
           <label class="chk san-filter" id="sanFilterBox"><input type="checkbox" id="sanFilter"> <span class="l-el">🔎 Extra φίλτρο: έγινε hunt σε αυτό το sanity — κόψε όσα δεν μπορούν</span><span class="l-en">🔎 Extra filter: a hunt happened at this sanity — cut those that can't</span></label>
         </div>
+        <div class="mimic-warn" id="sanZeroWarn"><span class="l-el">☠️ <strong>Κρίσιμο sanity:</strong> σχεδόν ΟΛΑ τα ghosts μπορούν τώρα να κάνουν hunt. Το crucifix δουλεύει κανονικά αν είναι κάτω πριν ξεκινήσει. Σπάσε line-of-sight αμέσως, μην τρέχεις άσκοπα, και σκέψου αν αξίζει να τραβήξεις παραπάνω ή να αποσυρθείς.</span><span class="l-en">☠️ <strong>Critical sanity:</strong> almost EVERY ghost can hunt now. A crucifix still works normally if it's down before a hunt starts. Break line-of-sight immediately, don't sprint without a reason, and consider whether pushing further is worth it or it's time to pull out.</span></div>
         <div class="sanity-note" id="sanNote"><span class="l-el">Σύρε το slider στο τρέχον sanity σου — ή άναψε το <strong>Auto-drain</strong> για να πέφτει μόνο του (small 0.12 / medium 0.08 / large 0.05 %/s στο σκοτάδι, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — το difficulty αλλάζει από το μενού πάνω δεξιά). Στο φως δεν πέφτει — ξετίκαρε το «Σκοτάδι». Τα ghosts που κάνουν hunt σε αυτό το επίπεδο τονίζονται παρακάτω. <strong>Σε ομάδα:</strong> τα hunts κρίνονται από τον ΜΕΣΟ ΟΡΟ sanity της ομάδας (Banshee: μόνο του στόχου της).</span><span class="l-en">Drag the slider to your current sanity — or switch on <strong>Auto-drain</strong> to let it fall on its own (small 0.12 / medium 0.08 / large 0.05 %/s in darkness, <span class="drainMultTxt">×1.5</span> difficulty, ×0.5 solo — change difficulty from the menu top right). It doesn't drop in the light — untick "Darkness". Ghosts that can hunt at this level are highlighted below. <strong>In a team:</strong> hunts trigger off the team's AVERAGE sanity (Banshee: its target's only).</span></div>
       </div>
       <div class="tool-col">
@@ -564,6 +570,18 @@
         <div class="smudge-note"><span class="l-el">Διάρκειες hunt για <strong class="diffNameTxt">Intermediate</strong>. Grace period <span class="graceTxt">4s</span> στην αρχή (το ghost δεν σκοτώνει ακόμα). Cursed hunts: +20s. Cooldown μεταξύ hunts: 25s (<strong>Demon</strong>: 20s).</span><span class="l-en">Hunt durations for <strong class="diffNameTxt">Intermediate</strong>. Grace period <span class="graceTxt">4s</span> at the start (the ghost can't kill yet). Cursed hunts: +20s. Cooldown between hunts: 25s (<strong>Demon</strong>: 20s).</span></div>
       </div>
     </div>
+  </div>
+
+  <div class="panel anchor-target" id="hunt-behaviors">
+    <div class="panel-label"><span class="l-el">Τι κάνει κάθε ghost ΣΕ hunt</span><span class="l-en">What each ghost does DURING a hunt</span></div>
+    <div class="sanity-note" style="margin-bottom:10px"><span class="l-el">Ξεχωριστό από το evidence tell — αυτό είναι κίνηση/behavior μέσα στο ίδιο το hunt. Πιο χρήσιμο όταν το sanity είναι χαμηλό και σχεδόν οτιδήποτε μπορεί να κάνει hunt — εκείνη τη στιγμή μετράει πώς θα αντιδράσεις, όχι η ταυτοποίηση.</span><span class="l-en">Separate from the evidence tell — this is movement/behavior during the hunt itself. Most useful once sanity is low enough that almost anything can hunt — in that moment, how you react matters more than identification.</span></div>
+    <div class="thresh-wrap">
+      <table class="thresh">
+        <thead><tr><th>Ghost</th><th><span class="l-el">Στο hunt</span><span class="l-en">During the hunt</span></th></tr></thead>
+        <tbody id="huntBehaviorBody"></tbody>
+      </table>
+    </div>
+    <div class="sanity-note" style="margin-top:10px"><span class="l-el">Κόκκινη γραμμή = μπορεί ήδη να κάνει hunt στο sanity που έχεις ορίσει παραπάνω. Θολές γραμμές = ήδη αποκλεισμένο βάσει evidence/behaviors.</span><span class="l-en">Red row = can already hunt at the sanity you've set above. Dimmed rows = already excluded by evidence/behaviors.</span></div>
   </div>
 
   <div class="panel anchor-target" id="survival">
@@ -827,7 +845,7 @@
 </div>
 <script src="ghosts-data.js"></script>
 <script>
-const APP_VERSION = "1.31.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.32.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -898,6 +916,7 @@ const STR = {
 };
 function tellOf(g){ return lang==="en" ? (TELL_EN[g.name]||g.tell) : g.tell; }
 function huntOf(g){ return lang==="en" ? (HUNT_EN[g.name]||g.hunt) : g.hunt; }
+function huntBehaviorOf(g){ return lang==="en" ? HUNT_BEHAVIOR_EN[g.name] : HUNT_BEHAVIOR[g.name]; }
 
 // ---- ability index: παρατήρηση → ποιο ghost το κάνει, ανά κατηγορία ----
 // Όσα ανήκουν σε δύο κατηγορίες εμφανίζονται και στις δύο.
@@ -1045,6 +1064,20 @@ const BEHAVIORS = [
  {id:"sixFinger",label:"Fingerprints με 6 δάχτυλα",      en:"Six-fingered fingerprints",    ic:"🖖", include:["Obake"], group:"other"},
  {id:"twinTouch",label:"Interactions σε 2 σημεία μαζί",  en:"Interactions in 2 spots at once",ic:"👯", include:["The Twins","The Mimic"], group:"other"},
  {id:"doorSlam", label:"Πόρτα έκλεισε τέρμα με δύναμη",  en:"Door slammed fully shut",      ic:"🚪", include:["Yurei","The Mimic"], group:"other"},
+ // "Hunt-only": μόνο κατά τη διάρκεια hunt, ποτέ γενικά κατά την έρευνα — ίδια ids με τα
+ // "advanced" ερωτήσεις του questionnaire.html.
+ {id:"deogenSpeed",   label:"Αργό από κοντά, γρήγορο από μακριά",       en:"Slow up close, fast from far",             ic:"🐌", include:["Deogen","The Mimic"], group:"hunt"},
+ {id:"revenantLos",   label:"Σέρνεται → sprint μόλις σε είδε",          en:"Crawls → sprints once it sees you",        ic:"👀", include:["Revenant","The Mimic"], group:"hunt"},
+ {id:"thayeAge",      label:"Ξεκίνησε γρήγορο, «κουράστηκε» με την ώρα",en:"Started fast, 'got tired' over time",      ic:"⏳", include:["Thaye","The Mimic"], group:"hunt"},
+ {id:"raijuElec",     label:"Πιο γρήγορο/hunt νωρίς κοντά σε ηλεκτρονικά",en:"Faster/hunts earlier near electronics",  ic:"🔌", include:["Raiju","The Mimic"], group:"hunt"},
+ {id:"galluEnrage",   label:"Crucifix/incense/salt το εξαγρίωσαν",      en:"Crucifix/incense/salt enraged it",         ic:"😡", include:["Gallu","The Mimic"], group:"hunt"},
+ {id:"obamboMood",    label:"Ήρεμο/επιθετικό εναλλάξ κάθε ~2 λεπτά",    en:"Calm/aggressive swings every ~2 min",      ic:"🎭", include:["Obambo","The Mimic"], group:"hunt"},
+ {id:"aswangEnd",     label:"Hunt τελείωσε απότομα σε κρυψώνα",         en:"Hunt ended abruptly at a hiding spot",     ic:"🔚", include:["Aswang","The Mimic"], group:"hunt"},
+ {id:"aswangReturn",  label:"Επόμενο hunt: ίδια παλιά κρυψώνα",         en:"Next hunt: same old hiding spot",          ic:"🔁", include:["Aswang","The Mimic"], group:"hunt"},
+ {id:"kormosWall",    label:"Σε σκότωσε μέσα από τοίχο/έπιπλο",         en:"Killed you through a wall/furniture",      ic:"🧱", include:["Kormos","The Mimic"], group:"hunt"},
+ {id:"kormosBlind",   label:"Αγνοεί θόρυβο, αντιδρά μόνο σε βήματα",    en:"Ignores noise, reacts only to footsteps",  ic:"🙉", include:["Kormos","The Mimic"], group:"hunt"},
+ {id:"onryoFlames",   label:"Κάθε 3η σβησμένη φλόγα = hunt",            en:"Every 3rd extinguished flame = hunt",      ic:"🕯️", include:["Onryo","The Mimic"], group:"hunt"},
+ {id:"onryoFirelight",label:"Φλόγα δίπλα του μπλόκαρε hunt",            en:"A flame nearby blocked a hunt",            ic:"🔥", include:["Onryo","The Mimic"], group:"hunt"},
 ];
 const bhState = {}; // id -> 0 off, 1 on
 BEHAVIORS.forEach(b=>bhState[b.id]=0);
@@ -1078,14 +1111,16 @@ function buildEvBoard(){
 
 const bhGrid = document.getElementById("bhGrid");
 const otGrid = document.getElementById("otGrid");
+const huntBhGrid = document.getElementById("huntBhGrid");
 function buildBhBoard(){
-  bhGrid.innerHTML=""; otGrid.innerHTML="";
+  bhGrid.innerHTML=""; otGrid.innerHTML=""; huntBhGrid.innerHTML="";
   BEHAVIORS.forEach(bh=>{
     const b=document.createElement("button");
     b.className="ev"; b.dataset.bh=bh.id;
     b.innerHTML=`<span class="mark"></span><span class="ic">${bh.ic}</span><span class="name">${lang==="en"?bh.en:bh.label}</span>`;
     b.onclick=()=>{ bhState[bh.id]=bhState[bh.id]?0:1; render(); };
-    (bh.group==="other" ? otGrid : bhGrid).appendChild(b);
+    const target = bh.group==="other" ? otGrid : bh.group==="hunt" ? huntBhGrid : bhGrid;
+    target.appendChild(b);
   });
 }
 
@@ -1124,6 +1159,19 @@ function buildThresh(){
     const badge = g.isAny ? '<span class="any-badge">ANY (ability)</span>' : (g.variableTh ? '<span class="var-badge">variable</span>' : "");
     tr.innerHTML=`<td class="gname">${g.name}${badge}</td><td class="num">${g.isAny?"70%+":g.thMax+"%"}</td><td>${huntOf(g)}</td>`;
     threshBody.appendChild(tr);
+  });
+}
+
+// ---- alphabetical hunt-behavior reference table ----
+const huntBehaviorBody = document.getElementById("huntBehaviorBody");
+const alphaGhosts = GHOSTS.map((g,i)=>({...g,i})).sort((a,b)=>a.name.localeCompare(b.name));
+function buildHuntBehaviorTable(){
+  huntBehaviorBody.innerHTML="";
+  alphaGhosts.forEach(g=>{
+    const tr=document.createElement("tr");
+    tr.dataset.i=g.i;
+    tr.innerHTML=`<td class="gname">${g.name}</td><td>${huntBehaviorOf(g)}</td>`;
+    huntBehaviorBody.appendChild(tr);
   });
 }
 
@@ -1273,6 +1321,14 @@ function render(){
     tr.classList.toggle("dim", !possible);
     tr.classList.toggle("hot", g.variableTh || g.thMax>=sanity);
   });
+  document.querySelectorAll("#huntBehaviorBody tr").forEach(tr=>{
+    const g=GHOSTS[tr.dataset.i];
+    const ev=effEv(g);
+    const possible = onKeys.every(k=>ev.includes(k)) && !offKeys.some(k=>ev.includes(k)) && passesBehaviors(g) && passesSanity(g) && passesSpeed(g) && passesManual(g);
+    tr.classList.toggle("dim", !possible);
+    tr.classList.toggle("hot", g.variableTh || g.thMax>=sanity);
+  });
+  document.getElementById("sanZeroWarn").classList.toggle("show", sanity<=10);
 
   // sanity status readout (based on ghosts still possible per evidence)
   const st = sanityStatusFor(huntableCnt);
@@ -1724,7 +1780,7 @@ function setLang(l){
   if("wakeLock" in navigator) wakeBtn.title = STR[l].wakeTitle;
   document.getElementById("bloodMoonLbl").title = STR[l].bloodMoonTitle;
   document.getElementById("ccOption").textContent = l==="el" ? "Προσαρμοσμένη" : "Custom";
-  buildEvBoard(); buildBhBoard(); buildCards(); buildThresh(); buildSpeedRows(); buildAbilities();
+  buildEvBoard(); buildBhBoard(); buildCards(); buildThresh(); buildHuntBehaviorTable(); buildSpeedRows(); buildAbilities();
   applyDiff();
   render();
 }

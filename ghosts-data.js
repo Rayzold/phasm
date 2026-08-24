@@ -96,9 +96,78 @@ const HUNT_EN = {
  "Kormos":"50% / 70% if you sprint near it",
 };
 
+// What each ghost actually DOES once a hunt starts — separate from its evidence/identification
+// tell, and separate from its sanity threshold. Most useful once sanity is low enough that
+// nearly everything can hunt: identification matters less in that moment than knowing how to
+// react to what's chasing you.
+const HUNT_BEHAVIOR = {
+ "Spirit":"Κανονική ταχύτητα, καμία ιδιαίτερη κίνηση — το πιο «βαρετό» hunt.",
+ "Wraith":"Αγνοεί εμπόδια σαν το αλάτι· κανονική ταχύτητα, τίποτα ιδιαίτερο στο κυνήγι.",
+ "Phantom":"Μένει αόρατο για διαστήματα μέσα στο hunt· το να το κοιτάς ρίχνει sanity.",
+ "Poltergeist":"Καμία ιδιαίτερη κίνηση σε hunt — το ability του (πολλαπλά αντικείμενα) είναι πριν το hunt, όχι κατά τη διάρκειά του.",
+ "Banshee":"Κυνηγά ΕΝΑΝ συγκεκριμένο στόχο και αγνοεί σχεδόν όλους τους άλλους — σε ομάδα, αν δεν είσαι ο στόχος, είσαι σχετικά ασφαλής.",
+ "Jinn":"Με τον breaker ON κινείται γρήγορα από μακριά και κανονικά από κοντά· breaker OFF = πάντα κανονικό.",
+ "Mare":"Κανονική ταχύτητα κίνησης· ο μόνος ιδιαίτερος παράγοντας είναι το threshold του, όχι πώς κινείται.",
+ "Revenant":"Σαλιγκάρι (~1.0 m/s) όταν δεν σε βλέπει, τέρας (~3.0 m/s) τη στιγμή που σε δει — έχει σημασία ΜΟΝΟ αν σπάσεις line-of-sight αμέσως.",
+ "Shade":"Απίθανο να κάνει hunt όσο είσαι στο ίδιο δωμάτιο· αν κάνει, κινείται κανονικά.",
+ "Demon":"Μπορεί να κάνει hunt σε ΟΠΟΙΟΔΗΠΟΤΕ sanity· ελάχιστο cooldown (20s) μεταξύ hunts — έρχονται πυκνά.",
+ "Yurei":"Κλείνει πόρτες με δύναμη μέσα στο hunt (ρίχνει sanity σε κοντινούς)· τείνει να μένει κοντά στο ghost room του.",
+ "Oni":"Πιο καθαρά ορατό σε hunt (λιγότερο flickering)· κανονική ταχύτητα αλλά «νιώθεται» πιο επιθετικό.",
+ "Yokai":"Η ανίχνευσή του καταρρέει σε hunt — σε εντοπίζει μόνο από ~2.5m, οπότε μπορεί να περάσει δίπλα σου αν μείνεις σιωπηλός.",
+ "Hantu":"Ταχύτητα αντιστρόφως ανάλογη της θερμοκρασίας δωματίου — πιο γρήγορο στο κρύο, πιο αργό στη ζέστη· παγωμένη ανάσα αν ο breaker είναι off.",
+ "Goryo":"Σπάνια απομακρύνεται πολύ από το ghost room του, ακόμα και σε hunt.",
+ "Myling":"Αθόρυβο hunt — βήματα/φωνή ακούγονται μόνο από πολύ κοντά, σε αντίθεση με τα άλλα ghosts.",
+ "Onryo":"Το hunt του συνδέεται με το σβήσιμο φλόγας (κάθε 3η = hunt), ανεξαρτήτως sanity· αναμμένη φλόγα δίπλα του λειτουργεί σαν crucifix.",
+ "The Twins":"Δύο ταυτόχρονες «παρουσίες» hunt με ελαφρώς διαφορετικές ταχύτητες — σαν να κυνηγούν δύο ghosts μαζί.",
+ "Raiju":"Επιταχύνει και παρεμβαίνει σε ενεργά ηλεκτρονικά κατά τη διάρκεια του hunt.",
+ "Obake":"Αλλάζει στιγμιαία μορφή (shapeshift) μέσα στο hunt — οπτικό μόνο, δεν αλλάζει ταχύτητα/behavior.",
+ "The Mimic":"Δανείζεται τη hunting συμπεριφορά ενός άλλου ghost για κάποιο διάστημα και μετά αλλάζει — απρόβλεπτο εξ ορισμού.",
+ "Moroi":"Επιταχύνει όσο πέφτει το sanity σου — τα hunts γίνονται πιο επικίνδυνα όσο προχωρά το contract.",
+ "Deogen":"ΠΑΝΤΑ σε βρίσκει, δεν ψάχνει ποτέ· εξαιρετικά αργό από κοντά, πολύ γρήγορο από μακριά — κάνε loop γύρω από έπιπλα.",
+ "Thaye":"«Γερνάει»: ξεκινά γρήγορο κι επιθετικό, γίνεται αργό κι ήσυχο όσο περνά η ώρα κοντά σου.",
+ "Dayan":"Ταχύτητα δεμένη με τη δική σου κίνηση — μείνε ακίνητος και επιβραδύνει, τρέξε και επιταχύνει.",
+ "Gallu":"Μετά από crucifix/incense/salt γίνεται πιο γρήγορο στο ΕΠΟΜΕΝΟ hunt, μετά «εξαντλείται» και ηρεμεί.",
+ "Obambo":"Εναλλάσσει διάθεση κάθε ~2 λεπτά — ήρεμο (αργό) vs επιθετικό (γρήγορο αλλά κοντύτερο hunt).",
+ "Aswang":"Φτάνει σε max ταχύτητα με line-of-sight μέσα σε ~9s· αν σε βρει σε επίσημη κρυψώνα το hunt τελειώνει ακαριαία — αλλά ξέρει πλέον πού να ξαναψάξει.",
+ "Kormos":"ΤΥΦΛΟ — εντοπίζει μόνο από ήχο βημάτων· ακινησία σε σώζει χωρίς locker, αλλά σκοτώνει από κοντά μέσα από τοίχους.",
+ "Deildegast":"Η ταχύτητα εκκίνησης καθορίζεται από πόσα αντικείμενα κουνήθηκαν πριν το hunt (3.0 έως 0.4 m/s) — ΔΕΝ αλλάζει με line-of-sight μέσα στο ίδιο hunt.",
+};
+const HUNT_BEHAVIOR_EN = {
+ "Spirit":"Normal speed, no special movement — the most 'boring' hunt there is.",
+ "Wraith":"Ignores obstacles like salt; normal speed, nothing unusual about its hunt.",
+ "Phantom":"Goes invisible for stretches mid-hunt; looking at it drains your sanity.",
+ "Poltergeist":"No special hunt movement — its multi-object throw ability happens before a hunt, not during one.",
+ "Banshee":"Chases ONE specific target and mostly ignores everyone else — in a team, if you're not the target, you're relatively safe.",
+ "Jinn":"With the breaker ON it's fast from a distance and normal up close; breaker OFF = always normal.",
+ "Mare":"Normal movement speed — its only quirk is the threshold, not how it moves.",
+ "Revenant":"Snail (~1.0 m/s) when it can't see you, monster (~3.0 m/s) the instant it does — only matters if you break line-of-sight immediately.",
+ "Shade":"Unlikely to hunt while you're in the same room; if it does, it moves normally.",
+ "Demon":"Can hunt at ANY sanity; shortest cooldown between hunts (20s) — they come back-to-back.",
+ "Yurei":"Slams doors with force mid-hunt (drains nearby sanity); tends to stay close to its ghost room.",
+ "Oni":"More clearly visible during hunts (less flickering); normal speed but 'feels' more aggressive.",
+ "Yokai":"Its detection collapses during a hunt — only senses you within ~2.5m, so it can walk right past you if you stay silent.",
+ "Hantu":"Speed is inversely tied to room temperature — faster in the cold, slower in the warmth; freezing breath if the breaker's off.",
+ "Goryo":"Rarely strays far from its ghost room, even mid-hunt.",
+ "Myling":"A quiet hunter — footsteps/voice are only audible from very close, unlike other ghosts.",
+ "Onryo":"Its hunt is tied to extinguishing a flame (every 3rd = hunt), regardless of sanity; a lit flame nearby works like a crucifix.",
+ "The Twins":"Two simultaneous hunting 'presences' at slightly different speeds — like being hunted by two ghosts at once.",
+ "Raiju":"Speeds up and interferes with active electronics during the hunt.",
+ "Obake":"Briefly shapeshifts mid-hunt — purely visual, doesn't change speed or behavior.",
+ "The Mimic":"Borrows another ghost's hunting behavior for a while, then switches — unpredictable by design.",
+ "Moroi":"Gets faster as your sanity drops — hunts get more dangerous as the contract goes on.",
+ "Deogen":"ALWAYS finds you, never searches; painfully slow up close, very fast at range — loop around furniture.",
+ "Thaye":"'Ages': starts fast and aggressive, gets slow and quiet the longer it's been active near you.",
+ "Dayan":"Speed is tied to your own movement — stand still and it slows, run and it speeds up.",
+ "Gallu":"Crucifix/incense/salt make it faster on the NEXT hunt, then it 'exhausts' and calms down.",
+ "Obambo":"Mood swings every ~2 minutes — calm (slow) vs aggressive (faster but shorter hunts).",
+ "Aswang":"Hits max line-of-sight speed in ~9s; corner you in an official hiding spot and the hunt ends instantly — but it'll remember to check there again.",
+ "Kormos":"BLIND — tracks by footstep sound only; standing still saves you without a locker, but it kills up close even through walls.",
+ "Deildegast":"Its hunt-start speed is set by how many items were moved beforehand (3.0 down to 0.4 m/s) — does NOT change with line-of-sight mid-hunt.",
+};
+
 function effEv(g){ return g.mimic ? [...g.ev,"ORB"] : g.ev; }
 
-// Κανόνες συμπεριφοράς (χωρίς UI labels — αυτά μένουν per-page): ίδια 13 ids με το
+// Κανόνες συμπεριφοράς (χωρίς UI labels — αυτά μένουν per-page): ίδια 25 ids με το
 // BEHAVIORS array του index.html και τα αντίστοιχα ids στο questionnaire.html.
 const BEHAVIOR_RULES = [
  {id:"salt",       exclude:["Wraith"]},
@@ -114,4 +183,19 @@ const BEHAVIOR_RULES = [
  {id:"sixFinger",  include:["Obake"]},
  {id:"twinTouch",  include:["The Twins","The Mimic"]},
  {id:"doorSlam",   include:["Yurei","The Mimic"]},
+ // ---- hunt-only tells: only observable DURING an actual hunt, not general investigation
+ // behavior. The Mimic is included in all of them — mimicking another ghost's hunt behavior
+ // for a while is its whole mechanic, so any of these could plausibly be a Mimic borrowing it.
+ {id:"deogenSpeed",    include:["Deogen","The Mimic"]},
+ {id:"revenantLos",    include:["Revenant","The Mimic"]},
+ {id:"thayeAge",       include:["Thaye","The Mimic"]},
+ {id:"raijuElec",      include:["Raiju","The Mimic"]},
+ {id:"galluEnrage",    include:["Gallu","The Mimic"]},
+ {id:"obamboMood",     include:["Obambo","The Mimic"]},
+ {id:"aswangEnd",      include:["Aswang","The Mimic"]},
+ {id:"aswangReturn",   include:["Aswang","The Mimic"]},
+ {id:"kormosWall",     include:["Kormos","The Mimic"]},
+ {id:"kormosBlind",    include:["Kormos","The Mimic"]},
+ {id:"onryoFlames",    include:["Onryo","The Mimic"]},
+ {id:"onryoFirelight", include:["Onryo","The Mimic"]},
 ];
