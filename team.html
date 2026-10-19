@@ -101,6 +101,7 @@
     <h1>SQUAD PLAN</h1>
     <div class="headerBtns">
       <button id="langBtn" title="Ελληνικά / English">ΕΛ</button>
+      <a class="backLink" href="loadouts.html">⚡ <span class="l-el">Loadout sheet</span><span class="l-en">Loadout sheet</span></a>
       <a class="backLink" href="questionnaire.html">📋 <span class="l-el">Ερωτηματολόγιο</span><span class="l-en">Quiz</span></a>
       <a class="backLink" href="index.html"><span class="l-el">← Αρχική</span><span class="l-en">← Dashboard</span></a>
     </div>
@@ -112,11 +113,11 @@
     <div class="panel-label"><span class="l-el">Κάλυψη evidence — Loadout 1</span><span class="l-en">Evidence coverage — Loadout 1</span></div>
     <div class="cov">
       <div class="cov-item"><div class="ev">EMF 5</div><div class="who" style="color:var(--runner)">Markos</div></div>
-      <div class="cov-item"><div class="ev">D.O.T.S.</div><div class="who" style="color:var(--detect)">Nikos</div></div>
+      <div class="cov-item"><div class="ev">D.O.T.S.</div><div class="who" style="color:var(--exor)">Nikos</div></div>
       <div class="cov-item"><div class="ev">Ultraviolet</div><div class="who" style="color:var(--runner)">Markos</div></div>
-      <div class="cov-item"><div class="ev">Freezing</div><div class="who"><span style="color:var(--nurse)">Paschalia</span> · <span style="color:var(--exor)">Kiki</span></div></div>
-      <div class="cov-item"><div class="ev">Ghost Orbs</div><div class="who" style="color:var(--detect)">Nikos</div></div>
-      <div class="cov-item"><div class="ev">Ghost Writing</div><div class="who" style="color:var(--exor)">Kiki</div></div>
+      <div class="cov-item"><div class="ev">Freezing</div><div class="who"><span style="color:var(--nurse)">Paschalia</span> · <span style="color:var(--detect)">Kiki</span></div></div>
+      <div class="cov-item"><div class="ev">Ghost Orbs</div><div class="who" style="color:var(--exor)">Nikos</div></div>
+      <div class="cov-item"><div class="ev">Ghost Writing</div><div class="who" style="color:var(--detect)">Kiki</div></div>
       <div class="cov-item"><div class="ev">Spirit Box</div><div class="who" style="color:var(--nurse)">Paschalia</div></div>
     </div>
     <p class="note" style="margin:10px 0 0"><span class="l-el">Δύο thermometers: μοιράζετε το σπίτι στα δύο (π.χ. πάνω / κάτω όροφος) και βρίσκετε το ghost room στον μισό χρόνο.</span><span class="l-en">Two thermometers: split the house in half (e.g. upstairs / downstairs) and find the ghost room in half the time.</span></p>
@@ -153,8 +154,8 @@
     </section>
 
     <!-- Kiki -->
-    <section class="role" style="--c:var(--exor)">
-      <div class="role-head"><span class="role-ic">✝️</span><div><h2 class="role-name">Kiki</h2><div class="role-title">Exorcist</div></div><a class="guide-link" href="exorcist.html"><span class="l-el">🖼️ Οδηγός με εικόνες →</span><span class="l-en">🖼️ Picture guide →</span></a></div>
+    <section class="role" style="--c:var(--detect)">
+      <div class="role-head"><span class="role-ic">🔎</span><div><h2 class="role-name">Kiki</h2><div class="role-title">Detective</div></div><a class="guide-link" href="detective.html"><span class="l-el">🖼️ Οδηγός με εικόνες →</span><span class="l-en">🖼️ Picture guide →</span></a></div>
       <p class="mission"><span class="l-el">Οχυρώνει το ghost room και μετά γίνεται τα μάτια της ομάδας από το truck.</span><span class="l-en">Fortifies the ghost room, then becomes the squad's eyes from the truck.</span></p>
       <h3>Loadout 1</h3>
       <ul class="items">
@@ -205,8 +206,8 @@
     </section>
 
     <!-- Nikos -->
-    <section class="role" style="--c:var(--detect)">
-      <div class="role-head"><span class="role-ic">🔎</span><div><h2 class="role-name">Nikos</h2><div class="role-title">Detective</div></div><a class="guide-link" href="detective.html"><span class="l-el">🖼️ Οδηγός με εικόνες →</span><span class="l-en">🖼️ Picture guide →</span></a></div>
+    <section class="role" style="--c:var(--exor)">
+      <div class="role-head"><span class="role-ic">✝️</span><div><h2 class="role-name">Nikos</h2><div class="role-title">Exorcist</div></div><a class="guide-link" href="exorcist.html"><span class="l-el">🖼️ Οδηγός με εικόνες →</span><span class="l-en">🖼️ Picture guide →</span></a></div>
       <p class="mission"><span class="l-el">Στήνει παρακολούθηση στο ghost room και μετά τρέχει μέσα στο σπίτι τα tests με αλάτι, κεριά και θυμίαμα.</span><span class="l-en">Sets up surveillance in the ghost room, then runs the salt, candle and incense tests inside the house.</span></p>
       <h3>Loadout 1</h3>
       <ul class="items">
@@ -238,17 +239,17 @@
       <div class="phase">
         <div class="ph">1 · <span class="l-el">Είσοδος</span><span class="l-en">Entry</span><small><span class="l-el">πρώτα 2–3 λεπτά</span><span class="l-en">first 2–3 min</span></small></div>
         <ul>
-          <li style="--c:var(--nurse)"><b>Paschalia</b> + <b style="--c:var(--exor)">Kiki</b>: <span class="l-el">thermometers σε διαφορετικούς ορόφους.</span><span class="l-en">thermometers on different floors.</span></li>
+          <li style="--c:var(--nurse)"><b>Paschalia</b> + <b style="--c:var(--detect)">Kiki</b>: <span class="l-el">thermometers σε διαφορετικούς ορόφους.</span><span class="l-en">thermometers on different floors.</span></li>
           <li style="--c:var(--runner)"><b>Markos</b>: <span class="l-el">breaker, UV στις πόρτες στη διαδρομή, EMF σε ό,τι κουνηθεί.</span><span class="l-en">breaker, UV on doors along the way, EMF on anything that moves.</span></li>
-          <li style="--c:var(--detect)"><b>Nikos</b>: <span class="l-el">περιμένει το ghost room και φέρνει Video Camera, DOTS και Motion Sensor.</span><span class="l-en">waits for the ghost room call, then brings Video Camera, DOTS and Motion Sensor.</span></li>
+          <li style="--c:var(--exor)"><b>Nikos</b>: <span class="l-el">περιμένει το ghost room και φέρνει Video Camera, DOTS και Motion Sensor.</span><span class="l-en">waits for the ghost room call, then brings Video Camera, DOTS and Motion Sensor.</span></li>
         </ul>
       </div>
       <div class="phase">
         <div class="ph">2 · Ghost room<small><span class="l-el">στήσιμο</span><span class="l-en">setup</span></small></div>
         <ul>
-          <li style="--c:var(--exor)"><b>Kiki</b>: <span class="l-el">book και crucifix στο room.</span><span class="l-en">book and crucifix in the room.</span></li>
+          <li style="--c:var(--detect)"><b>Kiki</b>: <span class="l-el">book και crucifix στο room.</span><span class="l-en">book and crucifix in the room.</span></li>
           <li style="--c:var(--nurse)"><b>Paschalia</b>: <span class="l-el">Spirit Box με σβηστά φώτα, recorder σε κάθε ήχο.</span><span class="l-en">Spirit Box with the lights off, recorder on every sound.</span></li>
-          <li style="--c:var(--detect)"><b>Nikos</b>: <span class="l-el">στήνει κάμερα, D.O.T.S. και sensor.</span><span class="l-en">sets up camera, D.O.T.S. and sensor.</span></li>
+          <li style="--c:var(--exor)"><b>Nikos</b>: <span class="l-el">στήνει κάμερα, D.O.T.S. και sensor.</span><span class="l-en">sets up camera, D.O.T.S. and sensor.</span></li>
         </ul>
       </div>
       <div class="phase">
@@ -257,15 +258,15 @@
           <li><span class="l-el">Πότε: όταν το room είναι στημένο και έχουν βγει ή αποκλειστεί 1–2 evidence, ή όταν η sanity πέσει ~60%.</span><span class="l-en">When: once the room is set up and 1–2 evidence are found or ruled out, or when sanity drops to ~60%.</span></li>
           <li><span class="l-el">Περάστε τα ✓ / ✗ στο Evidence Board πριν ξαναμπείτε, και κοιτάξτε το «Επόμενο item» για τα swaps.</span><span class="l-en">Log the ✓ / ✗ on the Evidence Board before going back in, and check "Next item" for the swaps.</span></li>
           <li><span class="l-el">Ό,τι evidence έχει κλείσει δεν ξαναμπαίνει. Τη θέση του την παίρνει ο εξοπλισμός του Loadout 2.</span><span class="l-en">Evidence gear that's already resolved stays behind. Loadout 2 gear takes its slot.</span></li>
-          <li style="--c:var(--exor)"><b>Kiki</b>: <span class="l-el">στήνει sensors και tripod και γυρίζει να μείνει στο truck.</span><span class="l-en">sets the sensors and tripod, then comes back to stay in the truck.</span></li>
+          <li style="--c:var(--detect)"><b>Kiki</b>: <span class="l-el">στήνει sensors και tripod και γυρίζει να μείνει στο truck.</span><span class="l-en">sets the sensors and tripod, then comes back to stay in the truck.</span></li>
         </ul>
       </div>
       <div class="phase">
         <div class="ph">4 · Hunt<small><span class="l-el">πρωτόκολλο</span><span class="l-en">protocol</span></small></div>
         <ul>
-          <li style="--c:var(--exor)"><b>Kiki</b> (truck): <span class="l-el">φωνάζει «HUNT», μετράει τη διάρκεια, βλέπει από το Head Gear (blink, shapeshift, ταχύτητα).</span><span class="l-en">calls “HUNT”, times it, watches through the Head Gear (blink, shapeshift, speed).</span></li>
+          <li style="--c:var(--detect)"><b>Kiki</b> (truck): <span class="l-el">φωνάζει «HUNT», μετράει τη διάρκεια, βλέπει από το Head Gear (blink, shapeshift, ταχύτητα).</span><span class="l-en">calls “HUNT”, times it, watches through the Head Gear (blink, shapeshift, speed).</span></li>
           <li style="--c:var(--runner)"><b>Markos</b>: <span class="l-el">κάνει loop. Στο τέλος λέει αν υπήρξε LOS speed-up.</span><span class="l-en">loops it. At the end, reports whether there was a LOS speed-up.</span></li>
-          <li style="--c:var(--detect)"><b>Nikos</b>: <span class="l-el">smudge αν τον βρει και μετράει τα δευτερόλεπτα του blind.</span><span class="l-en">smudges if it finds him and counts the blind seconds.</span></li>
+          <li style="--c:var(--exor)"><b>Nikos</b>: <span class="l-el">smudge αν τον βρει και μετράει τα δευτερόλεπτα του blind.</span><span class="l-en">smudges if it finds him and counts the blind seconds.</span></li>
           <li style="--c:var(--nurse)"><b>Paschalia</b>: <span class="l-el">κρύβεται. Μετά το hunt, pills σε όποιον είναι κάτω από 40%.</span><span class="l-en">hides. After the hunt, pills for anyone below 40%.</span></li>
         </ul>
       </div>
@@ -273,7 +274,7 @@
         <div class="ph">5 · <span class="l-el">Κλείσιμο</span><span class="l-en">Wrap-up</span><small><span class="l-el">πριν φύγετε</span><span class="l-en">before leaving</span></small></div>
         <ul>
           <li style="--c:var(--runner)"><b>Markos</b>: <span class="l-el">ghost photo, bone, cursed item.</span><span class="l-en">ghost photo, bone, cursed item.</span></li>
-          <li style="--c:var(--exor)"><b>Kiki</b>: <span class="l-el">επιβεβαιώνει το ghost στο journal. Αν μένουν 2, λέει ποιο rule-out test τα ξεχωρίζει.</span><span class="l-en">confirms the ghost in the journal. If 2 remain, she calls the rule-out test that splits them.</span></li>
+          <li style="--c:var(--detect)"><b>Kiki</b>: <span class="l-el">επιβεβαιώνει το ghost στο journal. Αν μένουν 2, λέει ποιο rule-out test τα ξεχωρίζει.</span><span class="l-en">confirms the ghost in the journal. If 2 remain, she calls the rule-out test that splits them.</span></li>
         </ul>
       </div>
     </div>
@@ -287,9 +288,9 @@
         <thead><tr><th><span class="l-el">Παίκτης</span><span class="l-en">Player</span></th><th><span class="l-el">Ρόλος</span><span class="l-en">Role</span></th><th>Loadout 1</th><th>Loadout 2</th></tr></thead>
         <tbody>
           <tr><td class="n" style="color:var(--nurse)">Paschalia</td><td>Oracle</td><td>Thermometer · Spirit Box · Sound Recorder</td><td>Sanity Pills ×2 · Parabolic Microphone · Incense</td></tr>
-          <tr><td class="n" style="color:var(--exor)">Kiki</td><td>Exorcist</td><td>Thermometer · Ghost Writing Book · Crucifix</td><td>Motion Sensor ×2 · Tripod → truck</td></tr>
+          <tr><td class="n" style="color:var(--detect)">Kiki</td><td>Detective</td><td>Thermometer · Ghost Writing Book · Crucifix</td><td>Motion Sensor ×2 · Tripod → truck</td></tr>
           <tr><td class="n" style="color:var(--runner)">Markos</td><td>Scout</td><td>UV Light · EMF Reader · Photo Camera</td><td>Photo Camera · Head Gear · Sanity Pills</td></tr>
-          <tr><td class="n" style="color:var(--detect)">Nikos</td><td>Detective</td><td>Video Camera · D.O.T.S. · Motion Sensor</td><td>Salt · Firelight · Incense</td></tr>
+          <tr><td class="n" style="color:var(--exor)">Nikos</td><td>Exorcist</td><td>Video Camera · D.O.T.S. · Motion Sensor</td><td>Salt · Firelight · Incense</td></tr>
         </tbody>
       </table>
     </div>

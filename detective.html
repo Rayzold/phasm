@@ -11,10 +11,10 @@
 <style>
 *{box-sizing:border-box} html,body{margin:0;padding:0}
 
-/* Layout (Detective): one big picture per step, a 3–8 word caption under it. Single dark look (night-vision journal), matches Phasmo Journal. */
+/* Layout: one big picture per step, a 3–8 word caption under it. Single dark look (night-vision journal), matches Phasmo Journal. */
 :root{
   --bg:#0A0D12; --card:#0f141c; --line:#232b38; --fg:#E4E8EE; --muted:#8A93A3;
-  --acc:#9DB8E0; --exor:#9DB8E0; --runner:#E07A7A; --nv:#8FE388; --cold:#8FC7FF; --danger:#E15B5B; --paper:#EDE4CE;
+  --exor:#9DB8E0; --acc:#9DB8E0; --runner:#E07A7A; --nv:#8FE388; --cold:#8FC7FF; --danger:#E15B5B; --paper:#EDE4CE;
   --f-display:"Special Elite","Courier New",monospace;
   --f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   color-scheme:dark;
@@ -26,25 +26,25 @@ html:not([lang=en]) .l-en{display:none!important}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .btns{display:flex;gap:8px;flex-wrap:wrap}
 .btn{font-family:var(--f-display);font-size:13px;letter-spacing:1px;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:6px 13px;background:none;cursor:pointer}
-.btn:hover,.btn:focus-visible{border-color:var(--acc);color:var(--acc);outline:none}
+.btn:hover,.btn:focus-visible{border-color:var(--exor);color:var(--exor);outline:none}
 .hero{display:grid;justify-items:center;text-align:center;gap:6px}
 .hero svg{width:min(150px,40vw);height:auto}
-h1{font-family:var(--f-display);font-size:clamp(30px,7vw,48px);color:var(--acc);margin:0;letter-spacing:2px;text-wrap:balance}
+h1{font-family:var(--f-display);font-size:clamp(30px,7vw,48px);color:var(--exor);margin:0;letter-spacing:2px;text-wrap:balance}
 .who{font-size:18px;color:var(--muted)}
 .job{font-size:clamp(18px,4vw,22px);margin:4px 0 0;text-wrap:balance}
 .steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:16px}
 .step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 14px 16px;display:grid;gap:10px;align-content:start;min-width:0}
 .step svg{width:100%;height:auto;max-width:100%;display:block}
-.num{font-family:var(--f-display);color:var(--acc);font-size:14px;letter-spacing:2px}
+.num{font-family:var(--f-display);color:var(--exor);font-size:14px;letter-spacing:2px}
 .cap{font-size:19px;line-height:1.3;font-weight:600;text-wrap:balance}
 .cap small{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:4px}
 .phase{font-family:var(--f-display);font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px}
-.phase b{color:var(--acc);font-weight:400}
+.phase b{color:var(--exor);font-weight:400}
 .loadouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px}
 .lo{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;min-width:0}
-.lo.two{border-color:var(--acc)}
+.lo.two{border-color:var(--c2,var(--exor))}
 .lo-h{font-family:var(--f-display);font-size:14px;letter-spacing:2px;color:var(--muted)}
-.lo.two .lo-h{color:var(--acc)}
+.lo.two .lo-h{color:var(--c2,var(--exor))}
 .lo-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .it{display:grid;justify-items:center;text-align:center;gap:4px;background:#0b1018;border-radius:10px;padding:10px 6px}
 .it svg{width:min(72px,100%);height:auto}
@@ -52,15 +52,16 @@ h1{font-family:var(--f-display);font-size:clamp(30px,7vw,48px);color:var(--acc);
 .it span{font-size:12px;color:var(--muted);line-height:1.25}
 .stay{font-size:13px;color:var(--muted)}
 .stay b{color:var(--fg);font-weight:600}
+.mini span{display:block}
 .rule{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--danger);border-radius:10px;padding:14px 16px;font-size:18px;font-weight:600}
 .rule .big{font-size:34px;line-height:1}
 .mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr));gap:10px}
 .mini div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center;font-size:15px}
-.mini b{display:block;font-family:var(--f-display);font-size:26px;color:var(--acc);font-weight:400}
+.mini b{display:block;font-family:var(--f-display);font-size:26px;color:var(--exor);font-weight:400}
 .mini span{color:var(--muted);font-size:13px}
 @media (prefers-reduced-motion:no-preference){ .flame{animation:fl 1.6s ease-in-out infinite alternate;transform-origin:50% 100%} }
 @keyframes fl{from{transform:scaleY(1)}to{transform:scaleY(1.12)}}
-.mini span{display:block}</style>
+</style>
 </head>
 <body>
 
@@ -78,137 +79,128 @@ h1{font-family:var(--f-display);font-size:clamp(30px,7vw,48px);color:var(--acc);
       <circle cx="46" cy="46" r="5" fill="var(--acc)" opacity=".5"/>
     </svg>
     <h1>DETECTIVE</h1>
-    <div class="who">Nikos</div>
-    <p class="job"><span class="l-el">Στήνεις κάμερες στο δωμάτιο και μετά κάνεις τα tests με αλάτι, κεριά και θυμίαμα.</span><span class="l-en">You set up cameras in the room, then run the salt, candle and incense tests.</span></p>
+    <div class="who">Kiki</div>
+    <p class="job"><span class="l-el">Φυλάς το δωμάτιο του φαντάσματος και μετά γίνεσαι τα μάτια της ομάδας από το truck.</span><span class="l-en">You guard the ghost's room, then become the squad's eyes from the truck.</span></p>
   </div>
 
   <div class="loadouts">
     <div class="lo">
       <div class="lo-h">LOADOUT 1 · <span class="l-el">ΠΡΩΤΗ ΕΙΣΟΔΟΣ</span><span class="l-en">FIRST TRIP IN</span></div>
       <div class="lo-items">
-        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="8" y="26" width="46" height="30" rx="5" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><path d="M54 34 L72 26 L72 56 L54 48 Z" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><circle cx="20" cy="36" r="3" fill="var(--danger)"/></svg><b>Video Camera</b><span><span class="l-el">βλέπεις orbs</span><span class="l-en">spot orbs</span></span></div>
-        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="22" y="56" width="36" height="16" rx="4" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><path d="M40 56 L8 8 L72 8 Z" fill="rgba(143,227,136,.10)"/><g transform="translate(10 10) scale(.9)"><circle cx="0" cy="0" r="1.8" fill="var(--nv)"/><circle cx="0" cy="8" r="1.8" fill="var(--nv)"/><circle cx="0" cy="16" r="1.8" fill="var(--nv)"/><circle cx="0" cy="24" r="1.8" fill="var(--nv)"/><circle cx="0" cy="32" r="1.8" fill="var(--nv)"/><circle cx="0" cy="40" r="1.8" fill="var(--nv)"/><circle cx="8" cy="0" r="1.8" fill="var(--nv)"/><circle cx="8" cy="8" r="1.8" fill="var(--nv)"/><circle cx="8" cy="16" r="1.8" fill="var(--nv)"/><circle cx="8" cy="24" r="1.8" fill="var(--nv)"/><circle cx="8" cy="32" r="1.8" fill="var(--nv)"/><circle cx="8" cy="40" r="1.8" fill="var(--nv)"/><circle cx="16" cy="0" r="1.8" fill="var(--nv)"/><circle cx="16" cy="8" r="1.8" fill="var(--nv)"/><circle cx="16" cy="16" r="1.8" fill="var(--nv)"/><circle cx="16" cy="24" r="1.8" fill="var(--nv)"/><circle cx="16" cy="32" r="1.8" fill="var(--nv)"/><circle cx="16" cy="40" r="1.8" fill="var(--nv)"/><circle cx="24" cy="0" r="1.8" fill="var(--nv)"/><circle cx="24" cy="8" r="1.8" fill="var(--nv)"/><circle cx="24" cy="16" r="1.8" fill="var(--nv)"/><circle cx="24" cy="24" r="1.8" fill="var(--nv)"/><circle cx="24" cy="32" r="1.8" fill="var(--nv)"/><circle cx="24" cy="40" r="1.8" fill="var(--nv)"/><circle cx="32" cy="0" r="1.8" fill="var(--nv)"/><circle cx="32" cy="8" r="1.8" fill="var(--nv)"/><circle cx="32" cy="16" r="1.8" fill="var(--nv)"/><circle cx="32" cy="24" r="1.8" fill="var(--nv)"/><circle cx="32" cy="32" r="1.8" fill="var(--nv)"/><circle cx="32" cy="40" r="1.8" fill="var(--nv)"/><circle cx="40" cy="0" r="1.8" fill="var(--nv)"/><circle cx="40" cy="8" r="1.8" fill="var(--nv)"/><circle cx="40" cy="16" r="1.8" fill="var(--nv)"/><circle cx="40" cy="24" r="1.8" fill="var(--nv)"/><circle cx="40" cy="32" r="1.8" fill="var(--nv)"/><circle cx="40" cy="40" r="1.8" fill="var(--nv)"/><circle cx="48" cy="0" r="1.8" fill="var(--nv)"/><circle cx="48" cy="8" r="1.8" fill="var(--nv)"/><circle cx="48" cy="16" r="1.8" fill="var(--nv)"/><circle cx="48" cy="24" r="1.8" fill="var(--nv)"/><circle cx="48" cy="32" r="1.8" fill="var(--nv)"/><circle cx="48" cy="40" r="1.8" fill="var(--nv)"/><circle cx="56" cy="0" r="1.8" fill="var(--nv)"/><circle cx="56" cy="8" r="1.8" fill="var(--nv)"/><circle cx="56" cy="16" r="1.8" fill="var(--nv)"/><circle cx="56" cy="24" r="1.8" fill="var(--nv)"/><circle cx="56" cy="32" r="1.8" fill="var(--nv)"/><circle cx="56" cy="40" r="1.8" fill="var(--nv)"/></g></svg><b>D.O.T.S.</b><span><span class="l-el">φιγούρα στις κουκκίδες</span><span class="l-en">shape in the dots</span></span></div>
-        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="24" y="14" width="32" height="44" rx="6" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><circle cx="40" cy="30" r="7" fill="#0b1018" stroke="var(--acc)" stroke-width="3"/><circle cx="40" cy="48" r="3" fill="var(--nv)"/><path d="M14 64 h52" stroke="var(--acc)" stroke-width="3" stroke-dasharray="4 4"/></svg><b>Motion Sensor</b><span><span class="l-el">πόρτα του room</span><span class="l-en">room doorway</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="32" y="8" width="16" height="50" rx="8" fill="#1b2330" stroke="#c9d3e0" stroke-width="3"/><rect x="37" y="28" width="6" height="30" rx="3" fill="var(--cold)"/><circle cx="40" cy="62" r="11" fill="var(--cold)" stroke="#c9d3e0" stroke-width="3"/></svg><b>Thermometer</b><span><span class="l-el">βρες το κρύο</span><span class="l-en">find the cold</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><path d="M8 24 L40 18 L40 64 L8 70 Z" fill="var(--paper)"/><path d="M72 24 L40 18 L40 64 L72 70 Z" fill="#E4D9BE"/><line x1="40" y1="18" x2="40" y2="64" stroke="#7a6d55" stroke-width="2"/><path d="M48 38 q6 -6 11 1 t9 -1" fill="none" stroke="#5a2a2a" stroke-width="3" stroke-linecap="round"/></svg><b>Ghost Writing Book</b><span><span class="l-el">γράφει;</span><span class="l-en">does it write?</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="34" y="8" width="12" height="64" rx="2" fill="var(--exor)"/><rect x="18" y="24" width="44" height="11" rx="2" fill="var(--exor)"/></svg><b>Crucifix</b><span><span class="l-el">σταματά hunts</span><span class="l-en">stops hunts</span></span></div>
       </div>
     </div>
     <div class="lo two">
       <div class="lo-h">LOADOUT 2 · <span class="l-el">ΜΕΤΑ ΤΟ TRUCK</span><span class="l-en">AFTER THE TRUCK</span></div>
       <div class="lo-items">
-        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="26" y="20" width="28" height="40" rx="6" fill="#d7dde6"/><rect x="26" y="12" width="28" height="12" rx="4" fill="#8A93A3"/><g fill="#0b1018"><circle cx="34" cy="17" r="1.6"/><circle cx="40" cy="17" r="1.6"/><circle cx="46" cy="17" r="1.6"/></g><ellipse cx="40" cy="70" rx="24" ry="6" fill="#e9edf2"/></svg><b>Salt</b><span><span class="l-el">δύο σωροί</span><span class="l-en">two piles</span></span></div>
-        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="30" r="24" fill="rgba(240,198,116,.12)"/><rect x="31" y="34" width="18" height="38" rx="3" fill="var(--paper)"/><path class="flame" d="M40 12 C50 24 48 32 40 33 C32 32 30 24 40 12 Z" fill="#F0C674"/></svg><b>Firelight</b><span><span class="l-el">κεριά στις γωνίες</span><span class="l-en">corner candles</span></span></div>
-        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="14" y="62" width="52" height="8" rx="3" fill="#7a5a3a"/><line x1="30" y1="62" x2="44" y2="34" stroke="#9c6b42" stroke-width="4" stroke-linecap="round"/><path d="M44 32 C36 22 54 18 46 8" fill="none" stroke="#b9c2ce" stroke-width="4" stroke-linecap="round" opacity=".75"/></svg><b>Incense</b><span><span class="l-el">τυφλώνει το ghost</span><span class="l-en">blinds the ghost</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="24" y="14" width="32" height="44" rx="6" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><circle cx="40" cy="30" r="7" fill="#0b1018" stroke="var(--acc)" stroke-width="3"/><circle cx="40" cy="48" r="3" fill="var(--nv)"/><path d="M14 64 h52" stroke="var(--acc)" stroke-width="3" stroke-dasharray="4 4"/></svg><b>Motion Sensor</b><span><span class="l-el">έξοδος 2</span><span class="l-en">exit 2</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="24" y="14" width="32" height="44" rx="6" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><circle cx="40" cy="30" r="7" fill="#0b1018" stroke="var(--acc)" stroke-width="3"/><circle cx="40" cy="48" r="3" fill="var(--nv)"/><path d="M14 64 h52" stroke="var(--acc)" stroke-width="3" stroke-dasharray="4 4"/></svg><b>Motion Sensor</b><span><span class="l-el">έξοδος 3</span><span class="l-en">exit 3</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="22" y="10" width="36" height="20" rx="4" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><line x1="40" y1="30" x2="40" y2="44" stroke="#c9d3e0" stroke-width="4"/><path d="M40 44 L18 74 M40 44 L62 74 M40 44 L40 74" stroke="#c9d3e0" stroke-width="4" stroke-linecap="round"/></svg><b>Tripod</b><span><span class="l-el">καλύτερη γωνία</span><span class="l-en">better angle</span></span></div>
       </div>
-      <div class="stay"><span class="l-el">Μένουν στημένα στο room: <b>Video Camera</b> · <b>D.O.T.S.</b> · <b>Motion Sensor</b>.</span><span class="l-en">Stay set up in the room: <b>Video Camera</b> · <b>D.O.T.S.</b> · <b>Motion Sensor</b>.</span></div>
+      <div class="stay"><span class="l-el">Μένουν στημένα στο room: <b>Book</b> · <b>Crucifix</b>. Στήσε sensors και tripod και γύρνα στο truck. Δεν φάνηκαν Orbs; Πάρε <b>2η Video Camera</b> αντί για το 2ο sensor.</span><span class="l-en">Stay set up in the room: <b>Book</b> · <b>Crucifix</b>. Set the sensors and tripod, then head back to the truck. No Orbs yet? Take a <b>2nd Video Camera</b> instead of the 2nd sensor.</span></div>
     </div>
   </div>
 
-  <div class="phase"><b>1</b> · <span class="l-el">Πρώτη είσοδος</span><span class="l-en">First trip in</span> — Video Camera · D.O.T.S. · Motion Sensor</div>
+  <div class="phase"><b>1</b> · <span class="l-el">Πρώτη είσοδος</span><span class="l-en">First trip in</span> — Thermometer · Ghost Writing Book · Crucifix</div>
   <div class="steps">
     <div class="step">
-      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><path d="M14 120 h120 v-60 h-40 l-14 -20 h-66 z" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><circle cx="40" cy="122" r="12" fill="#1b2330" stroke="#c9d3e0" stroke-width="3"/><circle cx="110" cy="122" r="12" fill="#1b2330" stroke="#c9d3e0" stroke-width="3"/><path d="M150 52 h66 a8 8 0 0 1 8 8 v24 a8 8 0 0 1 -8 8 h-44 l-12 12 v-12 h-10 a8 8 0 0 1 -8 -8 v-24 a8 8 0 0 1 8 -8 z" fill="#1b2330" stroke="var(--acc)" stroke-width="2"/><text x="186" y="78" text-anchor="middle" fill="var(--acc)" font-family="Special Elite, monospace" font-size="14">ROOM?</text></svg>
+      <svg viewBox="0 0 240 150" aria-hidden="true">
+        <rect width="240" height="150" rx="10" fill="#0b1018"/>
+        <rect x="96" y="14" width="26" height="96" rx="13" fill="#1b2330" stroke="#c9d3e0" stroke-width="3"/>
+        <rect x="104" y="50" width="10" height="56" rx="5" fill="var(--cold)"/>
+        <circle cx="109" cy="118" r="20" fill="var(--cold)" stroke="#c9d3e0" stroke-width="3"/>
+        <g stroke="var(--cold)" stroke-width="5" stroke-linecap="round">
+          <line x1="185" y1="45" x2="185" y2="105"/><line x1="159" y1="60" x2="211" y2="90"/><line x1="159" y1="90" x2="211" y2="60"/>
+        </g>
+        <text x="40" y="80" fill="var(--cold)" font-family="Special Elite, monospace" font-size="30">0°</text>
+      </svg>
       <div class="num">01</div>
-      <div class="cap"><span class="l-el">Περίμενε να βρεθεί το δωμάτιο</span><span class="l-en">Wait for the room call</span><small><span class="l-el">Μετά πήγαινε με όλα τα items μαζί.</span><span class="l-en">Then go in with all your gear at once.</span></small></div>
+      <div class="cap"><span class="l-el">Βρες το πιο κρύο δωμάτιο</span><span class="l-en">Find the coldest room</span><small><span class="l-el">Η Paschalia ψάχνει τον άλλο όροφο.</span><span class="l-en">Paschalia checks the other floor.</span></small></div>
     </div>
     <div class="step">
-      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(16 50)"><rect x="0" y="6" width="46" height="30" rx="5" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><path d="M46 14 L62 8 L62 34 L46 28 Z" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><circle cx="10" cy="14" r="3" fill="var(--danger)"/></g><g transform="translate(124 20)"><rect width="96" height="68" rx="5" fill="#141b26" stroke="var(--acc)" stroke-width="3"/><rect x="40" y="68" width="16" height="10" fill="#3a4556"/><rect x="26" y="78" width="44" height="6" rx="2" fill="#3a4556"/><circle cx='30' cy='26' r='4' fill='#e9edf2'/><circle cx='62' cy='40' r='3' fill='#e9edf2'/><circle cx='48' cy='18' r='2.5' fill='#e9edf2'/><text x='8' y='62' fill='var(--nv)' font-family="Special Elite, monospace" font-size='10'>REC</text></g><path d="M84 72 h30" stroke="var(--acc)" stroke-width="3" stroke-dasharray="4 4"/></svg>
+      <svg viewBox="0 0 240 150" aria-hidden="true">
+        <rect width="240" height="150" rx="10" fill="#0b1018"/>
+        <path d="M40 50 L120 40 L120 118 L40 128 Z" fill="var(--paper)"/>
+        <path d="M200 50 L120 40 L120 118 L200 128 Z" fill="#E4D9BE"/>
+        <line x1="120" y1="40" x2="120" y2="118" stroke="#7a6d55" stroke-width="3"/>
+        <path d="M140 70 q12 -10 22 2 t24 -2 M138 92 q14 8 26 -4 t22 4" fill="none" stroke="#5a2a2a" stroke-width="4" stroke-linecap="round"/>
+        <g transform="translate(70 18)"><path d="M0 26 L18 0 L24 6 L6 32 Z" fill="var(--exor)"/><path d="M0 26 L-4 38 L6 32 Z" fill="#c9d3e0"/></g>
+      </svg>
       <div class="num">02</div>
-      <div class="cap"><span class="l-el">Βάλε την κάμερα να κοιτά το δωμάτιο</span><span class="l-en">Point the camera at the room</span><small><span class="l-el">Φωτεινές τελείες στην οθόνη → Ghost Orbs ✓</span><span class="l-en">Bright specks on the monitor → Ghost Orbs ✓</span></small></div>
+      <div class="cap"><span class="l-el">Άσε το βιβλίο εκεί που «κάθεται»</span><span class="l-en">Leave the book where it hangs out</span><small><span class="l-el">Γράφει; → Ghost Writing ✓</span><span class="l-en">It writes? → Ghost Writing ✓</span></small></div>
     </div>
     <div class="step">
-      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><path d="M70 128 L20 20 L220 20 L170 128 Z" fill="rgba(143,227,136,.06)"/><g transform="translate(36 26) scale(2.6)"><circle cx="0" cy="0" r="1.8" fill="var(--nv)"/><circle cx="0" cy="8" r="1.8" fill="var(--nv)"/><circle cx="0" cy="16" r="1.8" fill="var(--nv)"/><circle cx="0" cy="24" r="1.8" fill="var(--nv)"/><circle cx="0" cy="32" r="1.8" fill="var(--nv)"/><circle cx="0" cy="40" r="1.8" fill="var(--nv)"/><circle cx="8" cy="0" r="1.8" fill="var(--nv)"/><circle cx="8" cy="8" r="1.8" fill="var(--nv)"/><circle cx="8" cy="16" r="1.8" fill="var(--nv)"/><circle cx="8" cy="24" r="1.8" fill="var(--nv)"/><circle cx="8" cy="32" r="1.8" fill="var(--nv)"/><circle cx="8" cy="40" r="1.8" fill="var(--nv)"/><circle cx="16" cy="0" r="1.8" fill="var(--nv)"/><circle cx="16" cy="8" r="1.8" fill="var(--nv)"/><circle cx="16" cy="16" r="1.8" fill="var(--nv)"/><circle cx="16" cy="24" r="1.8" fill="var(--nv)"/><circle cx="16" cy="32" r="1.8" fill="var(--nv)"/><circle cx="16" cy="40" r="1.8" fill="var(--nv)"/><circle cx="24" cy="0" r="1.8" fill="var(--nv)"/><circle cx="24" cy="8" r="1.8" fill="var(--nv)"/><circle cx="24" cy="16" r="1.8" fill="var(--nv)"/><circle cx="24" cy="24" r="1.8" fill="var(--nv)"/><circle cx="24" cy="32" r="1.8" fill="var(--nv)"/><circle cx="24" cy="40" r="1.8" fill="var(--nv)"/><circle cx="32" cy="0" r="1.8" fill="var(--nv)"/><circle cx="32" cy="8" r="1.8" fill="var(--nv)"/><circle cx="32" cy="16" r="1.8" fill="var(--nv)"/><circle cx="32" cy="24" r="1.8" fill="var(--nv)"/><circle cx="32" cy="32" r="1.8" fill="var(--nv)"/><circle cx="32" cy="40" r="1.8" fill="var(--nv)"/><circle cx="40" cy="0" r="1.8" fill="var(--nv)"/><circle cx="40" cy="8" r="1.8" fill="var(--nv)"/><circle cx="40" cy="16" r="1.8" fill="var(--nv)"/><circle cx="40" cy="24" r="1.8" fill="var(--nv)"/><circle cx="40" cy="32" r="1.8" fill="var(--nv)"/><circle cx="40" cy="40" r="1.8" fill="var(--nv)"/><circle cx="48" cy="0" r="1.8" fill="var(--nv)"/><circle cx="48" cy="8" r="1.8" fill="var(--nv)"/><circle cx="48" cy="16" r="1.8" fill="var(--nv)"/><circle cx="48" cy="24" r="1.8" fill="var(--nv)"/><circle cx="48" cy="32" r="1.8" fill="var(--nv)"/><circle cx="48" cy="40" r="1.8" fill="var(--nv)"/><circle cx="56" cy="0" r="1.8" fill="var(--nv)"/><circle cx="56" cy="8" r="1.8" fill="var(--nv)"/><circle cx="56" cy="16" r="1.8" fill="var(--nv)"/><circle cx="56" cy="24" r="1.8" fill="var(--nv)"/><circle cx="56" cy="32" r="1.8" fill="var(--nv)"/><circle cx="56" cy="40" r="1.8" fill="var(--nv)"/></g><g transform="translate(100 48) scale(1.1)"><circle cx="18" cy="8" r="9" fill="#0b1018" stroke="var(--nv)" stroke-width="2"/><rect x="7" y="19" width="22" height="40" rx="9" fill="#0b1018" stroke="var(--nv)" stroke-width="2"/></g><rect x="100" y="126" width="40" height="14" rx="3" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="2"/></svg>
+      <svg viewBox="0 0 240 150" aria-hidden="true">
+        <rect width="240" height="150" rx="10" fill="#0b1018"/>
+        <rect x="20" y="16" width="200" height="118" fill="none" stroke="#3a4556" stroke-width="3" stroke-dasharray="6 6"/>
+        <circle cx="120" cy="75" r="48" fill="rgba(226,166,91,.12)" stroke="var(--exor)" stroke-width="2" stroke-dasharray="4 5"/>
+        <rect x="114" y="48" width="12" height="54" rx="2" fill="var(--exor)"/>
+        <rect x="99" y="62" width="42" height="11" rx="2" fill="var(--exor)"/>
+        <text x="174" y="128" fill="var(--muted)" font-family="Special Elite, monospace" font-size="15">3–5 m</text>
+      </svg>
       <div class="num">03</div>
-      <div class="cap"><span class="l-el">Άναψε το D.O.T.S. στο δωμάτιο</span><span class="l-en">Turn on the D.O.T.S. in the room</span><small><span class="l-el">Φιγούρα → D.O.T.S. ✓. Μόνο στην κάμερα → ίσως Goryo.</span><span class="l-en">A shape → D.O.T.S. ✓. Only on camera → maybe Goryo.</span></small></div>
+      <div class="cap"><span class="l-el">Σταυρός στη μέση του δωματίου</span><span class="l-en">Cross in the middle of the room</span><small><span class="l-el">Κάηκε; Το ghost ήταν μέσα στον κύκλο.</span><span class="l-en">Burned? The ghost was inside the circle.</span></small></div>
     </div>
+  </div>
+
+  <div class="phase"><b>2</b> · <span class="l-el">Πίσω στο truck → αλλαγή</span><span class="l-en">Back to the truck → swap</span> — Motion Sensor ×2 · Tripod</div>
+  <div class="steps">
     <div class="step">
-      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><rect x="20" y="20" width="110" height="110" fill="none" stroke="#3a4556" stroke-width="3"/><rect x="128" y="56" width="6" height="38" fill="#0b1018"/><line x1="131" y1="56" x2="131" y2="94" stroke="var(--acc)" stroke-width="3" stroke-dasharray="4 4"/><rect x="134" y="66" width="14" height="18" rx="3" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="2"/><g transform="translate(150 24)"><rect width="76" height="56" rx="4" fill="#141b26" stroke="var(--acc)" stroke-width="2"/><rect x="10" y="10" width="26" height="20" fill="none" stroke="#3a4556" stroke-width="2"/><rect x="40" y="10" width="26" height="36" fill="none" stroke="#3a4556" stroke-width="2"/><circle cx="36" cy="22" r="4" fill="var(--nv)"/></g><text x="188" y="104" text-anchor="middle" fill="var(--nv)" font-family="Special Elite, monospace" font-size="13">MAP</text></svg>
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><rect x="60" y="24" width="120" height="100" fill="none" stroke="#3a4556" stroke-width="3"/><g fill="#0b1018"><rect x="104" y="20" width="32" height="8"/><rect x="176" y="58" width="8" height="32"/><rect x="56" y="58" width="8" height="32"/></g><g stroke="var(--acc)" stroke-width="3" stroke-dasharray="4 4"><line x1="104" y1="24" x2="136" y2="24"/><line x1="180" y1="58" x2="180" y2="90"/><line x1="60" y1="58" x2="60" y2="90"/></g><g transform="translate(102 58)"><path d="M0 34 C0 8 8 -4 18 -4 C28 -4 36 8 36 34 L29 29 L23 35 L17 29 L11 35 L5 29 Z" fill="#c9d3e0" opacity=".9"/><circle cx="12" cy="10" r="3" fill="#0b1018"/><circle cx="24" cy="10" r="3" fill="#0b1018"/></g><text x="120" y="142" text-anchor="middle" fill="var(--acc)" font-family="Special Elite, monospace" font-size="14">90s</text></svg>
       <div class="num">04</div>
-      <div class="cap"><span class="l-el">Motion Sensor στην πόρτα</span><span class="l-en">Motion Sensor in the doorway</span><small><span class="l-el">Ανάβει στον χάρτη του truck.</span><span class="l-en">It lights up on the truck map.</span></small></div>
+      <div class="cap"><span class="l-el">Sensor σε κάθε έξοδο του δωματίου</span><span class="l-en">A sensor on every exit of the room</span><small><span class="l-el">Μετά το θυμίαμα βγήκε πριν τα 90s → όχι Yurei.</span><span class="l-en">Left before 90s after incense → not Yurei.</span></small></div>
     </div>
-  </div>
-
-  <div class="phase"><b>2</b> · <span class="l-el">Πίσω στο truck → αλλαγή</span><span class="l-en">Back to the truck → swap</span> — Salt · Firelight · Incense</div>
-  <div class="steps">
     <div class="step">
-      <svg viewBox="0 0 240 150" aria-hidden="true">
-        <rect width="240" height="150" rx="10" fill="#0b1018"/>
-        <rect x="96" y="10" width="48" height="70" fill="none" stroke="#3a4556" stroke-width="4"/>
-        <ellipse cx="80" cy="112" rx="34" ry="12" fill="#e9edf2"/>
-        <ellipse cx="160" cy="112" rx="34" ry="12" fill="#e9edf2"/>
-        <g fill="#2b333f"><ellipse cx="72" cy="110" rx="6" ry="4"/><ellipse cx="86" cy="113" rx="6" ry="4"/></g>
-        <text x="120" y="140" text-anchor="middle" fill="var(--exor)" font-family="Special Elite, monospace" font-size="16">⟵ 2s ⟶</text>
-      </svg>
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(28 20)"><rect x="0" y="0" width="48" height="28" rx="5" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><line x1="24" y1="28" x2="24" y2="46" stroke="#c9d3e0" stroke-width="4"/><path d="M24 46 L2 110 M24 46 L46 110 M24 46 L24 110" stroke="#c9d3e0" stroke-width="4" stroke-linecap="round"/></g><path d="M80 34 L224 10 L224 120 Z" fill="rgba(157,184,224,.10)"/><g transform="translate(170 60)"><path d="M0 34 C0 8 8 -4 18 -4 C28 -4 36 8 36 34 L29 29 L23 35 L17 29 L11 35 L5 29 Z" fill="#c9d3e0" opacity=".9"/><circle cx="12" cy="10" r="3" fill="#0b1018"/><circle cx="24" cy="10" r="3" fill="#0b1018"/></g></svg>
       <div class="num">05</div>
-      <div class="cap"><span class="l-el">Δύο σωρούς αλάτι, με 2 δευτερόλεπτα διαφορά</span><span class="l-en">Two salt piles, 2 seconds apart</span><small><span class="l-el">Πάτησε ένα → όχι Wraith. Πάτησε και τα δύο → όχι Gallu.</span><span class="l-en">Steps in one → not Wraith. Steps in both → not Gallu.</span></small></div>
-    </div>
-    <div class="step">
-      <svg viewBox="0 0 240 150" aria-hidden="true">
-        <rect width="240" height="150" rx="10" fill="#0b1018"/>
-        <rect x="24" y="14" width="192" height="122" fill="none" stroke="#3a4556" stroke-width="3"/>
-        <defs><g id="cnd">
-          <circle cx="0" cy="0" r="28" fill="rgba(240,198,116,.10)"/>
-          <rect x="-5" y="-4" width="10" height="18" rx="2" fill="var(--paper)"/>
-          <path class="flame" d="M0 -18 C6 -10 5 -5 0 -4 C-5 -5 -6 -10 0 -18 Z" fill="#F0C674"/>
-        </g></defs>
-        <use href="#cnd" x="48" y="42"/><use href="#cnd" x="192" y="42"/><use href="#cnd" x="48" y="112"/><use href="#cnd" x="192" y="112"/>
-        <text x="120" y="82" text-anchor="middle" fill="var(--exor)" font-family="Special Elite, monospace" font-size="22">4 m</text>
-      </svg>
-      <div class="num">06</div>
-      <div class="cap"><span class="l-el">Κεριά σε κάθε γωνία</span><span class="l-en">A candle in every corner</span><small><span class="l-el">Hunt δίπλα σε αναμμένο κερί → όχι Onryo.</span><span class="l-en">Hunt next to a lit candle → not Onryo.</span></small></div>
-    </div>
-    <div class="step">
-      <svg viewBox="0 0 240 150" aria-hidden="true">
-        <rect width="240" height="150" rx="10" fill="#0b1018"/>
-        <g transform="translate(60 90)"><rect x="-8" y="0" width="16" height="34" rx="3" fill="var(--paper)"/><path d="M0 -6 q10 -14 0 -26 q-6 10 -8 6" fill="none" stroke="#5b6473" stroke-width="3"/></g>
-        <g transform="translate(120 90)"><rect x="-8" y="0" width="16" height="34" rx="3" fill="var(--paper)"/><path d="M0 -6 q10 -14 0 -26 q-6 10 -8 6" fill="none" stroke="#5b6473" stroke-width="3"/></g>
-        <g transform="translate(180 90)"><rect x="-8" y="0" width="16" height="34" rx="3" fill="var(--paper)"/><path d="M0 -6 q10 -14 0 -26 q-6 10 -8 6" fill="none" stroke="#5b6473" stroke-width="3"/></g>
-        <text x="60" y="40" text-anchor="middle" fill="var(--muted)" font-family="Special Elite, monospace" font-size="20">1</text>
-        <text x="120" y="40" text-anchor="middle" fill="var(--muted)" font-family="Special Elite, monospace" font-size="20">2</text>
-        <text x="180" y="40" text-anchor="middle" fill="var(--danger)" font-family="Special Elite, monospace" font-size="24">3 ?</text>
-      </svg>
-      <div class="num">07</div>
-      <div class="cap"><span class="l-el">Μέτρα τα κεριά που σβήνει</span><span class="l-en">Count the candles it blows out</span><small><span class="l-el">Έσβησε 3ο και δεν έκανε hunt → όχι Onryo.</span><span class="l-en">3rd one out and no hunt → not Onryo.</span></small></div>
+      <div class="cap"><span class="l-el">Κάμερα πάνω στο Tripod</span><span class="l-en">Camera on the Tripod</span><small><span class="l-el">Ψηλά, να βλέπει όλο το δωμάτιο.</span><span class="l-en">Up high, seeing the whole room.</span></small></div>
     </div>
   </div>
 
-  <div class="phase"><b>3</b> · <span class="l-el">Όταν κυνηγάει (hunt)</span><span class="l-en">When it hunts</span></div>
+  <div class="phase"><b>3</b> · <span class="l-el">Μετά μένεις στο truck</span><span class="l-en">Then you stay in the truck</span></div>
   <div class="steps">
     <div class="step">
-      <svg viewBox="0 0 240 150" aria-hidden="true">
-        <rect width="240" height="150" rx="10" fill="#0b1018"/>
-        <rect x="40" y="96" width="44" height="12" rx="4" fill="#7a5a3a"/>
-        <path d="M62 94 C50 78 74 70 62 54 C52 40 72 30 64 16" fill="none" stroke="#b9c2ce" stroke-width="5" stroke-linecap="round" opacity=".7"/>
-        <circle cx="168" cy="76" r="44" fill="#141b26" stroke="var(--exor)" stroke-width="4"/>
-        <rect x="160" y="22" width="16" height="10" rx="2" fill="var(--exor)"/>
-        <line x1="168" y1="76" x2="168" y2="46" stroke="var(--fg)" stroke-width="4" stroke-linecap="round"/>
-        <line x1="168" y1="76" x2="190" y2="88" stroke="var(--exor)" stroke-width="4" stroke-linecap="round"/>
-        <text x="168" y="138" text-anchor="middle" fill="var(--exor)" font-family="Special Elite, monospace" font-size="16">1 · 2 · 3 · 4 …</text>
-      </svg>
-      <div class="num">08</div>
-      <div class="cap"><span class="l-el">Κάψε θυμίαμα και μέτρα δευτερόλεπτα</span><span class="l-en">Light the incense and count seconds</span><small><span class="l-el">Πόσο έμεινε τυφλό το φάντασμα;</span><span class="l-en">How long did the ghost stay blind?</span></small></div>
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(20 22)"><rect width="96" height="68" rx="5" fill="#141b26" stroke="var(--acc)" stroke-width="3"/><rect x="40" y="68" width="16" height="10" fill="#3a4556"/><rect x="26" y="78" width="44" height="6" rx="2" fill="#3a4556"/></g><g font-family="Special Elite, monospace" font-size="13"><text x="27" y="62" fill="var(--muted)">48</text><text x="46" y="62" fill="var(--muted)">49</text><text x="66" y="63" fill="var(--fg)" font-size="19">50</text><text x="92" y="62" fill="var(--muted)">51</text></g><text x="176" y="72" text-anchor="middle" fill="var(--acc)" font-family="Special Elite, monospace" font-size="30">50%</text><text x="176" y="100" text-anchor="middle" fill="var(--muted)" font-family="Special Elite, monospace" font-size="13">middle</text></svg>
+      <div class="num">06</div>
+      <div class="cap"><span class="l-el">Διάβασε τη sanity στο truck</span><span class="l-en">Read the sanity in the truck</span><small><span class="l-el">Το μεσαίο από τα 5 νούμερα.</span><span class="l-en">The middle of the 5 numbers.</span></small></div>
     </div>
     <div class="step">
-      <svg viewBox="0 0 240 150" aria-hidden="true">
-        <rect width="240" height="150" rx="10" fill="#0b1018"/>
-        <circle cx="90" cy="75" r="40" fill="rgba(226,166,91,.14)" stroke="var(--exor)" stroke-width="2"/>
-        <circle cx="90" cy="75" r="62" fill="none" stroke="var(--danger)" stroke-width="2" stroke-dasharray="5 5"/>
-        <rect x="85" y="58" width="10" height="34" rx="2" fill="var(--exor)"/><rect x="76" y="66" width="28" height="8" rx="2" fill="var(--exor)"/>
-        <g transform="translate(150 66)"><path d="M0 26 C0 6 6 -4 14 -4 C22 -4 28 6 28 26 L22 22 L17 27 L11 22 L6 27 Z" fill="#c9d3e0" opacity=".85"/><circle cx="9" cy="8" r="2.4" fill="#0b1018"/><circle cx="19" cy="8" r="2.4" fill="#0b1018"/></g>
-        <text x="200" y="136" text-anchor="middle" fill="var(--danger)" font-family="Special Elite, monospace" font-size="15">×1.5</text>
-      </svg>
-      <div class="num">09</div>
-      <div class="cap"><span class="l-el">Δες πού ξεκίνησε το hunt</span><span class="l-en">See where the hunt started</span><small><span class="l-el">Λίγο έξω από τον κύκλο και ο σταυρός δεν κάηκε → όχι Demon.</span><span class="l-en">Just outside the circle and the cross didn't burn → not Demon.</span></small></div>
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><circle cx="74" cy="76" r="50" fill="#141b26" stroke="var(--acc)" stroke-width="4"/><path d="M74 76 L74 26 A50 50 0 0 1 117 101 Z" fill="rgba(143,227,136,.25)"/><path d="M74 76 L117 101 A50 50 0 0 1 31 101 Z" fill="rgba(225,91,91,.25)"/><line x1="74" y1="76" x2="74" y2="38" stroke="var(--fg)" stroke-width="4" stroke-linecap="round"/><g font-family="Special Elite, monospace" font-size="15"><text x="146" y="62" fill="var(--nv)">calm</text><text x="146" y="80" fill="var(--muted)">hunt ≤10%</text><text x="146" y="110" fill="var(--danger)">angry</text></g></svg>
+      <div class="num">07</div>
+      <div class="cap"><span class="l-el">Κοίτα το ρολόι για το Obambo</span><span class="l-en">Watch the clock for the Obambo</span><small><span class="l-el">Hunt πάνω από 10% ενώ θα ήταν calm → όχι Obambo.</span><span class="l-en">Hunt above 10% while it'd be calm → not Obambo.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><rect x="18" y="30" width="86" height="90" fill="rgba(143,199,255,.10)" stroke="#3a4556" stroke-width="3"/><rect x="136" y="30" width="86" height="90" fill="rgba(143,199,255,.30)" stroke="#3a4556" stroke-width="3"/><text x="61" y="82" text-anchor="middle" fill="var(--muted)" font-family="Special Elite, monospace" font-size="18">8°</text><text x="179" y="82" text-anchor="middle" fill="#8FC7FF" font-family="Special Elite, monospace" font-size="18">1°</text><path d="M86 136 h64" stroke="var(--danger)" stroke-width="4" stroke-linecap="round"/><path d="M140 128 l10 8 l-10 8" fill="none" stroke="var(--danger)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="num">08</div>
+      <div class="cap"><span class="l-el">Το κρύο πήγε σε άλλο δωμάτιο;</span><span class="l-en">Did the cold move to another room?</span><small><span class="l-el">Άλλαξε room → όχι Goryo.</span><span class="l-en">Room changed → not Goryo.</span></small></div>
     </div>
   </div>
 
-  <div class="phase"><span class="l-el">Τι σημαίνουν τα δευτερόλεπτα</span><span class="l-en">What the seconds mean</span></div>
-  <div class="mini">
-    <div><b>4s</b><span class="l-el">θυμωμένο Gallu</span><span class="l-en">angry Gallu</span></div>
-    <div><b>5s</b><span class="l-el">κανονικό</span><span class="l-en">normal</span></div>
-    <div><b>6s</b><span class="l-el">κουρασμένο Gallu</span><span class="l-en">tired Gallu</span></div>
-    <div><b>7s</b>Moroi</div>
+  <div class="phase"><b>4</b> · <span class="l-el">Όταν κυνηγάει (hunt)</span><span class="l-en">When it hunts</span></div>
+  <div class="steps">
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(16 18)"><rect width="96" height="68" rx="5" fill="#141b26" stroke="var(--acc)" stroke-width="3"/><rect x="40" y="68" width="16" height="10" fill="#3a4556"/><rect x="26" y="78" width="44" height="6" rx="2" fill="#3a4556"/><g transform='translate(30 14)'><path d="M0 34 C0 8 8 -4 18 -4 C28 -4 36 8 36 34 L29 29 L23 35 L17 29 L11 35 L5 29 Z" fill="#c9d3e0" opacity=".9"/><circle cx="12" cy="10" r="3" fill="#0b1018"/><circle cx="24" cy="10" r="3" fill="#0b1018"/></g><circle cx='84' cy='10' r='3' fill='var(--runner)'/></g><g font-family="Special Elite, monospace" font-size="14"><text x="130" y="44" fill="var(--fg)">blink ✓</text><text x="130" y="68" fill="var(--fg)">shapeshift ✗</text><text x="130" y="92" fill="var(--fg)">speed ?</text></g><text x="64" y="124" text-anchor="middle" fill="var(--runner)" font-family="Special Elite, monospace" font-size="12">Markos cam</text></svg>
+      <div class="num">09</div>
+      <div class="cap"><span class="l-el">Δες το hunt από την κάμερα του Markos</span><span class="l-en">Watch the hunt on Markos's camera</span><small><span class="l-el">Κανονικό blink → όχι Phantom, όχι Oni. Χωρίς shapeshift → όχι Obake.</span><span class="l-en">Normal blink → not Phantom, not Oni. No shapeshift → not Obake.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><text x="70" y="88" text-anchor="middle" fill="var(--danger)" font-family="Special Elite, monospace" font-size="40">HUNT</text><circle cx="182" cy="74" r="40" fill="#141b26" stroke="var(--acc)" stroke-width="4"/><text x="182" y="82" text-anchor="middle" fill="var(--acc)" font-family="Special Elite, monospace" font-size="22">0:40</text><rect x="174" y="26" width="16" height="9" rx="2" fill="var(--acc)"/></svg>
+      <div class="num">10</div>
+      <div class="cap"><span class="l-el">Φώναξε HUNT και χρονομέτρα</span><span class="l-en">Shout HUNT and time it</span><small><span class="l-el">Μετά πέρνα ό,τι είδατε στο board.</span><span class="l-en">Then log what you saw on the board.</span></small></div>
+    </div>
   </div>
 
-  <div class="rule"><span class="big">🏃</span><span><span class="l-el">Αν σε βρει: θυμίαμα και τρέξε. Μην μένεις να μετράς δίπλα του.</span><span class="l-en">If it finds you: incense, then run. Don't stand next to it counting.</span></span></div>
+  <div class="phase"><span class="l-el">Τι βλέπεις μόνο εσύ</span><span class="l-en">What only you can see</span></div>
+  <div class="mini">
+    <div><b>⚪</b><span class="l-el">orbs στην οθόνη</span><span class="l-en">orbs on the monitor</span><span>Ghost Orbs</span></div>
+    <div><b>🟢</b><span class="l-el">D.O.T.S. μόνο στην κάμερα</span><span class="l-en">D.O.T.S. only on camera</span><span>Goryo?</span></div>
+    <div><b>50</b><span class="l-el">το μεσαίο νούμερο</span><span class="l-en">the middle number</span><span><span class="l-el">sanity</span><span class="l-en">sanity</span></span></div>
+    <div><b>💡</b><span class="l-el">blink στο hunt</span><span class="l-en">blink in the hunt</span><span>≠ Phantom · Oni</span></div>
+  </div>
+
+  <div class="rule"><span class="big">📢</span><span><span class="l-el">Στο truck είσαι ασφαλής, αλλά είσαι τα μάτια της ομάδας. Δεις κάτι; Πες το αμέσως.</span><span class="l-en">The truck is safe, but you're the squad's eyes. See something? Say it right away.</span></span></div>
 </div>
 
 <script>

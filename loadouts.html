@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Phasmo Journal — Squad Loadout Sheet</title>
+<meta name="theme-color" content="#0A0D12">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap">
+<style>
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+
+/* Layout: one row per player, three columns (start / 1st return / 2nd return). Single dark look matching Phasmo Journal. */
+:root{
+  --bg:#0A0D12; --card:#0f141c; --line:#232b38; --fg:#E4E8EE; --muted:#8A93A3; --nv:#8FE388; --warn:#F0C674;
+  --oracle:#7FD1C7; --detect:#9DB8E0; --scout:#E07A7A; --exor:#E2A65B;
+  --f-display:"Special Elite","Courier New",monospace;
+  --f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body)}
+html[lang=en] .l-el{display:none!important}
+html:not([lang=en]) .l-en{display:none!important}
+.wrap{max-width:1000px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;display:grid;gap:16px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{font-family:var(--f-display);font-size:13px;letter-spacing:1px;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:6px 13px;background:none;cursor:pointer}
+.btn:hover,.btn:focus-visible{border-color:var(--nv);color:var(--nv);outline:none}
+h1{font-family:var(--f-display);color:var(--nv);font-size:clamp(26px,6vw,38px);margin:0;letter-spacing:1px}
+.sub{color:var(--muted);font-size:14px;margin:0;max-width:70ch}
+.head{display:grid;grid-template-columns:minmax(0,150px) repeat(3,minmax(0,1fr));gap:10px;font-family:var(--f-display);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 4px}
+.head .r2{color:var(--warn)}
+.row{display:grid;grid-template-columns:minmax(0,150px) repeat(3,minmax(0,1fr));gap:10px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:12px;padding:12px}
+.who b{display:block;font-family:var(--f-display);font-size:19px;color:#EAEDF2;font-weight:400}
+.who span{font-family:var(--f-display);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--c)}
+.cell{display:grid;gap:5px;align-content:start;min-width:0}
+.cell .lab{display:none;font-family:var(--f-display);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.cell.r2 .lab{color:var(--warn)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:13px;background:#141b26;border:1px solid var(--line);border-radius:7px;padding:3px 8px;white-space:nowrap}
+.cell.r1 .chip{border-color:var(--c)}
+.cell.r2 .chip{border-style:dashed;border-color:var(--warn)}
+.chip.truck{background:transparent;border:0;color:var(--c);padding-left:0;font-family:var(--f-display)}
+.note{font-size:12px;color:var(--muted);line-height:1.35}
+.note b{color:var(--fg);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:12px;border-radius:3px;border:1px solid var(--line);vertical-align:-1px;margin-right:5px;font-style:normal}
+.legend .l1 i{border-color:var(--fg)} .legend .l2 i{border-style:dashed;border-color:var(--warn)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:10px}
+.rule{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.rule b{color:var(--nv);font-family:var(--f-display);font-weight:400}
+@media (max-width:720px){
+  .head{display:none}
+  .row{grid-template-columns:minmax(0,1fr)}
+  .cell .lab{display:block}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <a class="btn" href="team.html" id="backBtn"><span class="l-el">← Ομάδα</span><span class="l-en">← Squad</span></a>
+    <button class="btn" id="langBtn" type="button">ΕΛ</button>
+  </div>
+  <h1>LOADOUT SHEET</h1>
+  <p class="sub"><span class="l-el">Τι παίρνει ο καθένας από το van σε κάθε είσοδο. Η 2η επιστροφή είναι πρόταση: αλλάζει ανάλογα με το ποια ghosts μένουν.</span><span class="l-en">What each player grabs from the van on every trip. The 2nd return is a suggestion: adjust it to the ghosts still in play.</span></p>
+  <div class="legend">
+    <span class="l1"><i></i><span class="l-el">σίγουρο</span><span class="l-en">fixed</span></span>
+    <span class="l2"><i></i><span class="l-el">πρόταση</span><span class="l-en">suggestion</span></span>
+  </div>
+
+  <div class="head"><div></div><div><span class="l-el">Αρχή</span><span class="l-en">Start</span></div><div><span class="l-el">1η επιστροφή</span><span class="l-en">1st return</span></div><div class="r2"><span class="l-el">2η επιστροφή</span><span class="l-en">2nd return</span></div></div>
+
+  <!-- Paschalia -->
+  <div class="row" style="--c:var(--oracle)">
+    <div class="who"><b>Paschalia</b><span>Oracle</span></div>
+    <div class="cell r0"><span class="lab"><span class="l-el">Αρχή</span><span class="l-en">Start</span></span>
+      <div class="chips"><span class="chip">Thermometer</span><span class="chip">Spirit Box</span><span class="chip">Sound Recorder</span></div></div>
+    <div class="cell r1"><span class="lab"><span class="l-el">1η επιστροφή</span><span class="l-en">1st return</span></span>
+      <div class="chips"><span class="chip">Sanity Pills ×2</span><span class="chip">Parabolic Mic</span><span class="chip">Incense</span></div>
+      <div class="note"><span class="l-el">Χωρίς απάντηση ακόμα; Κράτα <b>Spirit Box</b> αντί για Parabolic.</span><span class="l-en">No answer yet? Keep the <b>Spirit Box</b> instead of the Parabolic.</span></div></div>
+    <div class="cell r2"><span class="lab"><span class="l-el">2η επιστροφή</span><span class="l-en">2nd return</span></span>
+      <div class="chips"><span class="chip">Sanity Pills ×2</span><span class="chip">Incense</span><span class="chip">Sound Recorder</span></div>
+      <div class="note"><span class="l-el">Ξαναγέμισε pills. Μένει Myling ή Banshee; Κράτα το <b>Parabolic</b>.</span><span class="l-en">Refill pills. Myling or Banshee still possible? Keep the <b>Parabolic</b>.</span></div></div>
+  </div>
+
+  <!-- Kiki -->
+  <div class="row" style="--c:var(--detect)">
+    <div class="who"><b>Kiki</b><span>Detective</span></div>
+    <div class="cell r0"><span class="lab"><span class="l-el">Αρχή</span><span class="l-en">Start</span></span>
+      <div class="chips"><span class="chip">Thermometer</span><span class="chip">Ghost Writing Book</span><span class="chip">Crucifix</span></div></div>
+    <div class="cell r1"><span class="lab"><span class="l-el">1η επιστροφή</span><span class="l-en">1st return</span></span>
+      <div class="chips"><span class="chip">Motion Sensor ×2</span><span class="chip">Tripod</span><span class="chip truck">→ van</span></div>
+      <div class="note"><span class="l-el">Τα στήνει και μένει στο van. Χωρίς Orbs; <b>2η Video Camera</b> αντί για 1 sensor.</span><span class="l-en">Sets them up, then stays in the van. No Orbs? <b>2nd Video Camera</b> instead of one sensor.</span></div></div>
+    <div class="cell r2"><span class="lab"><span class="l-el">2η επιστροφή</span><span class="l-en">2nd return</span></span>
+      <div class="chips"><span class="chip truck"><span class="l-el">μένει στο van</span><span class="l-en">stays in the van</span></span></div>
+      <div class="note"><span class="l-el">Μπαίνει μόνο αν άλλαξε room: <b>Video Camera</b> + <b>Motion Sensor</b> στο νέο room.</span><span class="l-en">Goes in only if the room changed: <b>Video Camera</b> + <b>Motion Sensor</b> to the new room.</span></div></div>
+  </div>
+
+  <!-- Markos -->
+  <div class="row" style="--c:var(--scout)">
+    <div class="who"><b>Markos</b><span>Scout</span></div>
+    <div class="cell r0"><span class="lab"><span class="l-el">Αρχή</span><span class="l-en">Start</span></span>
+      <div class="chips"><span class="chip">UV Light</span><span class="chip">EMF Reader</span><span class="chip">Photo Camera</span></div></div>
+    <div class="cell r1"><span class="lab"><span class="l-el">1η επιστροφή</span><span class="l-en">1st return</span></span>
+      <div class="chips"><span class="chip">Photo Camera</span><span class="chip">Head Gear</span><span class="chip">Sanity Pills</span></div>
+      <div class="note"><span class="l-el">Ανοιχτό UV ή EMF; Κράτα το αντί για τα pills.</span><span class="l-en">UV or EMF still open? Keep it instead of the pills.</span></div></div>
+    <div class="cell r2"><span class="lab"><span class="l-el">2η επιστροφή</span><span class="l-en">2nd return</span></span>
+      <div class="chips"><span class="chip">Photo Camera</span><span class="chip">Head Gear</span><span class="chip">Incense</span></div>
+      <div class="note"><span class="l-el">Θυμίαμα για να ξεφεύγει στα loops. Έβγαλες όλες τις φωτογραφίες; <b>Sanity Pills</b> αντί για Photo Camera.</span><span class="l-en">Incense to escape on loops. All photos done? <b>Sanity Pills</b> instead of the Photo Camera.</span></div></div>
+  </div>
+
+  <!-- Nikos -->
+  <div class="row" style="--c:var(--exor)">
+    <div class="who"><b>Nikos</b><span>Exorcist</span></div>
+    <div class="cell r0"><span class="lab"><span class="l-el">Αρχή</span><span class="l-en">Start</span></span>
+      <div class="chips"><span class="chip">Video Camera</span><span class="chip">D.O.T.S.</span><span class="chip">Motion Sensor</span></div></div>
+    <div class="cell r1"><span class="lab"><span class="l-el">1η επιστροφή</span><span class="l-en">1st return</span></span>
+      <div class="chips"><span class="chip">Salt</span><span class="chip">Firelight</span><span class="chip">Incense</span></div>
+      <div class="note"><span class="l-el">Camera, D.O.T.S. και sensor μένουν στημένα.</span><span class="l-en">Camera, D.O.T.S. and sensor stay set up.</span></div></div>
+    <div class="cell r2"><span class="lab"><span class="l-el">2η επιστροφή</span><span class="l-en">2nd return</span></span>
+      <div class="chips"><span class="chip">Incense ×2</span><span class="chip">Crucifix</span></div>
+      <div class="note"><span class="l-el">2ος σταυρός για Demon test και προστασία. Μένει Onryo; Κράτα το <b>Firelight</b>.</span><span class="l-en">2nd crucifix for the Demon test and protection. Onryo still possible? Keep the <b>Firelight</b>.</span></div></div>
+  </div>
+
+  <div class="rules">
+    <div class="rule"><b>1</b> · <span class="l-el">Ό,τι evidence έχει κλείσει (✓ ή ✗) μένει στο van.</span><span class="l-en">Any evidence that's settled (✓ or ✗) stays in the van.</span></div>
+    <div class="rule"><b>2</b> · <span class="l-el">Τα στημένα items στο room δεν τα μαζεύετε μέχρι το τέλος.</span><span class="l-en">Don't pick up the gear set up in the room until the end.</span></div>
+    <div class="rule"><b>3</b> · <span class="l-el">2η επιστροφή: όταν μείνουν 2–3 ghosts ή η sanity πέσει κάτω από 40%.</span><span class="l-en">2nd return: when 2–3 ghosts remain or sanity drops below 40%.</span></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY="phasmo-team-v1", lang="el";
+  try{ var d=JSON.parse(localStorage.getItem(KEY)||"null"); if(d && (d.lang==="en"||d.lang==="el")) lang=d.lang; }catch(e){}
+  var btn=document.getElementById("langBtn");
+  function set(l){ lang=l; document.documentElement.setAttribute("lang",l); btn.textContent = l==="el" ? "EN" : "ΕΛ"; try{ localStorage.setItem(KEY, JSON.stringify({lang:l})); }catch(e){} }
+  btn.addEventListener("click",function(){ set(lang==="el"?"en":"el"); });
+  set(lang);
+})();
+</script>
+</body>
+</html>
