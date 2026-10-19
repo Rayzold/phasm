@@ -40,6 +40,18 @@ h1{font-family:var(--f-display);font-size:clamp(30px,7vw,48px);color:var(--exor)
 .cap small{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:4px}
 .phase{font-family:var(--f-display);font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px}
 .phase b{color:var(--exor);font-weight:400}
+.loadouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px}
+.lo{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;min-width:0}
+.lo.two{border-color:var(--c2,var(--exor))}
+.lo-h{font-family:var(--f-display);font-size:14px;letter-spacing:2px;color:var(--muted)}
+.lo.two .lo-h{color:var(--c2,var(--exor))}
+.lo-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.it{display:grid;justify-items:center;text-align:center;gap:4px;background:#0b1018;border-radius:10px;padding:10px 6px}
+.it svg{width:min(72px,100%);height:auto}
+.it b{font-size:13.5px;line-height:1.2}
+.it span{font-size:12px;color:var(--muted);line-height:1.25}
+.stay{font-size:13px;color:var(--muted)}
+.stay b{color:var(--fg);font-weight:600}
 .rule{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--danger);border-radius:10px;padding:14px 16px;font-size:18px;font-weight:600}
 .rule .big{font-size:34px;line-height:1}
 .mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr));gap:10px}
@@ -67,6 +79,26 @@ h1{font-family:var(--f-display);font-size:clamp(30px,7vw,48px);color:var(--exor)
     <h1>EXORCIST</h1>
     <div class="who">Kiki</div>
     <p class="job"><span class="l-el">Φυλάς το δωμάτιο του φαντάσματος. Το δοκιμάζεις με αλάτι, κεριά και καπνό.</span><span class="l-en">You guard the ghost's room. You test it with salt, candles and smoke.</span></p>
+  </div>
+
+  <div class="loadouts">
+    <div class="lo">
+      <div class="lo-h">LOADOUT 1 · <span class="l-el">ΠΡΩΤΗ ΕΙΣΟΔΟΣ</span><span class="l-en">FIRST TRIP IN</span></div>
+      <div class="lo-items">
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="32" y="8" width="16" height="50" rx="8" fill="#1b2330" stroke="#c9d3e0" stroke-width="3"/><rect x="37" y="28" width="6" height="30" rx="3" fill="var(--cold)"/><circle cx="40" cy="62" r="11" fill="var(--cold)" stroke="#c9d3e0" stroke-width="3"/></svg><b>Thermometer</b><span><span class="l-el">βρες το κρύο</span><span class="l-en">find the cold</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><path d="M8 24 L40 18 L40 64 L8 70 Z" fill="var(--paper)"/><path d="M72 24 L40 18 L40 64 L72 70 Z" fill="#E4D9BE"/><line x1="40" y1="18" x2="40" y2="64" stroke="#7a6d55" stroke-width="2"/><path d="M48 38 q6 -6 11 1 t9 -1" fill="none" stroke="#5a2a2a" stroke-width="3" stroke-linecap="round"/></svg><b>Ghost Writing Book</b><span><span class="l-el">γράφει;</span><span class="l-en">does it write?</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="34" y="8" width="12" height="64" rx="2" fill="var(--exor)"/><rect x="18" y="24" width="44" height="11" rx="2" fill="var(--exor)"/></svg><b>Crucifix</b><span><span class="l-el">σταματά hunts</span><span class="l-en">stops hunts</span></span></div>
+      </div>
+    </div>
+    <div class="lo two">
+      <div class="lo-h">LOADOUT 2 · <span class="l-el">ΜΕΤΑ ΤΟ TRUCK</span><span class="l-en">AFTER THE TRUCK</span></div>
+      <div class="lo-items">
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="26" y="20" width="28" height="40" rx="6" fill="#d7dde6"/><rect x="26" y="12" width="28" height="12" rx="4" fill="#8A93A3"/><g fill="#0b1018"><circle cx="34" cy="17" r="1.6"/><circle cx="40" cy="17" r="1.6"/><circle cx="46" cy="17" r="1.6"/></g><ellipse cx="40" cy="70" rx="24" ry="6" fill="#e9edf2"/></svg><b>Salt</b><span><span class="l-el">δύο σωροί</span><span class="l-en">two piles</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="30" r="24" fill="rgba(240,198,116,.12)"/><rect x="31" y="34" width="18" height="38" rx="3" fill="var(--paper)"/><path class="flame" d="M40 12 C50 24 48 32 40 33 C32 32 30 24 40 12 Z" fill="#F0C674"/></svg><b>Firelight</b><span><span class="l-el">κεριά στις γωνίες</span><span class="l-en">corner candles</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="14" y="62" width="52" height="8" rx="3" fill="#7a5a3a"/><line x1="30" y1="62" x2="44" y2="34" stroke="#9c6b42" stroke-width="4" stroke-linecap="round"/><path d="M44 32 C36 22 54 18 46 8" fill="none" stroke="#b9c2ce" stroke-width="4" stroke-linecap="round" opacity=".75"/></svg><b>Incense</b><span><span class="l-el">τυφλώνει το ghost</span><span class="l-en">blinds the ghost</span></span></div>
+      </div>
+      <div class="stay"><span class="l-el">Μένουν στημένα στο room: <b>Book</b> · <b>Crucifix</b>. Δεν βρέθηκε Freezing ακόμα; Κράτα το <b>Thermometer</b> αντί για Firelight.</span><span class="l-en">Stay set up in the room: <b>Book</b> · <b>Crucifix</b>. No Freezing yet? Keep the <b>Thermometer</b> instead of Firelight.</span></div>
+    </div>
   </div>
 
   <div class="phase"><b>1</b> · <span class="l-el">Πρώτη είσοδος</span><span class="l-en">First trip in</span> — Thermometer · Ghost Writing Book · Crucifix</div>

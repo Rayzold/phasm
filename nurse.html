@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Phasmo Journal — Nurse Field Guide</title>
+<meta name="theme-color" content="#0A0D12">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap">
+<style>
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+
+/* Layout (Nurse): one big picture per step, a 3–8 word caption under it. Single dark look (night-vision journal), matches Phasmo Journal. */
+:root{
+  --bg:#0A0D12; --card:#0f141c; --line:#232b38; --fg:#E4E8EE; --muted:#8A93A3;
+  --acc:#7FD1C7; --exor:#E2A65B; --nv:#8FE388; --cold:#8FC7FF; --danger:#E15B5B; --paper:#EDE4CE;
+  --f-display:"Special Elite","Courier New",monospace;
+  --f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body)}
+html[lang=en] .l-el{display:none!important}
+html:not([lang=en]) .l-en{display:none!important}
+.wrap{max-width:900px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:22px 56px;display:grid;gap:22px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-family:var(--f-display);font-size:13px;letter-spacing:1px;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:6px 13px;background:none;cursor:pointer}
+.btn:hover,.btn:focus-visible{border-color:var(--acc);color:var(--acc);outline:none}
+.hero{display:grid;justify-items:center;text-align:center;gap:6px}
+.hero svg{width:min(150px,40vw);height:auto}
+h1{font-family:var(--f-display);font-size:clamp(30px,7vw,48px);color:var(--acc);margin:0;letter-spacing:2px;text-wrap:balance}
+.who{font-size:18px;color:var(--muted)}
+.job{font-size:clamp(18px,4vw,22px);margin:4px 0 0;text-wrap:balance}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:16px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 14px 16px;display:grid;gap:10px;align-content:start;min-width:0}
+.step svg{width:100%;height:auto;max-width:100%;display:block}
+.num{font-family:var(--f-display);color:var(--acc);font-size:14px;letter-spacing:2px}
+.cap{font-size:19px;line-height:1.3;font-weight:600;text-wrap:balance}
+.cap small{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:4px}
+.phase{font-family:var(--f-display);font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px}
+.phase b{color:var(--acc);font-weight:400}
+.loadouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px}
+.lo{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;min-width:0}
+.lo.two{border-color:var(--acc)}
+.lo-h{font-family:var(--f-display);font-size:14px;letter-spacing:2px;color:var(--muted)}
+.lo.two .lo-h{color:var(--acc)}
+.lo-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.it{display:grid;justify-items:center;text-align:center;gap:4px;background:#0b1018;border-radius:10px;padding:10px 6px}
+.it svg{width:min(72px,100%);height:auto}
+.it b{font-size:13.5px;line-height:1.2}
+.it span{font-size:12px;color:var(--muted);line-height:1.25}
+.stay{font-size:13px;color:var(--muted)}
+.stay b{color:var(--fg);font-weight:600}
+.rule{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--danger);border-radius:10px;padding:14px 16px;font-size:18px;font-weight:600}
+.rule .big{font-size:34px;line-height:1}
+.mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr));gap:10px}
+.mini div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center;font-size:15px}
+.mini b{display:block;font-family:var(--f-display);font-size:26px;color:var(--acc);font-weight:400}
+.mini span{color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:no-preference){ .flame{animation:fl 1.6s ease-in-out infinite alternate;transform-origin:50% 100%} }
+@keyframes fl{from{transform:scaleY(1)}to{transform:scaleY(1.12)}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <div class="btns"><a class="btn" href="team.html" id="backBtn"><span class="l-el">← Ομάδα</span><span class="l-en">← Squad</span></a></div>
+    <div class="btns"><button class="btn" id="langBtn" type="button">ΕΛ</button></div>
+  </div>
+
+  <div class="hero">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="56" fill="#0f1a19" stroke="var(--acc)" stroke-width="3"/>
+      <path d="M60 92 C30 72 22 56 30 44 C38 32 54 34 60 46 C66 34 82 32 90 44 C98 56 90 72 60 92 Z" fill="var(--acc)"/>
+      <path d="M30 62 h16 l6 -12 l8 24 l6 -12 h24" fill="none" stroke="#0f1a19" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>
+    <h1>NURSE</h1>
+    <div class="who">Paschalia</div>
+    <p class="job"><span class="l-el">Μιλάς στο φάντασμα και κρατάς την ομάδα «υγιή».</span><span class="l-en">You talk to the ghost and keep the squad sane.</span></p>
+  </div>
+
+  <div class="loadouts">
+    <div class="lo">
+      <div class="lo-h">LOADOUT 1 · <span class="l-el">ΠΡΩΤΗ ΕΙΣΟΔΟΣ</span><span class="l-en">FIRST TRIP IN</span></div>
+      <div class="lo-items">
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="32" y="8" width="16" height="50" rx="8" fill="#1b2330" stroke="#c9d3e0" stroke-width="3"/><rect x="37" y="28" width="6" height="30" rx="3" fill="var(--cold)"/><circle cx="40" cy="62" r="11" fill="var(--cold)" stroke="#c9d3e0" stroke-width="3"/></svg><b>Thermometer</b><span><span class="l-el">βρες το κρύο</span><span class="l-en">find the cold</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><line x1="52" y1="20" x2="64" y2="4" stroke="#c9d3e0" stroke-width="3" stroke-linecap="round"/><rect x="12" y="20" width="56" height="46" rx="8" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><rect x="20" y="28" width="40" height="14" rx="3" fill="#0b1018"/><text x="40" y="39" text-anchor="middle" fill="var(--danger)" font-family="Special Elite, monospace" font-size="11">88.5</text><g fill="#8A93A3"><circle cx="26" cy="54" r="3"/><circle cx="36" cy="54" r="3"/><circle cx="46" cy="54" r="3"/><circle cx="56" cy="54" r="3"/></g></svg><b>Spirit Box</b><span><span class="l-el">του μιλάς</span><span class="l-en">talk to it</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="10" y="22" width="60" height="38" rx="6" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><circle cx="28" cy="41" r="9" fill="#0b1018" stroke="#8A93A3" stroke-width="3"/><circle cx="52" cy="41" r="9" fill="#0b1018" stroke="#8A93A3" stroke-width="3"/><circle cx="62" cy="28" r="3" fill="var(--danger)"/></svg><b>Sound Recorder</b><span><span class="l-el">γράφεις ήχους</span><span class="l-en">record sounds</span></span></div>
+      </div>
+    </div>
+    <div class="lo two">
+      <div class="lo-h">LOADOUT 2 · <span class="l-el">ΜΕΤΑ ΤΟ TRUCK</span><span class="l-en">AFTER THE TRUCK</span></div>
+      <div class="lo-items">
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="22" y="10" width="36" height="12" rx="3" fill="#c9d3e0"/><rect x="18" y="22" width="44" height="50" rx="8" fill="#e9edf2"/><rect x="18" y="38" width="44" height="16" fill="var(--acc)"/><text x="40" y="51" text-anchor="middle" fill="#0b1018" font-family="Special Elite, monospace" font-size="12">+%</text></svg><b>Sanity Pills ×2</b><span><span class="l-el">για την ομάδα</span><span class="l-en">for the squad</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><path d="M14 16 A34 34 0 0 0 14 64 Z" fill="#c9d3e0" opacity=".9"/><line x1="16" y1="40" x2="46" y2="40" stroke="#c9d3e0" stroke-width="4"/><rect x="44" y="34" width="22" height="12" rx="3" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="2"/><path d="M56 22 q8 8 0 16 M64 18 q12 12 0 24" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round"/></svg><b>Parabolic Mic</b><span><span class="l-el">ακούς από μακριά</span><span class="l-en">hear from far</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="14" y="62" width="52" height="8" rx="3" fill="#7a5a3a"/><line x1="30" y1="62" x2="44" y2="34" stroke="#9c6b42" stroke-width="4" stroke-linecap="round"/><path d="M44 32 C36 22 54 18 46 8" fill="none" stroke="#b9c2ce" stroke-width="4" stroke-linecap="round" opacity=".75"/></svg><b>Incense</b><span><span class="l-el">τυφλώνει + timer</span><span class="l-en">blinds + timer</span></span></div>
+      </div>
+      <div class="stay"><span class="l-el">Δεν απάντησε ακόμα το Spirit Box; Κράτα το <b>Spirit Box</b> αντί για Parabolic.</span><span class="l-en">No Spirit Box answer yet? Keep the <b>Spirit Box</b> instead of the Parabolic.</span></div>
+    </div>
+  </div>
+
+  <div class="phase"><b>1</b> · <span class="l-el">Πρώτη είσοδος</span><span class="l-en">First trip in</span> — Thermometer · Spirit Box · Sound Recorder</div>
+  <div class="steps">
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><rect x="20" y="20" width="200" height="50" fill="none" stroke="#3a4556" stroke-width="3"/><rect x="20" y="80" width="200" height="50" fill="none" stroke="#3a4556" stroke-width="3"/><text x="34" y="52" fill="var(--exor)" font-family="Special Elite, monospace" font-size="17">Kiki ↑</text><text x="34" y="112" fill="var(--acc)" font-family="Special Elite, monospace" font-size="17">Paschalia ↓</text><g transform="translate(190 88)"><rect x="-6" y="0" width="12" height="30" rx="6" fill="#1b2330" stroke="#c9d3e0" stroke-width="2"/><rect x="-2.5" y="12" width="5" height="18" rx="2" fill="var(--cold)"/></g><text x="156" y="112" fill="var(--cold)" font-family="Special Elite, monospace" font-size="16">0°</text></svg>
+      <div class="num">01</div>
+      <div class="cap"><span class="l-el">Βρες το κρύο δωμάτιο: εσύ κάτω, η Kiki πάνω</span><span class="l-en">Find the cold room: you downstairs, Kiki upstairs</span><small><span class="l-el">Κάτω από 0° → Freezing ✓</span><span class="l-en">Below 0° → Freezing ✓</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(30 46)"><line x1="40" y1="0" x2="52" y2="-16" stroke="#c9d3e0" stroke-width="3" stroke-linecap="round"/><rect x="0" y="0" width="60" height="60" rx="8" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><rect x="8" y="10" width="44" height="18" rx="3" fill="#0b1018"/><text x="30" y="24" text-anchor="middle" fill="var(--danger)" font-family="Special Elite, monospace" font-size="12">88.5</text></g><path d="M118 40 h88 a10 10 0 0 1 10 10 v30 a10 10 0 0 1 -10 10 h-60 l-14 14 v-14 h-14 a10 10 0 0 1 -10 -10 v-30 a10 10 0 0 1 10 -10 z" fill="#1b2330" stroke="var(--acc)" stroke-width="2"/><text x="162" y="71" text-anchor="middle" fill="var(--acc)" font-family="Special Elite, monospace" font-size="18">…here…</text><text x="30" y="134" fill="var(--muted)" font-family="Special Elite, monospace" font-size="13">lights OFF</text></svg>
+      <div class="num">02</div>
+      <div class="cap"><span class="l-el">Σβήσε τα φώτα και μίλα στο Spirit Box</span><span class="l-en">Lights off, talk to the Spirit Box</span><small><span class="l-el">Απάντησε; → Spirit Box ✓</span><span class="l-en">It answered? → Spirit Box ✓</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(22 52)"><rect x="0" y="0" width="70" height="44" rx="6" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><circle cx="20" cy="22" r="10" fill="#0b1018" stroke="#8A93A3" stroke-width="3"/><circle cx="50" cy="22" r="10" fill="#0b1018" stroke="#8A93A3" stroke-width="3"/><circle cx="62" cy="8" r="3" fill="var(--danger)"/></g><path d="M110 75 l8 -18 l8 36 l8 -48 l8 56 l8 -40 l8 26 l8 -14 l8 8 l8 -6 l8 0 l8 0" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linejoin="round"/><text x="172" y="134" text-anchor="middle" fill="var(--warn)" font-family="Special Elite, monospace" font-size="18">$$</text></svg>
+      <div class="num">03</div>
+      <div class="cap"><span class="l-el">Γράψε κάθε περίεργο ήχο</span><span class="l-en">Record every weird sound</span><small><span class="l-el">Φέρνει λεφτά. Από πολύ μακριά; → ίσως Myling.</span><span class="l-en">It pays. From very far? → maybe Myling.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><circle cx="70" cy="42" r="20" fill="#F0C674" opacity=".9"/><g stroke="#F0C674" stroke-width="3" stroke-linecap="round"><line x1="70" y1="10" x2="70" y2="16"/><line x1="38" y1="42" x2="44" y2="42"/><line x1="96" y1="42" x2="102" y2="42"/></g><rect x="56" y="76" width="28" height="56" rx="4" fill="#1b2330" stroke="#c9d3e0" stroke-width="2"/><text x="70" y="110" text-anchor="middle" fill="var(--fg)" font-family="Special Elite, monospace" font-size="14">60</text><path d="M150 46 v60" stroke="var(--danger)" stroke-width="6" stroke-linecap="round"/><path d="M136 92 l14 18 l14 -18" fill="none" stroke="var(--danger)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><text x="200" y="84" text-anchor="middle" fill="var(--danger)" font-family="Special Elite, monospace" font-size="20">2× ?</text></svg>
+      <div class="num">04</div>
+      <div class="cap"><span class="l-el">Μετά την ηχογράφηση, στάσου στο φως</span><span class="l-en">After recording, stand in the light</span><small><span class="l-el">Η sanity δεν πέφτει; → όχι Moroi.</span><span class="l-en">Sanity not dropping? → not Moroi.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(18 58)"><path d="M0 34 C0 8 8 -4 18 -4 C28 -4 36 8 36 34 L29 29 L23 35 L17 29 L11 35 L5 29 Z" fill="#c9d3e0" opacity=".9"/><circle cx="12" cy="10" r="3" fill="#0b1018"/><circle cx="24" cy="10" r="3" fill="#0b1018"/></g><path d="M62 72 q7 -9 14 0 t14 0" fill="none" stroke="var(--acc)" stroke-width="4" stroke-linecap="round"/><g font-family="Special Elite, monospace" text-anchor="middle"><text x="172" y="46" fill="var(--fg)" font-size="17">−10%</text><text x="172" y="80" fill="var(--acc)" font-size="17">−15% Banshee</text><text x="172" y="114" fill="var(--danger)" font-size="17">−20% Oni</text></g></svg>
+      <div class="num">05</div>
+      <div class="cap"><span class="l-el">Σε χτύπησε event; Μέτρα πόσο έχασες</span><span class="l-en">An event hit you? Check what you lost</span><small><span class="l-el">Μόνο 10% → όχι Oni. Singing όχι 15% → όχι Banshee.</span><span class="l-en">Only 10% → not Oni. Singing not 15% → not Banshee.</span></small></div>
+    </div>
+  </div>
+
+  <div class="phase"><b>2</b> · <span class="l-el">Πίσω στο truck → αλλαγή</span><span class="l-en">Back to the truck → swap</span> — Sanity Pills · Parabolic Mic · Incense</div>
+  <div class="steps">
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(160 30)"><circle cx="20" cy="12" r="12" fill="#c9d3e0"/><rect x="6" y="28" width="28" height="48" rx="10" fill="#c9d3e0"/></g><text x="180" y="136" text-anchor="middle" fill="var(--danger)" font-family="Special Elite, monospace" font-size="18">35%</text><g transform="translate(40 50)"><rect x="4" y="0" width="28" height="9" rx="3" fill="#c9d3e0"/><rect x="0" y="9" width="36" height="42" rx="7" fill="#e9edf2"/><rect x="0" y="22" width="36" height="13" fill="var(--acc)"/></g><path d="M94 75 h46" stroke="var(--acc)" stroke-width="5" stroke-linecap="round"/><path d="M130 63 l12 12 l-12 12" fill="none" stroke="var(--acc)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="num">06</div>
+      <div class="cap"><span class="l-el">Κάποιος κάτω από 40%; Άφησε pill δίπλα του</span><span class="l-en">Someone below 40%? Drop a pill next to them</span><small><span class="l-el">Ρώτα «sanity;» μετά από κάθε hunt.</span><span class="l-en">Ask “sanity?” after every hunt.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(14 50)"><path d="M0 0 A26 26 0 0 0 0 50 Z" fill="#c9d3e0"/><line x1="2" y1="25" x2="26" y2="25" stroke="#c9d3e0" stroke-width="4"/></g><line x1="50" y1="75" x2="194" y2="75" stroke="#3a4556" stroke-width="2" stroke-dasharray="6 6"/><text x="122" y="64" text-anchor="middle" fill="var(--acc)" font-family="Special Elite, monospace" font-size="18">15 m</text><g transform="translate(198 52)"><ellipse cx="6" cy="10" rx="6" ry="9" fill="#c9d3e0"/><ellipse cx="20" cy="34" rx="6" ry="9" fill="#c9d3e0"/></g><text x="122" y="120" text-anchor="middle" fill="var(--muted)" font-family="Special Elite, monospace" font-size="14">Myling: 12 m</text></svg>
+      <div class="num">07</div>
+      <div class="cap"><span class="l-el">Άκου τα βήματα με το Parabolic</span><span class="l-en">Listen for footsteps with the Parabolic</span><small><span class="l-el">Τα ακούς στα 15 m; → όχι Myling.</span><span class="l-en">Hear them at 15 m? → not Myling.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><rect x="22" y="110" width="60" height="10" rx="3" fill="#7a5a3a"/><line x1="42" y1="110" x2="58" y2="80" stroke="#9c6b42" stroke-width="5" stroke-linecap="round"/><path d="M58 76 C46 62 70 54 60 36 C52 24 66 18 62 12" fill="none" stroke="#b9c2ce" stroke-width="5" stroke-linecap="round" opacity=".75"/><circle cx="168" cy="76" r="46" fill="#141b26" stroke="var(--acc)" stroke-width="4"/><text x="168" y="80" text-anchor="middle" fill="var(--acc)" font-family="Special Elite, monospace" font-size="26">3:00</text><text x="168" y="104" text-anchor="middle" fill="var(--muted)" font-family="Special Elite, monospace" font-size="13">Spirit</text></svg>
+      <div class="num">08</div>
+      <div class="cap"><span class="l-el">Θυμίαμα στο room και ξεκίνα το timer</span><span class="l-en">Incense in the room, start the timer</span><small><span class="l-el">Hunt πριν τα 3 λεπτά → όχι Spirit.</span><span class="l-en">Hunt before 3 minutes → not Spirit.</span></small></div>
+    </div>
+  </div>
+
+  <div class="phase"><b>3</b> · <span class="l-el">Όταν κυνηγάει (hunt)</span><span class="l-en">When it hunts</span></div>
+  <div class="steps">
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><rect x="80" y="20" width="96" height="112" rx="4" fill="#1b2330" stroke="#3a4556" stroke-width="3"/><line x1="128" y1="20" x2="128" y2="132" stroke="#3a4556" stroke-width="3"/><circle cx="118" cy="80" r="3" fill="#8A93A3"/><circle cx="138" cy="80" r="3" fill="#8A93A3"/><g transform="translate(22 62)"><path d="M0 34 C0 8 8 -4 18 -4 C28 -4 36 8 36 34 L29 29 L23 35 L17 29 L11 35 L5 29 Z" fill="#c9d3e0" opacity=".9"/><circle cx="12" cy="10" r="3" fill="#0b1018"/><circle cx="24" cy="10" r="3" fill="#0b1018"/></g><text x="200" y="86" fill="var(--danger)" font-family="Special Elite, monospace" font-size="26">!</text></svg>
+      <div class="num">09</div>
+      <div class="cap"><span class="l-el">Κρύψου. Το loop το κάνει ο Markos.</span><span class="l-en">Hide. Markos does the looping.</span><small><span class="l-el">Μόλις τελειώσει: «sanity;» και pills.</span><span class="l-en">When it ends: “sanity?” and pills.</span></small></div>
+    </div>
+  </div>
+
+  <div class="phase"><span class="l-el">Πόση sanity τρώει ένα event</span><span class="l-en">How much sanity an event eats</span></div>
+  <div class="mini">
+    <div><b>10%</b><span class="l-el">κανονικό</span><span class="l-en">normal</span></div>
+    <div><b>15%</b>Banshee<span> · singing</span></div>
+    <div><b>20%</b>Oni</div>
+    <div><b>&lt;40%</b><span class="l-el">ώρα για pill</span><span class="l-en">pill time</span></div>
+  </div>
+
+  <div class="rule"><span class="big">💊</span><span><span class="l-el">Τα pills είναι για την ομάδα. Κράτα ένα για σένα.</span><span class="l-en">The pills are for the squad. Keep one for yourself.</span></span></div>
+</div>
+
+<script>
+(function(){
+  var KEY="phasmo-team-v1", lang="el";
+  try{ var d=JSON.parse(localStorage.getItem(KEY)||"null"); if(d && (d.lang==="en"||d.lang==="el")) lang=d.lang; }catch(e){}
+  var btn=document.getElementById("langBtn");
+  function set(l){
+    lang=l; document.documentElement.setAttribute("lang",l);
+    btn.textContent = l==="el" ? "EN" : "ΕΛ";
+    try{ localStorage.setItem(KEY, JSON.stringify({lang:l})); }catch(e){}
+  }
+  btn.addEventListener("click",function(){ set(lang==="el"?"en":"el"); });
+  set(lang);
+})();
+</script>
+</body>
+</html>
