@@ -361,6 +361,9 @@ const EV_NAMES={EMF:"EMF",DOTS:"D.O.T.S.",UV:"Ultraviolet",FRZ:"Freezing",ORB:"G
 const COMMANDS=[
  // Rule-out behaviors (ghosts-data.js) — πρώτα, ώστε οι πιο συγκεκριμένες φράσεις να κερδίζουν.
  ...RULEOUT_BEHAVIORS.map(b=>({apply:{t:"bh",id:b.id}, en:b.voice.en, el:b.voice.el})),
+ // Πριν από τα evidence: αλλιώς «breathing on spirit box» → Spirit Box και «six fingerprints» → UV.
+ {apply:{t:"bh",id:"sbBreath"}, en:["heavy breathing","breathing on spirit box"], el:["βαριά αναπνοή","αναπνοή στο spirit box"]},
+ {apply:{t:"bh",id:"sixFinger"}, en:["six fingers","6 fingers","six finger print","six fingerprints"], el:["έξι δάχτυλα","6 δάχτυλα"]},
  {apply:{t:"ev",code:"EMF",val:2}, en:["no emf","not emf","ruled out emf"], el:["όχι emf","δεν βρήκα emf","αποκλείστηκε emf"]},
  {apply:{t:"ev",code:"EMF",val:1}, en:["emf five","emf"], el:["emf πέντε","emf"]},
  {apply:{t:"ev",code:"DOTS",val:2}, en:["no dots","not dots","ruled out dots","no dutch","no d o t s"], el:["όχι dots","δεν βρήκα dots","όχι dutch"]},
@@ -385,8 +388,6 @@ const COMMANDS=[
  {apply:{t:"bh",id:"foundHide"}, en:["found my hiding spot","found the hiding spot","came straight to me"], el:["βρήκε την κρυψώνα","ήρθε ίσια σε μένα"]},
  {apply:{t:"bh",id:"male"}, en:["male ghost","male name"], el:["αρσενικό ghost","αρσενικό όνομα"]},
  {apply:{t:"bh",id:"airball"}, en:["airball","air ball","saw airball","saw the airball"], el:["airball","air ball","είδα airball"]},
- {apply:{t:"bh",id:"sbBreath"}, en:["heavy breathing","breathing on spirit box"], el:["βαριά αναπνοή","αναπνοή στο spirit box"]},
- {apply:{t:"bh",id:"sixFinger"}, en:["six fingers","6 fingers","six finger print","six fingerprints"], el:["έξι δάχτυλα","6 δάχτυλα"]},
  {apply:{t:"bh",id:"twinTouch"}, en:["two interactions","to interactions","twin touch","double interaction","double interactions"], el:["δύο interactions","διπλό interaction"]},
  {apply:{t:"bh",id:"doorSlam"}, en:["door slam","door slammed","slammed the door"], el:["έκλεισε πόρτα","χτύπησε η πόρτα"]},
 
