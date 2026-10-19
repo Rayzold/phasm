@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phasmo Journal — Squad Plan</title>
+<meta name="theme-color" content="#0A0D12">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0D12; --bg2:#11161f;
+    --paper:#EDE4CE; --paper2:#E4D9BE;
+    --ink:#2A2620; --ink-soft:#5A5244;
+    --nv:#8FE388; --nv-dim:#57996b;
+    --danger:#E15B5B; --warn:#F0C674; --muted:#8A93A3; --line:#232b38;
+    /* χρώμα ανά ρόλο */
+    --nurse:#7FD1C7; --exor:#E2A65B; --runner:#E07A7A; --detect:#9DB8E0;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0;padding:0}
+  html[lang=en] .l-el{display:none!important}
+  html:not([lang=en]) .l-en{display:none!important}
+  body{
+    background:var(--bg);
+    background-image:radial-gradient(ellipse at 50% -10%, #16202b 0%, var(--bg) 55%);
+    color:#D7DCE4;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    min-height:100vh;
+    padding:20px 14px 60px;
+    line-height:1.45;
+  }
+  .wrap{max-width:1060px;margin:0 auto}
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px;justify-content:space-between}
+  h1{font-family:"Special Elite","Courier New",monospace;font-size:clamp(24px,5vw,36px);color:var(--nv);margin:0;letter-spacing:1px;text-shadow:0 0 18px rgba(143,227,136,.25)}
+  .headerBtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .backLink,#langBtn{
+    font-family:"Special Elite",monospace;font-size:12.5px;letter-spacing:1px;
+    color:var(--muted);text-decoration:none;border:1px solid var(--line);
+    border-radius:20px;padding:6px 13px;white-space:nowrap;background:none;cursor:pointer;
+  }
+  .backLink:hover,#langBtn:hover{border-color:var(--nv);color:var(--nv)}
+  .sub{color:var(--muted);font-size:14px;margin:2px 0 22px;max-width:700px}
+  .panel{border:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),#0d1219);border-radius:10px;padding:18px 18px 16px;margin-bottom:20px}
+  .panel-label{font-family:"Special Elite",monospace;font-size:12px;letter-spacing:3px;color:var(--nv-dim);text-transform:uppercase;margin-bottom:12px}
+  .note{color:var(--muted);font-size:13px}
+  /* coverage */
+  .cov{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px,100%),1fr));gap:8px}
+  .cov-item{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#0c1119;min-width:0}
+  .cov-item .ev{font-family:"Special Elite",monospace;font-size:13px;color:#EAEDF2}
+  .cov-item .who{font-size:12.5px;margin-top:2px}
+  /* role cards */
+  .roles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(470px,100%),1fr));gap:16px}
+  .role{border:1px solid var(--line);border-top:3px solid var(--c);border-radius:10px;background:#0c1119;padding:16px;min-width:0}
+  .role-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .role-ic{font-size:26px;line-height:1}
+  .role-name{font-family:"Special Elite",monospace;font-size:20px;color:#EAEDF2;margin:0}
+  .role-title{font-family:"Special Elite",monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--c)}
+  .mission{color:#B9C2CE;font-size:13.5px;margin:0 0 12px}
+  .role h3{font-family:"Special Elite",monospace;font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:14px 0 6px;font-weight:400}
+  .items{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+  .items li{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:baseline;font-size:13px}
+  .items .it{font-weight:600;color:#EAEDF2;white-space:nowrap}
+  .items .why{color:#B9C2CE;min-width:0}
+  .lo2 .it{color:var(--c)}
+  .duties{margin:0;padding-left:18px;font-size:13px;color:#C7CEDA}
+  .duties li{margin-bottom:3px}
+  .tests{display:flex;flex-wrap:wrap;gap:5px}
+  .tag{font-size:11.5px;border:1px solid var(--line);border-radius:12px;padding:2px 8px;color:#C7CEDA;background:#111823}
+  .swap{margin-top:8px;font-size:12.5px;color:var(--warn);border-left:2px solid #6b5a2a;padding-left:9px}
+  /* phases */
+  .phases{display:grid;gap:10px}
+  .phase{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr);gap:12px;border-bottom:1px solid #171d27;padding-bottom:10px}
+  .phase:last-child{border-bottom:0}
+  .phase .ph{font-family:"Special Elite",monospace;color:var(--nv);font-size:14px}
+  .phase .ph small{display:block;color:var(--muted);font-family:system-ui,sans-serif;font-size:12px;margin-top:2px}
+  .phase ul{margin:0;padding-left:0;list-style:none;font-size:13px;display:grid;gap:4px}
+  .phase li b{color:var(--c)}
+  @media (max-width:560px){.phase{grid-template-columns:minmax(0,1fr)}}
+  /* table */
+  .tw{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:620px}
+  th{text-align:left;font-family:"Special Elite",monospace;font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;padding:6px 10px;border-bottom:1px solid var(--line)}
+  td{padding:7px 10px;border-bottom:1px solid #171d27;color:#C7CEDA;vertical-align:top}
+  td.n{font-family:"Special Elite",monospace;white-space:nowrap}
+  .calls{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:8px}
+  .call{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;background:#0c1119}
+  .call code{font-family:"Special Elite",monospace;color:var(--nv);font-size:13.5px}
+  a{color:var(--nv)}
+  footer{margin-top:34px;color:#5b6473;font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>SQUAD PLAN</h1>
+    <div class="headerBtns">
+      <button id="langBtn" title="Ελληνικά / English">ΕΛ</button>
+      <a class="backLink" href="questionnaire.html">📋 <span class="l-el">Ερωτηματολόγιο</span><span class="l-en">Quiz</span></a>
+      <a class="backLink" href="index.html"><span class="l-el">← Αρχική</span><span class="l-en">← Dashboard</span></a>
+    </div>
+  </header>
+  <p class="sub"><span class="l-el">Ρόλοι για ομάδα 4 ατόμων. Το 1ο loadout καλύπτει και τα 7 evidence από την πρώτη είσοδο. Στην 1η επιστροφή στο truck, κάθε ρόλος αλλάζει σε εξοπλισμό για τα rule-out tests και την προστασία στα hunts.</span><span class="l-en">Roles for a 4-player squad. Loadout 1 covers all 7 evidence types on the first entry. On the first trip back to the truck, each role swaps to gear for rule-out tests and hunt protection.</span></p>
+
+  <!-- ===== Evidence coverage ===== -->
+  <div class="panel">
+    <div class="panel-label"><span class="l-el">Κάλυψη evidence — Loadout 1</span><span class="l-en">Evidence coverage — Loadout 1</span></div>
+    <div class="cov">
+      <div class="cov-item"><div class="ev">EMF 5</div><div class="who" style="color:var(--runner)">Markos</div></div>
+      <div class="cov-item"><div class="ev">D.O.T.S.</div><div class="who" style="color:var(--detect)">Nikos</div></div>
+      <div class="cov-item"><div class="ev">Ultraviolet</div><div class="who" style="color:var(--runner)">Markos</div></div>
+      <div class="cov-item"><div class="ev">Freezing</div><div class="who"><span style="color:var(--nurse)">Paschalia</span> · <span style="color:var(--exor)">Kiki</span></div></div>
+      <div class="cov-item"><div class="ev">Ghost Orbs</div><div class="who" style="color:var(--detect)">Nikos</div></div>
+      <div class="cov-item"><div class="ev">Ghost Writing</div><div class="who" style="color:var(--exor)">Kiki</div></div>
+      <div class="cov-item"><div class="ev">Spirit Box</div><div class="who" style="color:var(--nurse)">Paschalia</div></div>
+    </div>
+    <p class="note" style="margin:10px 0 0"><span class="l-el">Δύο thermometers: μοιράζετε το σπίτι στα δύο (π.χ. πάνω / κάτω όροφος) και βρίσκετε το ghost room στον μισό χρόνο.</span><span class="l-en">Two thermometers: split the house in half (e.g. upstairs / downstairs) and find the ghost room in half the time.</span></p>
+  </div>
+
+  <!-- ===== Roles ===== -->
+  <div class="roles">
+
+    <!-- Paschalia -->
+    <section class="role" style="--c:var(--nurse)">
+      <div class="role-head"><span class="role-ic">🩺</span><div><h2 class="role-name">Paschalia</h2><div class="role-title">Nurse</div></div></div>
+      <p class="mission"><span class="l-el">Δουλεύει το ghost room με τη φωνή και κρατά τη sanity της ομάδας υπό έλεγχο.</span><span class="l-en">Works the ghost room by voice and keeps the squad's sanity in check.</span></p>
+      <h3>Loadout 1</h3>
+      <ul class="items">
+        <li><span class="it">Thermometer</span><span class="why"><span class="l-el">Μισό σπίτι για το πιο κρύο room. Κάτω από 0 °C = Freezing.</span><span class="l-en">Half the house, hunting the coldest room. Below 0 °C = Freezing.</span></span></li>
+        <li><span class="it">Spirit Box</span><span class="why"><span class="l-el">Στο ghost room, φώτα σβηστά, μόνη ή ανά δύο.</span><span class="l-en">In the ghost room, lights off, alone or in a pair.</span></span></li>
+        <li><span class="it">Sound Recorder</span><span class="why"><span class="l-el">Ηχογραφεί paranormal ήχους (λεφτά) και τρέχει τα Moroi και Myling tests.</span><span class="l-en">Records paranormal sounds (money) and runs the Moroi and Myling tests.</span></span></li>
+      </ul>
+      <h3><span class="l-el">Καθήκοντα</span><span class="l-en">Duties</span></h3>
+      <ul class="duties">
+        <li><span class="l-el">Μετά από κάθε event ή hunt ρωτά «sanity;» και περνάει τις τιμές στο Sanity Tracker.</span><span class="l-en">After every event or hunt she asks "sanity?" and logs it in the Sanity Tracker.</span></li>
+        <li><span class="l-el">Σε singing event ή event που χτυπά κάποιον, μετράει πόση sanity χάθηκε (10 / 15 / 20%).</span><span class="l-en">On a singing event or an event that hits someone, she measures the sanity loss (10 / 15 / 20%).</span></li>
+        <li><span class="l-el">Μετά από sound recording, στέκεται σε φωτισμένο room και κοιτά αν πέφτει η sanity της.</span><span class="l-en">After a sound recording, she stands in a lit room and watches whether her sanity drops.</span></li>
+      </ul>
+      <h3><span class="l-el">Rule-out tests</span><span class="l-en">Rule-out tests</span></h3>
+      <div class="tests"><span class="tag">Banshee −15%</span><span class="tag">Oni −20%</span><span class="tag">Moroi drain</span><span class="tag">Myling recorder</span><span class="tag">Spirit 3′ smudge</span><span class="tag">Myling 12 m (Parabolic)</span></div>
+      <h3 class="lo2">Loadout 2 <span class="l-el">· 1η επιστροφή στο truck</span><span class="l-en">· first truck return</span></h3>
+      <ul class="items lo2">
+        <li><span class="it">Sanity Pills ×2</span><span class="why"><span class="l-el">Μία για εκείνη, μία για όποιον πέσει χαμηλότερα. Είναι η «νοσοκόμα».</span><span class="l-en">One for her, one for whoever is lowest. She's the medic.</span></span></li>
+        <li><span class="it">Parabolic Microphone</span><span class="why"><span class="l-el">Myling footsteps test (~15 m) και Banshee scream.</span><span class="l-en">Myling footsteps test (~15 m) and the Banshee scream.</span></span></li>
+        <li><span class="it">Incense</span><span class="why"><span class="l-el">Smudge στο room και έναρξη του Smudge Timer: Spirit 3′, Yurei 90s.</span><span class="l-en">Smudge the room and start the Smudge Timer: Spirit 3 min, Yurei 90s.</span></span></li>
+      </ul>
+      <div class="swap"><span class="l-el">Αν το Spirit Box είναι ακόμα αβέβαιο, κρατά το στη θέση του Parabolic.</span><span class="l-en">If Spirit Box is still unresolved, keep it instead of the Parabolic.</span></div>
+    </section>
+
+    <!-- Kiki -->
+    <section class="role" style="--c:var(--exor)">
+      <div class="role-head"><span class="role-ic">✝️</span><div><h2 class="role-name">Kiki</h2><div class="role-title">Exorcist</div></div></div>
+      <p class="mission"><span class="l-el">Οχυρώνει το ghost room και τρέχει τα tests με salt, crucifix και φλόγες.</span><span class="l-en">Fortifies the ghost room and runs the salt, crucifix and flame tests.</span></p>
+      <h3>Loadout 1</h3>
+      <ul class="items">
+        <li><span class="it">Thermometer</span><span class="why"><span class="l-el">Το άλλο μισό του σπιτιού. Όποια βρει πρώτη το κρύο το λέει στον ασύρματο.</span><span class="l-en">The other half of the house. Whoever finds the cold first calls it out.</span></span></li>
+        <li><span class="it">Ghost Writing Book</span><span class="why"><span class="l-el">Στο σημείο όπου «κάθεται» το ghost στο room του.</span><span class="l-en">On the spot where the ghost hangs out in its room.</span></span></li>
+        <li><span class="it">Crucifix</span><span class="why"><span class="l-el">Στο κέντρο του ghost room. Αργότερα χρησιμεύει και για το Demon range test.</span><span class="l-en">In the center of the ghost room. It also serves the Demon range test later.</span></span></li>
+      </ul>
+      <h3><span class="l-el">Καθήκοντα</span><span class="l-en">Duties</span></h3>
+      <ul class="duties">
+        <li><span class="l-el">Σημειώνει πού στέκεται το ghost την ώρα του hunt σε σχέση με το crucifix: εντός, εκτός ή ×1.5 range.</span><span class="l-en">Notes where the ghost starts a hunt relative to the crucifix: inside, outside, or within ×1.5 range.</span></li>
+        <li><span class="l-el">Μετράει τα smudge blind δευτερόλεπτα στο hunt: 4 / 5 / 6 / 7.</span><span class="l-en">Counts the smudge-blind seconds in a hunt: 4 / 5 / 6 / 7.</span></li>
+      </ul>
+      <h3><span class="l-el">Rule-out tests</span><span class="l-en">Rule-out tests</span></h3>
+      <div class="tests"><span class="tag">Wraith salt</span><span class="tag">Gallu 2nd salt</span><span class="tag">Demon ×1.5</span><span class="tag">Onryo 3rd flame</span><span class="tag">Onryo 4 m</span><span class="tag">Moroi 7s</span><span class="tag">Gallu 4s / 6s</span></div>
+      <h3 class="lo2">Loadout 2 <span class="l-el">· 1η επιστροφή στο truck</span><span class="l-en">· first truck return</span></h3>
+      <ul class="items lo2">
+        <li><span class="it">Salt</span><span class="why"><span class="l-el">Δύο σωροί με ≥2s διαφορά στην πόρτα του room: Wraith και Gallu μαζί.</span><span class="l-en">Two piles ≥2s apart at the room's door: Wraith and Gallu in one go.</span></span></li>
+        <li><span class="it">Firelight</span><span class="why"><span class="l-el">Κεριά στις γωνίες: Onryo (3η φλόγα, 4 m) και λιγότερο sanity drain.</span><span class="l-en">Candles in the corners: Onryo (3rd flame, 4 m) and slower sanity drain.</span></span></li>
+        <li><span class="it">Incense</span><span class="why"><span class="l-el">Η δική της έξοδος σε hunt και το μέτρημα του smudge blind.</span><span class="l-en">Her own hunt escape and the smudge-blind count.</span></span></li>
+      </ul>
+      <div class="swap"><span class="l-el">Το crucifix και το book μένουν στημένα στο room. Αν δεν έχει βρεθεί Freezing, κρατά το Thermometer στη θέση του Firelight.</span><span class="l-en">The crucifix and book stay set up in the room. If Freezing is still unknown, keep the Thermometer instead of the Firelight.</span></div>
+    </section>
+
+    <!-- Markos -->
+    <section class="role" style="--c:var(--runner)">
+      <div class="role-head"><span class="role-ic">🏃</span><div><h2 class="role-name">Markos</h2><div class="role-title">Runner</div></div></div>
+      <p class="mission"><span class="l-el">Κυνηγά interactions σε όλο το σπίτι, βγάζει τις φωτογραφίες και κάνει loop στα hunts.</span><span class="l-en">Chases interactions across the house, takes the photos and loops the ghost in hunts.</span></p>
+      <h3>Loadout 1</h3>
+      <ul class="items">
+        <li><span class="it">UV Light</span><span class="why"><span class="l-el">Πόρτες, switches, παράθυρα, keyboards. 6 δάχτυλα = Obake.</span><span class="l-en">Doors, switches, windows, keyboards. Six fingers = Obake.</span></span></li>
+        <li><span class="it">EMF Reader</span><span class="why"><span class="l-el">Τρέχει σε κάθε interaction για EMF 5.</span><span class="l-en">Rushes to every interaction for EMF 5.</span></span></li>
+        <li><span class="it">Photo Camera</span><span class="why"><span class="l-el">Φωτογραφία σε κάθε event (λεφτά και Phantom test).</span><span class="l-en">Snap every event (money and the Phantom test).</span></span></li>
+      </ul>
+      <h3><span class="l-el">Καθήκοντα</span><span class="l-en">Duties</span></h3>
+      <ul class="duties">
+        <li><span class="l-el">Ελέγχει breaker, νεροχύτες και μπανιέρες για dirty water, πόρτες που κουνήθηκαν μισές.</span><span class="l-en">Checks the breaker, sinks and tubs for dirty water, doors moved partway.</span></li>
+        <li><span class="l-el">Στα hunts είναι το δόλωμα: τρέχει τα LOS, Dayan και Kormos speed tests.</span><span class="l-en">In hunts he's the bait: runs the LOS, Dayan and Kormos speed tests.</span></li>
+      </ul>
+      <h3><span class="l-el">Rule-out tests</span><span class="l-en">Rule-out tests</span></h3>
+      <div class="tests"><span class="tag">Phantom photo</span><span class="tag">Poltergeist dirty water</span><span class="tag">Jinn / Hantu breaker</span><span class="tag">Mare light</span><span class="tag">Yurei door</span><span class="tag">LOS speed-up</span><span class="tag">Dayan</span><span class="tag">Moroi pill</span></div>
+      <h3 class="lo2">Loadout 2 <span class="l-el">· 1η επιστροφή στο truck</span><span class="l-en">· first truck return</span></h3>
+      <ul class="items lo2">
+        <li><span class="it">Photo Camera</span><span class="why"><span class="l-el">Τη κρατά: ghost photo, bone, cursed item για τα λεφτά.</span><span class="l-en">Keeps it: ghost photo, bone, cursed item for the money.</span></span></li>
+        <li><span class="it">Head Gear</span><span class="why"><span class="l-el">Ο Nikos βλέπει τα hunts από το truck: blink pattern, shapeshift, ταχύτητα.</span><span class="l-en">Nikos watches the hunts from the truck: blink pattern, shapeshift, speed.</span></span></li>
+        <li><span class="it">Sanity Pills</span><span class="why"><span class="l-el">Pill μέσα στο hunt για το Moroi test (επιβραδύνει;).</span><span class="l-en">Pill mid-hunt for the Moroi test (does it slow down?).</span></span></li>
+      </ul>
+      <div class="swap"><span class="l-el">Αν δεν έχουν κλείσει τα UV ή EMF, κρατά αυτό που λείπει στη θέση των Sanity Pills.</span><span class="l-en">If UV or EMF is still open, keep the missing one instead of the Sanity Pills.</span></div>
+    </section>
+
+    <!-- Nikos -->
+    <section class="role" style="--c:var(--detect)">
+      <div class="role-head"><span class="role-ic">🔎</span><div><h2 class="role-name">Nikos</h2><div class="role-title">Detective</div></div></div>
+      <p class="mission"><span class="l-el">Στήνει παρακολούθηση στο ghost room και τρέχει την έρευνα από το truck.</span><span class="l-en">Sets up surveillance in the ghost room and runs the investigation from the truck.</span></p>
+      <h3>Loadout 1</h3>
+      <ul class="items">
+        <li><span class="it">Video Camera</span><span class="why"><span class="l-el">Στραμμένη στο ghost room. Orbs και Goryo DOTS φαίνονται μόνο στην οθόνη του truck.</span><span class="l-en">Aimed at the ghost room. Orbs and Goryo DOTS only show on the truck monitor.</span></span></li>
+        <li><span class="it">D.O.T.S. Projector</span><span class="why"><span class="l-el">Μέσα στο ghost room, με θέα στο σημείο που κινείται το ghost.</span><span class="l-en">Inside the ghost room, covering where the ghost moves.</span></span></li>
+        <li><span class="it">Motion Sensor</span><span class="why"><span class="l-el">Στην πόρτα του room. Φαίνεται στον χάρτη του truck.</span><span class="l-en">In the room's doorway. It shows on the truck map.</span></span></li>
+      </ul>
+      <h3><span class="l-el">Καθήκοντα</span><span class="l-en">Duties</span></h3>
+      <ul class="duties">
+        <li><span class="l-el">Κρατά το Evidence Board ενημερωμένο και διαβάζει average sanity (το μεσαίο από τα 5 νούμερα).</span><span class="l-en">Keeps the Evidence Board up to date and reads the average sanity (the middle of the 5 numbers).</span></li>
+        <li><span class="l-el">Παρακολουθεί τις φάσεις του Obambo στο watch και προειδοποιεί για αλλαγή room.</span><span class="l-en">Tracks the Obambo phases on the watch and warns about room changes.</span></li>
+      </ul>
+      <h3><span class="l-el">Rule-out tests</span><span class="l-en">Rule-out tests</span></h3>
+      <div class="tests"><span class="tag">Goryo room change</span><span class="tag">Yurei 90s</span><span class="tag">Shade same room</span><span class="tag">Obambo phase</span><span class="tag">Phantom / Oni blink</span><span class="tag">Obake shapeshift</span><span class="tag">Raiju 15 m</span></div>
+      <h3 class="lo2">Loadout 2 <span class="l-el">· 1η επιστροφή στο truck</span><span class="l-en">· first truck return</span></h3>
+      <ul class="items lo2">
+        <li><span class="it">Motion Sensor ×2</span><span class="why"><span class="l-el">Κάθε έξοδος του ghost room καλυμμένη: Yurei (smudged 90s) και Shade tests.</span><span class="l-en">Every exit of the ghost room covered: Yurei (smudged 90s) and Shade tests.</span></span></li>
+        <li><span class="it">Tripod</span><span class="why"><span class="l-el">Καλύτερη γωνία για τη Video Camera, ψηλά και σταθερά.</span><span class="l-en">A better angle for the Video Camera, high and steady.</span></span></li>
+      </ul>
+      <div class="swap"><span class="l-el">Αν τα Orbs είναι ακόμα αβέβαια, πάρε 2η Video Camera στη θέση του 2ου Motion Sensor.</span><span class="l-en">If Orbs are still unresolved, take a 2nd Video Camera instead of the 2nd Motion Sensor.</span></div>
+    </section>
+  </div>
+
+  <!-- ===== Phases ===== -->
+  <div class="panel" style="margin-top:20px">
+    <div class="panel-label"><span class="l-el">Φάσεις του contract</span><span class="l-en">Contract phases</span></div>
+    <div class="phases">
+      <div class="phase">
+        <div class="ph">1 · <span class="l-el">Είσοδος</span><span class="l-en">Entry</span><small><span class="l-el">πρώτα 2–3 λεπτά</span><span class="l-en">first 2–3 min</span></small></div>
+        <ul>
+          <li style="--c:var(--nurse)"><b>Paschalia</b> + <b style="--c:var(--exor)">Kiki</b>: <span class="l-el">thermometers σε διαφορετικούς ορόφους.</span><span class="l-en">thermometers on different floors.</span></li>
+          <li style="--c:var(--runner)"><b>Markos</b>: <span class="l-el">breaker, UV στις πόρτες στη διαδρομή, EMF σε ό,τι κουνηθεί.</span><span class="l-en">breaker, UV on doors along the way, EMF on anything that moves.</span></li>
+          <li style="--c:var(--detect)"><b>Nikos</b>: <span class="l-el">περιμένει το ghost room και φέρνει Video Camera, DOTS και Motion Sensor.</span><span class="l-en">waits for the ghost room call, then brings Video Camera, DOTS and Motion Sensor.</span></li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="ph">2 · <span class="l-el">Ghost room</span><span class="l-en">Ghost room</span><small><span class="l-el">στήσιμο</span><span class="l-en">setup</span></small></div>
+        <ul>
+          <li style="--c:var(--exor)"><b>Kiki</b>: <span class="l-el">book και crucifix στο room.</span><span class="l-en">book and crucifix in the room.</span></li>
+          <li style="--c:var(--nurse)"><b>Paschalia</b>: <span class="l-el">Spirit Box με σβηστά φώτα, recorder σε κάθε ήχο.</span><span class="l-en">Spirit Box with the lights off, recorder on every sound.</span></li>
+          <li style="--c:var(--detect)"><b>Nikos</b>: <span class="l-el">στήνει τα δικά του και γυρίζει στο truck να κοιτάξει την κάμερα.</span><span class="l-en">sets up his gear and heads back to the truck to watch the camera.</span></li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="ph">3 · <span class="l-el">Επιστροφή στο truck</span><span class="l-en">Truck return</span><small><span class="l-el">αλλαγή σε Loadout 2</span><span class="l-en">swap to Loadout 2</span></small></div>
+        <ul>
+          <li><span class="l-el">Πότε: όταν το room είναι στημένο και έχουν βγει ή αποκλειστεί 1–2 evidence, ή όταν η sanity πέσει ~60%.</span><span class="l-en">When: once the room is set up and 1–2 evidence are found or ruled out, or when sanity drops to ~60%.</span></li>
+          <li><span class="l-el">Περάστε τα ✓ / ✗ στο Evidence Board πριν ξαναμπείτε, και κοιτάξτε το «Επόμενο item» για τα swaps.</span><span class="l-en">Log the ✓ / ✗ on the Evidence Board before going back in, and check "Next item" for the swaps.</span></li>
+          <li><span class="l-el">Ό,τι evidence έχει κλείσει δεν ξαναμπαίνει. Τη θέση του την παίρνει ο εξοπλισμός του Loadout 2.</span><span class="l-en">Evidence gear that's already resolved stays behind. Loadout 2 gear takes its slot.</span></li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="ph">4 · Hunt<small><span class="l-el">πρωτόκολλο</span><span class="l-en">protocol</span></small></div>
+        <ul>
+          <li style="--c:var(--detect)"><b>Nikos</b>: <span class="l-el">φωνάζει «HUNT», μετράει τη διάρκεια, βλέπει από το Head Gear (blink, shapeshift, ταχύτητα).</span><span class="l-en">calls "HUNT", times it, watches through the Head Gear (blink, shapeshift, speed).</span></li>
+          <li style="--c:var(--runner)"><b>Markos</b>: <span class="l-el">κάνει loop. Στο τέλος λέει αν υπήρξε LOS speed-up.</span><span class="l-en">loops it. At the end, reports whether there was a LOS speed-up.</span></li>
+          <li style="--c:var(--exor)"><b>Kiki</b>: <span class="l-el">smudge αν τη βρει και μετράει τα δευτερόλεπτα του blind.</span><span class="l-en">smudges if it finds her and counts the blind seconds.</span></li>
+          <li style="--c:var(--nurse)"><b>Paschalia</b>: <span class="l-el">κρύβεται. Μετά το hunt, sanity check και pills σε όποιον είναι κάτω από 40%.</span><span class="l-en">hides. After the hunt: sanity check and pills for anyone below 40%.</span></li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="ph">5 · <span class="l-el">Κλείσιμο</span><span class="l-en">Wrap-up</span><small><span class="l-el">πριν φύγετε</span><span class="l-en">before leaving</span></small></div>
+        <ul>
+          <li style="--c:var(--runner)"><b>Markos</b>: <span class="l-el">ghost photo, bone, cursed item.</span><span class="l-en">ghost photo, bone, cursed item.</span></li>
+          <li style="--c:var(--detect)"><b>Nikos</b>: <span class="l-el">επιβεβαιώνει το ghost στο journal. Αν μένουν 2, τρέχτε το rule-out test που τα ξεχωρίζει.</span><span class="l-en">confirms the ghost in the journal. If 2 remain, run the rule-out test that splits them.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Loadout summary table ===== -->
+  <div class="panel">
+    <div class="panel-label"><span class="l-el">Σύνοψη loadouts</span><span class="l-en">Loadout summary</span></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th><span class="l-el">Παίκτης</span><span class="l-en">Player</span></th><th><span class="l-el">Ρόλος</span><span class="l-en">Role</span></th><th>Loadout 1</th><th>Loadout 2</th></tr></thead>
+        <tbody>
+          <tr><td class="n" style="color:var(--nurse)">Paschalia</td><td>Nurse</td><td>Thermometer · Spirit Box · Sound Recorder</td><td>Sanity Pills ×2 · Parabolic Microphone · Incense</td></tr>
+          <tr><td class="n" style="color:var(--exor)">Kiki</td><td>Exorcist</td><td>Thermometer · Ghost Writing Book · Crucifix</td><td>Salt · Firelight · Incense</td></tr>
+          <tr><td class="n" style="color:var(--runner)">Markos</td><td>Runner</td><td>UV Light · EMF Reader · Photo Camera</td><td>Photo Camera · Head Gear · Sanity Pills</td></tr>
+          <tr><td class="n" style="color:var(--detect)">Nikos</td><td>Detective</td><td>Video Camera · D.O.T.S. · Motion Sensor</td><td>Motion Sensor ×2 · Tripod</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== Callouts ===== -->
+  <div class="panel">
+    <div class="panel-label"><span class="l-el">Callouts στον ασύρματο</span><span class="l-en">Voice callouts</span></div>
+    <div class="calls">
+      <div class="call"><code>"ROOM: [room]"</code><br><span class="l-el">Βρέθηκε ghost room. Όλοι συγκλίνουν.</span><span class="l-en">Ghost room found. Everyone converges.</span></div>
+      <div class="call"><code>"[evidence] ✓ / ✗"</code><br><span class="l-el">Ο Nikos το περνάει αμέσως στο board.</span><span class="l-en">Nikos logs it on the board right away.</span></div>
+      <div class="call"><code>"EVENT"</code><br><span class="l-el">Ο Markos βγάζει φωτογραφία, η Paschalia μετράει sanity.</span><span class="l-en">Markos takes the photo, Paschalia checks sanity.</span></div>
+      <div class="call"><code>"HUNT"</code><br><span class="l-el">Κρυψώνες. Ο Markos κάνει loop, η Kiki μετράει το smudge.</span><span class="l-en">Hide. Markos loops, Kiki counts the smudge.</span></div>
+      <div class="call"><code>"TRUCK"</code><br><span class="l-el">Όλοι πίσω για swap σε Loadout 2.</span><span class="l-en">Everyone back to swap to Loadout 2.</span></div>
+      <div class="call"><code>"PILLS"</code><br><span class="l-el">Κάποιος κάτω από 40%: η Paschalia πηγαίνει.</span><span class="l-en">Someone below 40%: Paschalia goes.</span></div>
+    </div>
+    <p class="note" style="margin:12px 0 0"><span class="l-el">Οι αναλυτικοί κανόνες για κάθε test βρίσκονται στο <a href="index.html#rule-outs">Rule-Outs</a> του dashboard.</span><span class="l-en">The detailed rules for every test are in the dashboard's <a href="index.html#rule-outs">Rule-Outs</a> section.</span></p>
+  </div>
+
+  <footer>Phasmo Journal · Squad Plan</footer>
+</div>
+<script>
+const LS_KEY="phasmo-team-v1";
+let lang="en";
+try{ const d=JSON.parse(localStorage.getItem(LS_KEY)||"null"); if(d && (d.lang==="en"||d.lang==="el")) lang=d.lang; }catch(e){}
+const langBtn=document.getElementById("langBtn");
+function setLang(l){
+  lang=l;
+  document.documentElement.setAttribute("lang",l);
+  langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({lang})); }catch(e){}
+}
+langBtn.onclick=()=>setLang(lang==="el" ? "en" : "el");
+setLang(lang);
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
