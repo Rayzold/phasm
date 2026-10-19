@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Phasmo Journal — Exorcist Field Guide</title>
+<meta name="theme-color" content="#0A0D12">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap">
+<style>
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+
+/* Layout: one big picture per step, a 3–8 word caption under it. Single dark look (night-vision journal), matches Phasmo Journal. */
+:root{
+  --bg:#0A0D12; --card:#0f141c; --line:#232b38; --fg:#E4E8EE; --muted:#8A93A3;
+  --exor:#E2A65B; --nv:#8FE388; --cold:#8FC7FF; --danger:#E15B5B; --paper:#EDE4CE;
+  --f-display:"Special Elite","Courier New",monospace;
+  --f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body)}
+html[lang=en] .l-el{display:none!important}
+html:not([lang=en]) .l-en{display:none!important}
+.wrap{max-width:900px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:22px 56px;display:grid;gap:22px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-family:var(--f-display);font-size:13px;letter-spacing:1px;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:6px 13px;background:none;cursor:pointer}
+.btn:hover,.btn:focus-visible{border-color:var(--exor);color:var(--exor);outline:none}
+.hero{display:grid;justify-items:center;text-align:center;gap:6px}
+.hero svg{width:min(150px,40vw);height:auto}
+h1{font-family:var(--f-display);font-size:clamp(30px,7vw,48px);color:var(--exor);margin:0;letter-spacing:2px;text-wrap:balance}
+.who{font-size:18px;color:var(--muted)}
+.job{font-size:clamp(18px,4vw,22px);margin:4px 0 0;text-wrap:balance}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:16px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 14px 16px;display:grid;gap:10px;align-content:start;min-width:0}
+.step svg{width:100%;height:auto;max-width:100%;display:block}
+.num{font-family:var(--f-display);color:var(--exor);font-size:14px;letter-spacing:2px}
+.cap{font-size:19px;line-height:1.3;font-weight:600;text-wrap:balance}
+.cap small{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:4px}
+.phase{font-family:var(--f-display);font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px}
+.phase b{color:var(--exor);font-weight:400}
+.rule{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--danger);border-radius:10px;padding:14px 16px;font-size:18px;font-weight:600}
+.rule .big{font-size:34px;line-height:1}
+.mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr));gap:10px}
+.mini div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center;font-size:15px}
+.mini b{display:block;font-family:var(--f-display);font-size:26px;color:var(--exor);font-weight:400}
+.mini span{color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:no-preference){ .flame{animation:fl 1.6s ease-in-out infinite alternate;transform-origin:50% 100%} }
+@keyframes fl{from{transform:scaleY(1)}to{transform:scaleY(1.12)}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <div class="btns"><a class="btn" href="team.html" id="backBtn"><span class="l-el">← Ομάδα</span><span class="l-en">← Squad</span></a></div>
+    <div class="btns"><button class="btn" id="langBtn" type="button">ΕΛ</button></div>
+  </div>
+
+  <div class="hero">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="56" fill="#1a1510" stroke="var(--exor)" stroke-width="3"/>
+      <rect x="53" y="22" width="14" height="76" rx="3" fill="var(--exor)"/>
+      <rect x="32" y="42" width="56" height="14" rx="3" fill="var(--exor)"/>
+    </svg>
+    <h1>EXORCIST</h1>
+    <div class="who">Kiki</div>
+    <p class="job"><span class="l-el">Φυλάς το δωμάτιο του φαντάσματος. Το δοκιμάζεις με αλάτι, κεριά και καπνό.</span><span class="l-en">You guard the ghost's room. You test it with salt, candles and smoke.</span></p>
+  </div>
+
+  <div class="phase"><b>1</b> · <span class="l-el">Πρώτη είσοδος</span><span class="l-en">First trip in</span> — Thermometer · Ghost Writing Book · Crucifix</div>
+  <div class="steps">
+    <!-- 1 find the cold -->
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true">
+        <rect width="240" height="150" rx="10" fill="#0b1018"/>
+        <rect x="96" y="14" width="26" height="96" rx="13" fill="#1b2330" stroke="#c9d3e0" stroke-width="3"/>
+        <rect x="104" y="50" width="10" height="56" rx="5" fill="var(--cold)"/>
+        <circle cx="109" cy="118" r="20" fill="var(--cold)" stroke="#c9d3e0" stroke-width="3"/>
+        <g stroke="var(--cold)" stroke-width="5" stroke-linecap="round">
+          <line x1="185" y1="45" x2="185" y2="105"/><line x1="159" y1="60" x2="211" y2="90"/><line x1="159" y1="90" x2="211" y2="60"/>
+        </g>
+        <text x="40" y="80" fill="var(--cold)" font-family="Special Elite, monospace" font-size="30">0°</text>
+      </svg>
+      <div class="num">01</div>
+      <div class="cap"><span class="l-el">Βρες το πιο κρύο δωμάτιο</span><span class="l-en">Find the coldest room</span><small><span class="l-el">Η Paschalia ψάχνει τον άλλο όροφο.</span><span class="l-en">Paschalia checks the other floor.</span></small></div>
+    </div>
+    <!-- 2 book -->
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true">
+        <rect width="240" height="150" rx="10" fill="#0b1018"/>
+        <path d="M40 50 L120 40 L120 118 L40 128 Z" fill="var(--paper)"/>
+        <path d="M200 50 L120 40 L120 118 L200 128 Z" fill="#E4D9BE"/>
+        <line x1="120" y1="40" x2="120" y2="118" stroke="#7a6d55" stroke-width="3"/>
+        <path d="M140 70 q12 -10 22 2 t24 -2 M138 92 q14 8 26 -4 t22 4" fill="none" stroke="#5a2a2a" stroke-width="4" stroke-linecap="round"/>
+        <g transform="translate(70 18)"><path d="M0 26 L18 0 L24 6 L6 32 Z" fill="var(--exor)"/><path d="M0 26 L-4 38 L6 32 Z" fill="#c9d3e0"/></g>
+      </svg>
+      <div class="num">02</div>
+      <div class="cap"><span class="l-el">Άσε το βιβλίο εκεί που «κάθεται»</span><span class="l-en">Leave the book where it hangs out</span><small><span class="l-el">Γράφει; → Ghost Writing ✓</span><span class="l-en">It writes? → Ghost Writing ✓</span></small></div>
+    </div>
+    <!-- 3 crucifix center -->
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true">
+        <rect width="240" height="150" rx="10" fill="#0b1018"/>
+        <rect x="20" y="16" width="200" height="118" fill="none" stroke="#3a4556" stroke-width="3" stroke-dasharray="6 6"/>
+        <circle cx="120" cy="75" r="48" fill="rgba(226,166,91,.12)" stroke="var(--exor)" stroke-width="2" stroke-dasharray="4 5"/>
+        <rect x="114" y="48" width="12" height="54" rx="2" fill="var(--exor)"/>
+        <rect x="99" y="62" width="42" height="11" rx="2" fill="var(--exor)"/>
+        <text x="174" y="128" fill="var(--muted)" font-family="Special Elite, monospace" font-size="15">3–5 m</text>
+      </svg>
+      <div class="num">03</div>
+      <div class="cap"><span class="l-el">Σταυρός στη μέση του δωματίου</span><span class="l-en">Cross in the middle of the room</span><small><span class="l-el">Κάηκε; Το ghost ήταν μέσα στον κύκλο.</span><span class="l-en">Burned? The ghost was inside the circle.</span></small></div>
+    </div>
+  </div>
+
+  <div class="phase"><b>2</b> · <span class="l-el">Πίσω στο truck → αλλαγή</span><span class="l-en">Back to the truck → swap</span> — Salt · Firelight · Incense</div>
+  <div class="steps">
+    <!-- 4 two salt piles -->
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true">
+        <rect width="240" height="150" rx="10" fill="#0b1018"/>
+        <rect x="96" y="10" width="48" height="70" fill="none" stroke="#3a4556" stroke-width="4"/>
+        <ellipse cx="80" cy="112" rx="34" ry="12" fill="#e9edf2"/>
+        <ellipse cx="160" cy="112" rx="34" ry="12" fill="#e9edf2"/>
+        <g fill="#2b333f"><ellipse cx="72" cy="110" rx="6" ry="4"/><ellipse cx="86" cy="113" rx="6" ry="4"/></g>
+        <text x="120" y="140" text-anchor="middle" fill="var(--exor)" font-family="Special Elite, monospace" font-size="16">⟵ 2s ⟶</text>
+      </svg>
+      <div class="num">04</div>
+      <div class="cap"><span class="l-el">Δύο σωρούς αλάτι, με 2 δευτερόλεπτα διαφορά</span><span class="l-en">Two salt piles, 2 seconds apart</span><small><span class="l-el">Πάτησε ένα → όχι Wraith. Πάτησε και τα δύο → όχι Gallu.</span><span class="l-en">Steps in one → not Wraith. Steps in both → not Gallu.</span></small></div>
+    </div>
+    <!-- 5 candles corners -->
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true">
+        <rect width="240" height="150" rx="10" fill="#0b1018"/>
+        <rect x="24" y="14" width="192" height="122" fill="none" stroke="#3a4556" stroke-width="3"/>
+        <defs><g id="cnd">
+          <circle cx="0" cy="0" r="28" fill="rgba(240,198,116,.10)"/>
+          <rect x="-5" y="-4" width="10" height="18" rx="2" fill="var(--paper)"/>
+          <path class="flame" d="M0 -18 C6 -10 5 -5 0 -4 C-5 -5 -6 -10 0 -18 Z" fill="#F0C674"/>
+        </g></defs>
+        <use href="#cnd" x="48" y="42"/><use href="#cnd" x="192" y="42"/><use href="#cnd" x="48" y="112"/><use href="#cnd" x="192" y="112"/>
+        <text x="120" y="82" text-anchor="middle" fill="var(--exor)" font-family="Special Elite, monospace" font-size="22">4 m</text>
+      </svg>
+      <div class="num">05</div>
+      <div class="cap"><span class="l-el">Κεριά σε κάθε γωνία</span><span class="l-en">A candle in every corner</span><small><span class="l-el">Hunt δίπλα σε αναμμένο κερί → όχι Onryo.</span><span class="l-en">Hunt next to a lit candle → not Onryo.</span></small></div>
+    </div>
+    <!-- 6 third flame -->
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true">
+        <rect width="240" height="150" rx="10" fill="#0b1018"/>
+        <g transform="translate(60 90)"><rect x="-8" y="0" width="16" height="34" rx="3" fill="var(--paper)"/><path d="M0 -6 q10 -14 0 -26 q-6 10 -8 6" fill="none" stroke="#5b6473" stroke-width="3"/></g>
+        <g transform="translate(120 90)"><rect x="-8" y="0" width="16" height="34" rx="3" fill="var(--paper)"/><path d="M0 -6 q10 -14 0 -26 q-6 10 -8 6" fill="none" stroke="#5b6473" stroke-width="3"/></g>
+        <g transform="translate(180 90)"><rect x="-8" y="0" width="16" height="34" rx="3" fill="var(--paper)"/><path d="M0 -6 q10 -14 0 -26 q-6 10 -8 6" fill="none" stroke="#5b6473" stroke-width="3"/></g>
+        <text x="60" y="40" text-anchor="middle" fill="var(--muted)" font-family="Special Elite, monospace" font-size="20">1</text>
+        <text x="120" y="40" text-anchor="middle" fill="var(--muted)" font-family="Special Elite, monospace" font-size="20">2</text>
+        <text x="180" y="40" text-anchor="middle" fill="var(--danger)" font-family="Special Elite, monospace" font-size="24">3 ?</text>
+      </svg>
+      <div class="num">06</div>
+      <div class="cap"><span class="l-el">Μέτρα τα κεριά που σβήνει</span><span class="l-en">Count the candles it blows out</span><small><span class="l-el">Έσβησε 3ο και δεν έκανε hunt → όχι Onryo.</span><span class="l-en">3rd one out and no hunt → not Onryo.</span></small></div>
+    </div>
+  </div>
+
+  <div class="phase"><b>3</b> · <span class="l-el">Όταν κυνηγάει (hunt)</span><span class="l-en">When it hunts</span></div>
+  <div class="steps">
+    <!-- 7 smudge count -->
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true">
+        <rect width="240" height="150" rx="10" fill="#0b1018"/>
+        <rect x="40" y="96" width="44" height="12" rx="4" fill="#7a5a3a"/>
+        <path d="M62 94 C50 78 74 70 62 54 C52 40 72 30 64 16" fill="none" stroke="#b9c2ce" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+        <circle cx="168" cy="76" r="44" fill="#141b26" stroke="var(--exor)" stroke-width="4"/>
+        <rect x="160" y="22" width="16" height="10" rx="2" fill="var(--exor)"/>
+        <line x1="168" y1="76" x2="168" y2="46" stroke="var(--fg)" stroke-width="4" stroke-linecap="round"/>
+        <line x1="168" y1="76" x2="190" y2="88" stroke="var(--exor)" stroke-width="4" stroke-linecap="round"/>
+        <text x="168" y="138" text-anchor="middle" fill="var(--exor)" font-family="Special Elite, monospace" font-size="16">1 · 2 · 3 · 4 …</text>
+      </svg>
+      <div class="num">07</div>
+      <div class="cap"><span class="l-el">Κάψε θυμίαμα και μέτρα δευτερόλεπτα</span><span class="l-en">Light the incense and count seconds</span><small><span class="l-el">Πόσο έμεινε τυφλό το φάντασμα;</span><span class="l-en">How long did the ghost stay blind?</span></small></div>
+    </div>
+    <!-- 8 crucifix range -->
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true">
+        <rect width="240" height="150" rx="10" fill="#0b1018"/>
+        <circle cx="90" cy="75" r="40" fill="rgba(226,166,91,.14)" stroke="var(--exor)" stroke-width="2"/>
+        <circle cx="90" cy="75" r="62" fill="none" stroke="var(--danger)" stroke-width="2" stroke-dasharray="5 5"/>
+        <rect x="85" y="58" width="10" height="34" rx="2" fill="var(--exor)"/><rect x="76" y="66" width="28" height="8" rx="2" fill="var(--exor)"/>
+        <g transform="translate(150 66)"><path d="M0 26 C0 6 6 -4 14 -4 C22 -4 28 6 28 26 L22 22 L17 27 L11 22 L6 27 Z" fill="#c9d3e0" opacity=".85"/><circle cx="9" cy="8" r="2.4" fill="#0b1018"/><circle cx="19" cy="8" r="2.4" fill="#0b1018"/></g>
+        <text x="200" y="136" text-anchor="middle" fill="var(--danger)" font-family="Special Elite, monospace" font-size="15">×1.5</text>
+      </svg>
+      <div class="num">08</div>
+      <div class="cap"><span class="l-el">Δες πού ξεκίνησε το hunt</span><span class="l-en">See where the hunt started</span><small><span class="l-el">Λίγο έξω από τον κύκλο και ο σταυρός δεν κάηκε → όχι Demon.</span><span class="l-en">Just outside the circle and the cross didn't burn → not Demon.</span></small></div>
+    </div>
+  </div>
+
+  <div class="phase"><span class="l-el">Τι σημαίνουν τα δευτερόλεπτα</span><span class="l-en">What the seconds mean</span></div>
+  <div class="mini">
+    <div><b>4s</b><span class="l-el">θυμωμένο Gallu</span><span class="l-en">angry Gallu</span></div>
+    <div><b>5s</b><span class="l-el">κανονικό</span><span class="l-en">normal</span></div>
+    <div><b>6s</b><span class="l-el">κουρασμένο Gallu</span><span class="l-en">tired Gallu</span></div>
+    <div><b>7s</b>Moroi</div>
+  </div>
+
+  <div class="rule"><span class="big">🏃</span><span><span class="l-el">Αν σε βρει: θυμίαμα και τρέξε. Μην μένεις να μετράς δίπλα του.</span><span class="l-en">If it finds you: incense, then run. Don't stand next to it counting.</span></span></div>
+</div>
+
+<script>
+(function(){
+  var KEY="phasmo-team-v1", lang="el";
+  try{ var d=JSON.parse(localStorage.getItem(KEY)||"null"); if(d && (d.lang==="en"||d.lang==="el")) lang=d.lang; }catch(e){}
+  var btn=document.getElementById("langBtn");
+  function set(l){
+    lang=l; document.documentElement.setAttribute("lang",l);
+    btn.textContent = l==="el" ? "EN" : "ΕΛ";
+    try{ localStorage.setItem(KEY, JSON.stringify({lang:l})); }catch(e){}
+  }
+  btn.addEventListener("click",function(){ set(lang==="el"?"en":"el"); });
+  set(lang);
+})();
+</script>
+</body>
+</html>
