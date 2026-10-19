@@ -359,6 +359,8 @@ const STR={
 // ---- voice commands: ordered so negations are checked before their positive counterpart ----
 const EV_NAMES={EMF:"EMF",DOTS:"D.O.T.S.",UV:"Ultraviolet",FRZ:"Freezing",ORB:"Ghost Orbs",WRT:"Ghost Writing",SB:"Spirit Box"};
 const COMMANDS=[
+ // Rule-out behaviors (ghosts-data.js) — πρώτα, ώστε οι πιο συγκεκριμένες φράσεις να κερδίζουν.
+ ...RULEOUT_BEHAVIORS.map(b=>({apply:{t:"bh",id:b.id}, en:b.voice.en, el:b.voice.el})),
  {apply:{t:"ev",code:"EMF",val:2}, en:["no emf","not emf","ruled out emf"], el:["όχι emf","δεν βρήκα emf","αποκλείστηκε emf"]},
  {apply:{t:"ev",code:"EMF",val:1}, en:["emf five","emf"], el:["emf πέντε","emf"]},
  {apply:{t:"ev",code:"DOTS",val:2}, en:["no dots","not dots","ruled out dots","no dutch","no d o t s"], el:["όχι dots","δεν βρήκα dots","όχι dutch"]},

@@ -323,7 +323,7 @@ const QUESTIONS = [
  {id:"male", type:"yesno", section:"other", icon:"♂️", exclude:["Banshee","Dayan"],
   en:"Is the ghost's name/model clearly MALE?",
   el:"Είναι το όνομα/μοντέλο του ghost ξεκάθαρα ΑΡΣΕΝΙΚΟ;"},
- {id:"airball", type:"yesno", section:"other", icon:"🌀", exclude:["Oni"],
+ {id:"airball", type:"yesno", section:"other", icon:"🌀", exclude:["Oni","Kormos"],
   en:"Did you witness the 'airball' ghost event (a ball rolling/thrown on its own)?",
   el:"Είδες το event «airball» (μια μπάλα να κυλάει/πετάγεται μόνη της);"},
  {id:"sbBreath", type:"yesno", section:"other", icon:"🌬️", include:["Deogen"],
@@ -393,6 +393,9 @@ const QUESTIONS = [
  {id:"deildegastItems", type:"yesno", section:"advanced", icon:"📦", include:["Deildegast"],
   en:"Did the ghost seem to move slower during hunts the more objects had been moved or thrown around beforehand — regardless of distance or line of sight?",
   el:"Φάνηκε το ghost να κινείται πιο αργά σε hunts όσα περισσότερα αντικείμενα είχαν μετακινηθεί ή πεταχτεί πριν — ανεξάρτητα από απόσταση ή οπτική επαφή;"},
+
+ // Rule-out ερωτήσεις από το ghosts-data.js (RULEOUT_BEHAVIORS) — ίδια ids με τα dashboard chips.
+ ...RULEOUT_BEHAVIORS.map(b=>({id:b.id, type:"yesno", section:b.qs, icon:b.ic, ...(b.include?{include:b.include}:{exclude:b.exclude}), en:b.q.en, el:b.q.el})),
 
  {id:"speedArchetype", type:"choice", section:"speed", icon:"🏃",
   en:"If you clocked the ghost's walking speed (footsteps or a stopwatch), which pattern fits best?",
@@ -523,7 +526,8 @@ function questionText(q){
 // Ids κοινά ανάμεσα σε αυτό το QUESTIONS array και το BEHAVIORS array του dashboard —
 // ίδιο naming εξ αρχής, ώστε οι απαντήσεις να μεταφέρονται 1:1 χωρίς mapping table.
 const DASHBOARD_BEHAVIOR_IDS = ["salt","lightOn","breakerOn","breakerOff","earlyHunt","noPhoto","foundHide","male","airball","sbBreath","sixFinger","twinTouch","doorSlam",
- "deogenSpeed","revenantLos","thayeAge","raijuElec","galluEnrage","obamboMood","aswangEnd","aswangReturn","kormosWall","kormosBlind","onryoFlames","onryoFirelight"];
+ "deogenSpeed","revenantLos","thayeAge","raijuElec","galluEnrage","obamboMood","aswangEnd","aswangReturn","kormosWall","kormosBlind","onryoFlames","onryoFirelight",
+ ...RULEOUT_BEHAVIORS.map(b=>b.id)];
 
 // Κωδικοποιεί ό,τι απαντήθηκε στο ίδιο #s= share-link format που ήδη διαβάζει το dashboard —
 // evidence + κοινά behaviors πάντα, sanity/sf μόνο αν δόθηκε πραγματικό ποσοστό (όχι "not sure").

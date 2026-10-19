@@ -77,6 +77,7 @@
   body.minimal #hunt-toolkit,
   body.minimal #hunt-behaviors,
   body.minimal #survival,
+  body.minimal #rule-outs,
   body.minimal #cursed,
   body.minimal #thresholds,
   body.minimal #photos,
@@ -84,11 +85,36 @@
   body.minimal .jumpnav a[href="#hunt-toolkit"],
   body.minimal .jumpnav a[href="#hunt-behaviors"],
   body.minimal .jumpnav a[href="#survival"],
+  body.minimal .jumpnav a[href="#rule-outs"],
   body.minimal .jumpnav a[href="#cursed"],
   body.minimal .jumpnav a[href="#thresholds"],
   body.minimal .jumpnav a[href="#photos"],
   body.minimal .jumpnav a[href="#abilities"]{display:none!important}
   body.minimal #minBtn{border-color:var(--nv);color:var(--nv)}
+  /* ---------- rule-outs reference ---------- */
+  .ro-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .ro-tab{cursor:pointer}
+  .ro-tab.on{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.08)}
+  .ro-head .search{max-width:280px}
+  .ro-count{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  table.thresh.ro td{vertical-align:top}
+  table.thresh.ro td.det{color:var(--muted)}
+  table.thresh.ro tr.ro-group td{background:#0f141c;font-family:"Special Elite",monospace;color:#EAEDF2;font-size:14px;letter-spacing:1px}
+  table.thresh.ro tr.ro-group td .n{font-family:inherit;font-size:11px;color:var(--muted);margin-left:6px;letter-spacing:0}
+  .ro-kind{font-size:10.5px;border-radius:10px;padding:1px 7px;white-space:nowrap;border:1px solid}
+  .ro-kind.x{color:var(--warn);border-color:#6b5a2a;background:rgba(240,198,116,.10)}
+  .ro-kind.pos{color:var(--nv);border-color:var(--nv-dim);background:rgba(143,227,136,.08)}
+  .ro-kind.info{color:#9db8e0;border-color:#3d5a80;background:rgba(61,90,128,.15)}
+  .ro-g{display:inline-block;font-family:"Special Elite",monospace;font-size:12px;color:#EAEDF2;background:#18202c;border-radius:4px;padding:1px 6px;margin:0 4px 3px 0;white-space:nowrap}
+  .ro-ts{font-family:"Special Elite",monospace;font-size:12px;color:var(--nv);text-decoration:none;white-space:nowrap}
+  .ro-ts:hover{text-decoration:underline}
+  .ro-apply{cursor:pointer;font-size:11px;white-space:nowrap;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:2px 7px;font-family:inherit}
+  .ro-apply:hover{border-color:var(--nv);color:var(--nv)}
+  .ro-apply.on{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.1)}
+  .card details.ro-card{margin-top:8px;font-size:12.5px}
+  .card details.ro-card summary{cursor:pointer;color:var(--ink-soft);font-weight:600}
+  .card details.ro-card ul{margin:5px 0 0;padding-left:18px}
+  .card details.ro-card li{margin-bottom:3px}
   /* ---------- ability index ---------- */
   .ab-cat{margin-bottom:16px}
   .ab-cat-h{
@@ -393,6 +419,7 @@
     <a href="#sanity-smudge">Sanity &amp; Smudge</a>
     <a href="#hunt-toolkit">Hunt Toolkit</a>
     <a href="#hunt-behaviors"><span class="l-el">Hunt Συμπεριφορές</span><span class="l-en">Hunt Behaviors</span></a>
+    <a href="#rule-outs">Rule-Outs</a>
     <a href="#survival">Survival</a>
     <a href="#cursed">Cursed Items</a>
     <a href="#thresholds">Thresholds</a>
@@ -450,6 +477,8 @@
     <div class="ev-grid" id="bhGrid"></div>
     <div class="panel-label" style="margin-top:16px"><span class="l-el">Other — ό,τι άλλο πρόσεξες</span><span class="l-en">Other — anything else you noticed</span></div>
     <div class="ev-grid" id="otGrid"></div>
+    <div class="panel-label" style="margin-top:16px">🧪 <span class="l-el">Rule-out tests — sanity, smudge, crucifix, cursed items</span><span class="l-en">Rule-out tests — sanity, smudge, crucifix, cursed items</span></div>
+    <div class="ev-grid" id="testGrid"></div>
     <div class="panel-label" style="margin-top:16px">🎯 <span class="l-el">Hunt-only — τι είδες ΣΕ hunt; (προαιρετικά φίλτρα)</span><span class="l-en">Hunt-only — what did you see DURING a hunt? (optional filters)</span></div>
     <div class="ev-grid" id="huntBhGrid"></div>
     <div class="mimic-warn" id="mimicWarn"><span class="l-el">⚠ <strong>The Mimic:</strong> δείχνει <em>πάντα</em> ψεύτικα Ghost Orbs επιπλέον των κανονικών του evidence (Spirit Box, Ultraviolet, Freezing). Με Orbs στο ταμπλό, μην το ξεγράφεις μέχρι να αποκλείσεις κάποιο από αυτά τα τρία.</span><span class="l-en">⚠ <strong>The Mimic:</strong> <em>always</em> shows fake Ghost Orbs on top of its real evidence (Spirit Box, Ultraviolet, Freezing). With Orbs on the board, don't write it off until you've excluded one of those three.</span></div>
@@ -582,6 +611,20 @@
       </table>
     </div>
     <div class="sanity-note" style="margin-top:10px"><span class="l-el">Κόκκινη γραμμή = μπορεί ήδη να κάνει hunt στο sanity που έχεις ορίσει παραπάνω. Θολές γραμμές = ήδη αποκλεισμένο βάσει evidence/behaviors.</span><span class="l-en">Red row = can already hunt at the sanity you've set above. Dimmed rows = already excluded by evidence/behaviors.</span></div>
+  </div>
+
+  <div class="panel anchor-target" id="rule-outs">
+    <div class="panel-label"><span class="l-el">Rule-Outs — πώς αποκλείεις κάθε ghost</span><span class="l-en">Rule-Outs — how to eliminate every ghost</span></div>
+    <div class="sanity-note" style="margin-bottom:10px"><span class="l-el">Από το guide του <a href="https://www.youtube.com/watch?v=PNPgkRpEkxw" target="_blank" rel="noopener" style="color:var(--nv)">Lisas Chillin (Οκτ. 2026)</a>. Το timestamp ανοίγει το video σε εκείνο το σημείο. Το «Φίλτρο» ενεργοποιεί το αντίστοιχο behavior chip στο Evidence Board.</span><span class="l-en">From <a href="https://www.youtube.com/watch?v=PNPgkRpEkxw" target="_blank" rel="noopener" style="color:var(--nv)">Lisas Chillin's guide (Oct 2026)</a>. The timestamp opens the video at that point. "Filter" toggles the matching behavior chip on the Evidence Board.</span></div>
+    <div class="ro-head">
+      <button type="button" class="sel ro-tab on" data-ro="ghost"><span class="l-el">Ανά Ghost</span><span class="l-en">By Ghost</span></button>
+      <button type="button" class="sel ro-tab" data-ro="elem"><span class="l-el">Ανά Στοιχείο</span><span class="l-en">By Clue</span></button>
+      <input type="search" class="search" id="roSearch" aria-label="Rule-out search">
+      <span class="ro-count" id="roCount"></span>
+    </div>
+    <div class="thresh-wrap">
+      <table class="thresh ro" id="roTable"></table>
+    </div>
   </div>
 
   <div class="panel anchor-target" id="survival">
@@ -845,7 +888,7 @@
 </div>
 <script src="ghosts-data.js"></script>
 <script>
-const APP_VERSION = "1.32.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.33.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -1059,7 +1102,7 @@ const BEHAVIORS = [
  // (το θηλυκό δεν κόβει κανένα, γι' αυτό δεν υπάρχει). Η ανάσα του Deogen και τα 6δάχτυλα prints του Obake
  // είναι unique — ούτε το Mimic τα αναπαράγει.
  {id:"male",     label:"Αρσενικό όνομα/μοντέλο",        en:"Male name/model",              ic:"♂️", exclude:["Banshee","Dayan"], group:"other"},
- {id:"airball",  label:"Είδα «airball» event",           en:"Saw an 'airball' event",       ic:"🌀", exclude:["Oni"], group:"other"},
+ {id:"airball",  label:"Είδα «airball» event",           en:"Saw an 'airball' event",       ic:"🌀", exclude:["Oni","Kormos"], group:"other"},
  {id:"sbBreath", label:"Βαριά ανάσα στο Spirit Box",     en:"Heavy breathing on Spirit Box",ic:"🌬️", include:["Deogen"], group:"other"},
  {id:"sixFinger",label:"Fingerprints με 6 δάχτυλα",      en:"Six-fingered fingerprints",    ic:"🖖", include:["Obake"], group:"other"},
  {id:"twinTouch",label:"Interactions σε 2 σημεία μαζί",  en:"Interactions in 2 spots at once",ic:"👯", include:["The Twins","The Mimic"], group:"other"},
@@ -1079,6 +1122,8 @@ const BEHAVIORS = [
  {id:"onryoFlames",   label:"Κάθε 3η σβησμένη φλόγα = hunt",            en:"Every 3rd extinguished flame = hunt",      ic:"🕯️", include:["Onryo","The Mimic"], group:"hunt"},
  {id:"onryoFirelight",label:"Φλόγα δίπλα του μπλόκαρε hunt",            en:"A flame nearby blocked a hunt",            ic:"🔥", include:["Onryo","The Mimic"], group:"hunt"},
 ];
+// Rule-out chips από το ghosts-data.js (RULEOUT_BEHAVIORS) — ορίζονται εκεί μία φορά για όλες τις σελίδες.
+RULEOUT_BEHAVIORS.forEach(b=>BEHAVIORS.push({id:b.id,label:b.label,en:b.en,ic:b.ic,group:b.group==="behavior"?undefined:b.group,...(b.include?{include:b.include}:{exclude:b.exclude})}));
 const bhState = {}; // id -> 0 off, 1 on
 BEHAVIORS.forEach(b=>bhState[b.id]=0);
 function passesBehaviors(g){
@@ -1112,14 +1157,15 @@ function buildEvBoard(){
 const bhGrid = document.getElementById("bhGrid");
 const otGrid = document.getElementById("otGrid");
 const huntBhGrid = document.getElementById("huntBhGrid");
+const testGrid = document.getElementById("testGrid");
 function buildBhBoard(){
-  bhGrid.innerHTML=""; otGrid.innerHTML=""; huntBhGrid.innerHTML="";
+  bhGrid.innerHTML=""; otGrid.innerHTML=""; huntBhGrid.innerHTML=""; testGrid.innerHTML="";
   BEHAVIORS.forEach(bh=>{
     const b=document.createElement("button");
     b.className="ev"; b.dataset.bh=bh.id;
     b.innerHTML=`<span class="mark"></span><span class="ic">${bh.ic}</span><span class="name">${lang==="en"?bh.en:bh.label}</span>`;
     b.onclick=()=>{ bhState[bh.id]=bhState[bh.id]?0:1; render(); };
-    const target = bh.group==="other" ? otGrid : bh.group==="hunt" ? huntBhGrid : bhGrid;
+    const target = bh.group==="other" ? otGrid : bh.group==="hunt" ? huntBhGrid : bh.group==="test" ? testGrid : bhGrid;
     target.appendChild(b);
   });
 }
@@ -1143,7 +1189,8 @@ function buildCards(){
       <h2 class="g-name">${g.name}</h2>
       <div class="chips">${g.ev.map(k=>`<span class="chip" data-k="${k}">${EV.find(e=>e.k===k).n}</span>`).join("")}${g.mimic?`<span class="chip" data-k="ORB">${STR[lang].fakeOrbs}</span>`:""}</div>
       <div class="meta"><span>Hunt: <b>${huntOf(g)}</b></span></div>
-      <div class="tell">${tellOf(g)}</div>`;
+      <div class="tell">${tellOf(g)}</div>${(()=>{ const ro=ruleOutsFor(g.name); if(!ro.length) return "";
+        return `<details class="ro-card"><summary>🧪 ${lang==="en"?"Rule-outs":"Rule-outs"} (${ro.length})</summary><ul>${ro.map(r=>`<li>${r.kind==="pos"?"✔ ":"✗ "}${roText(r)[0]}</li>`).join("")}</ul></details>`; })()}`;
     grid.appendChild(c);
   });
 }
@@ -1174,6 +1221,62 @@ function buildHuntBehaviorTable(){
     huntBehaviorBody.appendChild(tr);
   });
 }
+
+// ---- Rule-Outs reference (RULEOUTS από ghosts-data.js) ----
+let roView="ghost";
+const roTable=document.getElementById("roTable"), roSearch=document.getElementById("roSearch"), roCount=document.getElementById("roCount");
+const RO_KIND={el:{x:"Rule-out",pos:"Ένδειξη",info:"Info"},en:{x:"Rule-out",pos:"Points to",info:"Info"}};
+function roSec(ts){ const [m,s]=ts.split(":").map(Number); return m*60+s; }
+function roTs(r){ return `<a class="ro-ts" href="${RULEOUT_VIDEO}&t=${roSec(r.ts)}s" target="_blank" rel="noopener">${r.ts}</a>`; }
+function roApply(r){
+  if(!r.bh) return "";
+  return `<button type="button" class="ro-apply${bhState[r.bh]?" on":""}" data-bh-apply="${r.bh}">${bhState[r.bh]?"✓ ":""}${lang==="en"?"Filter":"Φίλτρο"}</button>`;
+}
+function roText(r){ return lang==="en"?r.en:r.el; }
+function roHay(r){ return [r.el.join(" "),r.en.join(" "),r.g.join(" "),RULEOUT_CATS[r.cat].en,RULEOUT_CATS[r.cat].el,r.ts].join(" ").toLowerCase(); }
+function buildRuleOuts(){
+  const q=roSearch.value.trim().toLowerCase();
+  const general = lang==="en"?"General":"Γενικά";
+  const H=lang==="en"
+    ? {clue:"Clue / observation",det:"Details",cat:"Category",type:"Type",gh:"Ghosts",vid:"Video"}
+    : {clue:"Στοιχείο / παρατήρηση",det:"Λεπτομέρειες",cat:"Κατηγορία",type:"Τύπος",gh:"Ghosts",vid:"Video"};
+  let html, n=0;
+  if(roView==="ghost"){
+    const byG={};
+    RULEOUTS.forEach(r=>(r.g.length?r.g:[general]).forEach(g=>{
+      if(q && !(roHay(r)+" "+g.toLowerCase()).includes(q)) return;
+      (byG[g]=byG[g]||[]).push(r);
+    }));
+    const names=Object.keys(byG).sort((a,b)=>a===general?1:b===general?-1:a.localeCompare(b));
+    html=`<thead><tr><th>${H.type}</th><th>${H.clue}</th><th>${H.det}</th><th>${H.cat}</th><th>${H.vid}</th><th></th></tr></thead><tbody>`;
+    names.forEach(g=>{
+      const rows=byG[g].slice().sort((a,b)=>roSec(a.ts)-roSec(b.ts)); n+=rows.length;
+      html+=`<tr class="ro-group"><td colspan="6">${g}<span class="n">${rows.length}</span></td></tr>`;
+      rows.forEach(r=>{ const [o,d]=roText(r); html+=`<tr><td><span class="ro-kind ${r.kind}">${RO_KIND[lang][r.kind]}</span></td><td>${o}</td><td class="det">${d}</td><td>${RULEOUT_CATS[r.cat][lang]}</td><td>${roTs(r)}</td><td>${roApply(r)}</td></tr>`; });
+    });
+  } else {
+    const rows=RULEOUTS.filter(r=>!q||roHay(r).includes(q)).slice().sort((a,b)=>RULEOUT_CATS[a.cat][lang].localeCompare(RULEOUT_CATS[b.cat][lang])||roSec(a.ts)-roSec(b.ts));
+    n=rows.length;
+    html=`<thead><tr><th>${H.clue}</th><th>${H.gh}</th><th>${H.type}</th><th>${H.det}</th><th>${H.cat}</th><th>${H.vid}</th><th></th></tr></thead><tbody>`;
+    rows.forEach(r=>{ const [o,d]=roText(r); html+=`<tr><td>${o}</td><td>${r.g.length?r.g.map(g=>`<span class="ro-g">${g}</span>`).join(""):general}</td><td><span class="ro-kind ${r.kind}">${RO_KIND[lang][r.kind]}</span></td><td class="det">${d}</td><td>${RULEOUT_CATS[r.cat][lang]}</td><td>${roTs(r)}</td><td>${roApply(r)}</td></tr>`; });
+  }
+  if(!n) html+=`<tr><td colspan="7" class="det">${lang==="en"?"Nothing matches. Try another word.":"Δεν βρέθηκε κάτι. Δοκίμασε άλλη λέξη."}</td></tr>`;
+  roTable.innerHTML=html+"</tbody>";
+  roCount.textContent = n+" "+(lang==="en"?"rows":"γραμμές");
+  roSearch.placeholder = lang==="en"?"🔍 Search: ghost, salt, smudge…":"🔍 Αναζήτηση: ghost, salt, smudge…";
+}
+document.querySelectorAll(".ro-tab").forEach(b=>b.addEventListener("click",()=>{
+  roView=b.dataset.ro;
+  document.querySelectorAll(".ro-tab").forEach(x=>x.classList.toggle("on",x===b));
+  buildRuleOuts();
+}));
+roSearch.addEventListener("input", buildRuleOuts);
+roTable.addEventListener("click", e=>{
+  const b=e.target.closest("[data-bh-apply]"); if(!b) return;
+  const id=b.dataset.bhApply; bhState[id]=bhState[id]?0:1; render();
+});
+// Rule-outs ανά ghost για τις κάρτες (μόνο kind x/pos)
+function ruleOutsFor(name){ return RULEOUTS.filter(r=>r.g.includes(name) && r.kind!=="info"); }
 
 // ---- «ποιο item να δοκιμάσω μετά;» ----
 // Κάθε αδοκίμαστο evidence βαθμολογείται με το πόσα ghosts κόβει ΕΓΓΥΗΜΕΝΑ,
@@ -1335,6 +1438,13 @@ function render(){
   const statusEl = document.getElementById("sanStatus");
   statusEl.textContent = st.txt;
   statusEl.className = "sanity-status " + st.cls;
+
+  // rule-outs: συγχρονισμός κουμπιών «Φίλτρο» με τα behavior chips
+  document.querySelectorAll("[data-bh-apply]").forEach(b=>{
+    const on=!!bhState[b.dataset.bhApply];
+    b.classList.toggle("on",on);
+    b.textContent=(on?"✓ ":"")+(lang==="en"?"Filter":"Φίλτρο");
+  });
 
   saveState();
 }
@@ -1780,7 +1890,7 @@ function setLang(l){
   if("wakeLock" in navigator) wakeBtn.title = STR[l].wakeTitle;
   document.getElementById("bloodMoonLbl").title = STR[l].bloodMoonTitle;
   document.getElementById("ccOption").textContent = l==="el" ? "Προσαρμοσμένη" : "Custom";
-  buildEvBoard(); buildBhBoard(); buildCards(); buildThresh(); buildHuntBehaviorTable(); buildSpeedRows(); buildAbilities();
+  buildEvBoard(); buildBhBoard(); buildCards(); buildThresh(); buildHuntBehaviorTable(); buildRuleOuts(); buildSpeedRows(); buildAbilities();
   applyDiff();
   render();
 }
