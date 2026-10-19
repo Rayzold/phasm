@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Phasmo Journal — Runner Field Guide</title>
+<meta name="theme-color" content="#0A0D12">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap">
+<style>
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+
+/* Layout (Runner): one big picture per step, a 3–8 word caption under it. Single dark look (night-vision journal), matches Phasmo Journal. */
+:root{
+  --bg:#0A0D12; --card:#0f141c; --line:#232b38; --fg:#E4E8EE; --muted:#8A93A3;
+  --acc:#E07A7A; --exor:#E2A65B; --uv:#B48CFF; --nv:#8FE388; --cold:#8FC7FF; --danger:#E15B5B; --paper:#EDE4CE;
+  --f-display:"Special Elite","Courier New",monospace;
+  --f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body)}
+html[lang=en] .l-el{display:none!important}
+html:not([lang=en]) .l-en{display:none!important}
+.wrap{max-width:900px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:22px 56px;display:grid;gap:22px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-family:var(--f-display);font-size:13px;letter-spacing:1px;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:6px 13px;background:none;cursor:pointer}
+.btn:hover,.btn:focus-visible{border-color:var(--acc);color:var(--acc);outline:none}
+.hero{display:grid;justify-items:center;text-align:center;gap:6px}
+.hero svg{width:min(150px,40vw);height:auto}
+h1{font-family:var(--f-display);font-size:clamp(30px,7vw,48px);color:var(--acc);margin:0;letter-spacing:2px;text-wrap:balance}
+.who{font-size:18px;color:var(--muted)}
+.job{font-size:clamp(18px,4vw,22px);margin:4px 0 0;text-wrap:balance}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:16px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 14px 16px;display:grid;gap:10px;align-content:start;min-width:0}
+.step svg{width:100%;height:auto;max-width:100%;display:block}
+.num{font-family:var(--f-display);color:var(--acc);font-size:14px;letter-spacing:2px}
+.cap{font-size:19px;line-height:1.3;font-weight:600;text-wrap:balance}
+.cap small{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:4px}
+.phase{font-family:var(--f-display);font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px}
+.phase b{color:var(--acc);font-weight:400}
+.loadouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px}
+.lo{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px;min-width:0}
+.lo.two{border-color:var(--acc)}
+.lo-h{font-family:var(--f-display);font-size:14px;letter-spacing:2px;color:var(--muted)}
+.lo.two .lo-h{color:var(--acc)}
+.lo-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.it{display:grid;justify-items:center;text-align:center;gap:4px;background:#0b1018;border-radius:10px;padding:10px 6px}
+.it svg{width:min(72px,100%);height:auto}
+.it b{font-size:13.5px;line-height:1.2}
+.it span{font-size:12px;color:var(--muted);line-height:1.25}
+.stay{font-size:13px;color:var(--muted)}
+.stay b{color:var(--fg);font-weight:600}
+.rule{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--danger);border-radius:10px;padding:14px 16px;font-size:18px;font-weight:600}
+.rule .big{font-size:34px;line-height:1}
+.mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr));gap:10px}
+.mini div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center;font-size:15px}
+.mini b{display:block;font-family:var(--f-display);font-size:26px;color:var(--acc);font-weight:400}
+.mini span{color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:no-preference){ .flame{animation:fl 1.6s ease-in-out infinite alternate;transform-origin:50% 100%} }
+@keyframes fl{from{transform:scaleY(1)}to{transform:scaleY(1.12)}}
+.mini span{display:block}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <div class="btns"><a class="btn" href="team.html" id="backBtn"><span class="l-el">← Ομάδα</span><span class="l-en">← Squad</span></a></div>
+    <div class="btns"><button class="btn" id="langBtn" type="button">ΕΛ</button></div>
+  </div>
+
+  <div class="hero">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="56" fill="#1c1012" stroke="var(--acc)" stroke-width="3"/>
+      <circle cx="68" cy="30" r="9" fill="var(--acc)"/>
+      <path d="M64 42 L50 62 L64 70 L58 92 M56 62 L40 72 M64 46 L80 56 L90 50 M64 70 L84 82" fill="none" stroke="var(--acc)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M22 50 h14 M18 64 h16 M24 78 h12" stroke="var(--acc)" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+    </svg>
+    <h1>RUNNER</h1>
+    <div class="who">Markos</div>
+    <p class="job"><span class="l-el">Τρέχεις σε όλο το σπίτι, κυνηγάς ίχνη και βγάζεις φωτογραφίες.</span><span class="l-en">You run the whole house, chase clues and take the photos.</span></p>
+  </div>
+
+  <div class="loadouts">
+    <div class="lo">
+      <div class="lo-h">LOADOUT 1 · <span class="l-el">ΠΡΩΤΗ ΕΙΣΟΔΟΣ</span><span class="l-en">FIRST TRIP IN</span></div>
+      <div class="lo-items">
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><path d="M44 30 L74 14 L74 66 L44 50 Z" fill="rgba(180,140,255,.25)"/><rect x="8" y="30" width="38" height="20" rx="5" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><rect x="40" y="27" width="8" height="26" rx="2" fill="var(--uv)"/></svg><b>UV Light</b><span><span class="l-el">δαχτυλιές</span><span class="l-en">fingerprints</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="22" y="8" width="36" height="64" rx="8" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><g><circle cx="40" cy="22" r="4" fill="var(--danger)"/><circle cx="40" cy="32" r="4" fill="#F0C674"/><circle cx="40" cy="42" r="4" fill="#F0C674"/><circle cx="40" cy="52" r="4" fill="var(--nv)"/><circle cx="40" cy="62" r="4" fill="var(--nv)"/></g></svg><b>EMF Reader</b><span><span class="l-el">ψάχνεις το 5</span><span class="l-en">look for a 5</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="8" y="24" width="64" height="42" rx="7" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><rect x="18" y="16" width="18" height="10" rx="2" fill="#c9d3e0"/><circle cx="40" cy="45" r="13" fill="#0b1018" stroke="#c9d3e0" stroke-width="3"/><circle cx="62" cy="32" r="3" fill="#F0C674"/></svg><b>Photo Camera</b><span><span class="l-el">κάθε event</span><span class="l-en">every event</span></span></div>
+      </div>
+    </div>
+    <div class="lo two">
+      <div class="lo-h">LOADOUT 2 · <span class="l-el">ΜΕΤΑ ΤΟ TRUCK</span><span class="l-en">AFTER THE TRUCK</span></div>
+      <div class="lo-items">
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="8" y="24" width="64" height="42" rx="7" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><rect x="18" y="16" width="18" height="10" rx="2" fill="#c9d3e0"/><circle cx="40" cy="45" r="13" fill="#0b1018" stroke="#c9d3e0" stroke-width="3"/><circle cx="62" cy="32" r="3" fill="#F0C674"/></svg><b>Photo Camera</b><span><span class="l-el">λεφτά</span><span class="l-en">money</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><path d="M14 46 C14 22 66 22 66 46" fill="none" stroke="#c9d3e0" stroke-width="6" stroke-linecap="round"/><rect x="30" y="20" width="20" height="14" rx="3" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="2"/><circle cx="40" cy="27" r="4" fill="var(--danger)"/><path d="M50 56 q10 -4 18 4 M50 64 q14 -6 22 6" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round"/></svg><b>Head Gear</b><span><span class="l-el">ο Nikos βλέπει</span><span class="l-en">Nikos watches</span></span></div>
+        <div class="it"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="22" y="10" width="36" height="12" rx="3" fill="#c9d3e0"/><rect x="18" y="22" width="44" height="50" rx="8" fill="#e9edf2"/><rect x="18" y="38" width="44" height="16" fill="var(--acc)"/><text x="40" y="51" text-anchor="middle" fill="#0b1018" font-family="Special Elite, monospace" font-size="12">+%</text></svg><b>Sanity Pills</b><span><span class="l-el">Moroi test</span><span class="l-en">Moroi test</span></span></div>
+      </div>
+      <div class="stay"><span class="l-el">Δεν έχει κλείσει το <b>UV</b> ή το <b>EMF</b>; Κράτα αυτό που λείπει αντί για τα Sanity Pills.</span><span class="l-en"><b>UV</b> or <b>EMF</b> still open? Keep the missing one instead of the Sanity Pills.</span></div>
+    </div>
+  </div>
+
+  <div class="phase"><b>1</b> · <span class="l-el">Πρώτη είσοδος</span><span class="l-en">First trip in</span> — UV Light · EMF Reader · Photo Camera</div>
+  <div class="steps">
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><rect x="120" y="14" width="80" height="122" rx="3" fill="#1b2330" stroke="#3a4556" stroke-width="3"/><circle cx="186" cy="80" r="4" fill="#8A93A3"/><g transform="translate(140 64)"><path d="M0 30 L0 8 Q0 2 4 2 Q8 2 8 8 L8 -6 Q8 -12 12 -12 Q16 -12 16 -6 L16 -10 Q16 -16 20 -16 Q24 -16 24 -10 L24 -4 Q24 -10 28 -10 Q32 -10 32 -4 L32 30 Q32 40 16 40 Q0 40 0 30 Z" fill="var(--uv)" opacity=".85"/></g><path d="M78 62 L120 44 L120 110 L78 88 Z" fill="rgba(180,140,255,.18)"/><g transform="translate(26 62)"><rect x="0" y="0" width="40" height="22" rx="5" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><rect x="38" y="-3" width="10" height="28" rx="2" fill="var(--uv)"/></g></svg>
+      <div class="num">01</div>
+      <div class="cap"><span class="l-el">Φώτισε πόρτες, διακόπτες και παράθυρα</span><span class="l-en">Shine on doors, switches and windows</span><small><span class="l-el">Δαχτυλιές → UV ✓. 6 δάχτυλα → Obake.</span><span class="l-en">Prints → UV ✓. Six fingers → Obake.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(40 24)"><rect x="0" y="0" width="40" height="100" rx="8" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><circle cx="20" cy="18" r="6" fill="var(--danger)"/><circle cx="20" cy="34" r="6" fill="#F0C674"/><circle cx="20" cy="50" r="6" fill="#F0C674"/><circle cx="20" cy="66" r="6" fill="var(--nv)"/><circle cx="20" cy="82" r="6" fill="var(--nv)"/></g><text x="160" y="90" text-anchor="middle" fill="var(--danger)" font-family="Special Elite, monospace" font-size="54">5</text><text x="160" y="124" text-anchor="middle" fill="var(--muted)" font-family="Special Elite, monospace" font-size="14">EMF</text></svg>
+      <div class="num">02</div>
+      <div class="cap"><span class="l-el">Τρέξε με το EMF σε ό,τι κουνήθηκε</span><span class="l-en">Run the EMF to anything that moved</span><small><span class="l-el">Έδειξε 5 → EMF ✓</span><span class="l-en">It shows 5 → EMF ✓</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><rect x="110" y="18" width="106" height="114" rx="6" fill="#e9edf2"/><rect x="118" y="26" width="90" height="82" fill="#1b2330"/><g transform="translate(145 50)"><path d="M0 34 C0 8 8 -4 18 -4 C28 -4 36 8 36 34 L29 29 L23 35 L17 29 L11 35 L5 29 Z" fill="#c9d3e0" opacity=".9"/><circle cx="12" cy="10" r="3" fill="#0b1018"/><circle cx="24" cy="10" r="3" fill="#0b1018"/></g><g transform="translate(18 52)"><rect x="0" y="8" width="64" height="42" rx="7" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><circle cx="32" cy="29" r="12" fill="#0b1018" stroke="#c9d3e0" stroke-width="3"/></g><path d="M86 40 l14 -10 M86 76 h16 M86 112 l14 10" stroke="#F0C674" stroke-width="3" stroke-linecap="round"/></svg>
+      <div class="num">03</div>
+      <div class="cap"><span class="l-el">Φωτογράφισε κάθε event</span><span class="l-en">Photograph every event</span><small><span class="l-el">Φαίνεται στη φωτογραφία → όχι Phantom.</span><span class="l-en">Shows in the photo → not Phantom.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><rect x="40" y="18" width="70" height="114" rx="6" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><rect x="62" y="36" width="26" height="46" rx="4" fill="#0b1018"/><rect x="66" y="40" width="18" height="18" rx="2" fill="#8A93A3"/><text x="75" y="112" text-anchor="middle" fill="var(--muted)" font-family="Special Elite, monospace" font-size="13">BREAKER</text><g font-family="Special Elite, monospace" font-size="15"><text x="122" y="56" fill="var(--muted)">OFF</text><text x="122" y="76" fill="var(--fg)">≠ Jinn</text><text x="122" y="104" fill="var(--muted)">ON</text><text x="122" y="124" fill="var(--fg)">≠ Hantu</text></g></svg>
+      <div class="num">04</div>
+      <div class="cap"><span class="l-el">Κοίτα τον breaker</span><span class="l-en">Check the breaker</span><small><span class="l-el">Το ghost τον έκλεισε → όχι Jinn. Τον άνοιξε → όχι Hantu.</span><span class="l-en">Ghost turned it off → not Jinn. On → not Hantu.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><path d="M20 70 h90 v22 a28 28 0 0 1 -28 28 h-34 a28 28 0 0 1 -28 -28 z" fill="#e9edf2"/><ellipse cx="65" cy="78" rx="40" ry="6" fill="#6b5233"/><path d="M96 70 v-28 h-14" fill="none" stroke="#c9d3e0" stroke-width="5" stroke-linecap="round"/><rect x="140" y="22" width="76" height="80" fill="#1b2330" stroke="#c9d3e0" stroke-width="3"/><line x1="178" y1="22" x2="178" y2="102" stroke="#c9d3e0" stroke-width="3"/><line x1="140" y1="62" x2="216" y2="62" stroke="#c9d3e0" stroke-width="3"/><text x="178" y="130" text-anchor="middle" fill="var(--acc)" font-family="Special Elite, monospace" font-size="18">knock knock</text></svg>
+      <div class="num">05</div>
+      <div class="cap"><span class="l-el">Βρόμικο νερό ή χτύπημα στο τζάμι</span><span class="l-en">Dirty water or a window knock</span><small><span class="l-el">→ όχι Poltergeist.</span><span class="l-en">→ not Poltergeist.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><rect x="40" y="16" width="16" height="120" fill="#3a4556"/><path d="M56 16 L130 34 L130 118 L56 136 Z" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="3"/><circle cx="118" cy="78" r="4" fill="#8A93A3"/><path d="M150 90 A90 90 0 0 0 132 40" fill="none" stroke="var(--acc)" stroke-width="3" stroke-dasharray="5 5"/><text x="186" y="84" text-anchor="middle" fill="var(--acc)" font-family="Special Elite, monospace" font-size="26">½</text></svg>
+      <div class="num">06</div>
+      <div class="cap"><span class="l-el">Πόρτα που άνοιξε μόνο μισή</span><span class="l-en">A door that moved only halfway</span><small><span class="l-el">→ όχι Yurei.</span><span class="l-en">→ not Yurei.</span></small></div>
+    </div>
+  </div>
+
+  <div class="phase"><b>2</b> · <span class="l-el">Πίσω στο truck → αλλαγή</span><span class="l-en">Back to the truck → swap</span> — Photo Camera · Head Gear · Sanity Pills</div>
+  <div class="steps">
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(26 40)"><path d="M0 34 C0 6 52 6 52 34" fill="none" stroke="#c9d3e0" stroke-width="6" stroke-linecap="round"/><rect x="16" y="2" width="20" height="14" rx="3" fill="#2a2f3a" stroke="#c9d3e0" stroke-width="2"/><circle cx="26" cy="9" r="4" fill="var(--danger)"/></g><path d="M92 60 q14 -8 26 0 M92 74 q20 -10 36 0" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round"/><rect x="140" y="30" width="80" height="58" rx="5" fill="#141b26" stroke="var(--detect, #9DB8E0)" stroke-width="3"/><g transform="translate(168 44)"><path d="M0 34 C0 8 8 -4 18 -4 C28 -4 36 8 36 34 L29 29 L23 35 L17 29 L11 35 L5 29 Z" fill="#c9d3e0" opacity=".9"/><circle cx="12" cy="10" r="3" fill="#0b1018"/><circle cx="24" cy="10" r="3" fill="#0b1018"/></g><text x="180" y="116" text-anchor="middle" fill="#9DB8E0" font-family="Special Elite, monospace" font-size="15">Nikos 👀</text></svg>
+      <div class="num">07</div>
+      <div class="cap"><span class="l-el">Φόρα το Head Gear</span><span class="l-en">Wear the Head Gear</span><small><span class="l-el">Ο Nikos βλέπει από το truck ό,τι βλέπεις.</span><span class="l-en">Nikos sees what you see from the truck.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(16 24) rotate(-6)"><rect width="62" height="74" rx="3" fill="#e9edf2"/><rect x="5" y="5" width="52" height="50" fill="#1b2330"/><g transform="translate(13 14) scale(.7)"><path d="M0 34 C0 8 8 -4 18 -4 C28 -4 36 8 36 34 L29 29 L23 35 L17 29 L11 35 L5 29 Z" fill="#c9d3e0" opacity=".9"/><circle cx="12" cy="10" r="3" fill="#0b1018"/><circle cx="24" cy="10" r="3" fill="#0b1018"/></g></g><g transform="translate(88 24)"><rect width="62" height="74" rx="3" fill="#e9edf2"/><rect x="5" y="5" width="52" height="50" fill="#1b2330"/><path d="M14 30 h34 M10 24 a5 5 0 1 0 0 12 M10 24 a5 5 0 1 1 0 12 M52 24 a5 5 0 1 1 0 12 M52 24 a5 5 0 1 0 0 12" stroke="#e9edf2" stroke-width="5" fill="none" stroke-linecap="round"/></g><g transform="translate(162 24) rotate(6)"><rect width="62" height="74" rx="3" fill="#e9edf2"/><rect x="5" y="5" width="52" height="50" fill="#1b2330"/><circle cx="31" cy="30" r="14" fill="none" stroke="#B48CFF" stroke-width="4"/><circle cx="31" cy="30" r="4" fill="#B48CFF"/></g><text x="120" y="140" text-anchor="middle" fill="var(--warn)" font-family="Special Elite, monospace" font-size="16">$$$</text></svg>
+      <div class="num">08</div>
+      <div class="cap"><span class="l-el">Βγάλε τις φωτογραφίες που πληρώνουν</span><span class="l-en">Take the photos that pay</span><small><span class="l-el">Ghost, bone, cursed item.</span><span class="l-en">Ghost, bone, cursed item.</span></small></div>
+    </div>
+  </div>
+
+  <div class="phase"><b>3</b> · <span class="l-el">Όταν κυνηγάει (hunt)</span><span class="l-en">When it hunts</span></div>
+  <div class="steps">
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><rect x="88" y="52" width="64" height="46" rx="6" fill="#2a2f3a" stroke="#3a4556" stroke-width="3"/><ellipse cx="120" cy="75" rx="70" ry="52" fill="none" stroke="var(--acc)" stroke-width="3" stroke-dasharray="7 6"/><path d="M186 66 l6 10 l-12 2" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(36 12) scale(.8)"><circle cx="12" cy="8" r="8" fill="var(--acc)"/><rect x="2" y="18" width="20" height="30" rx="8" fill="var(--acc)"/></g><g transform="translate(176 92) scale(.8)"><path d="M0 34 C0 8 8 -4 18 -4 C28 -4 36 8 36 34 L29 29 L23 35 L17 29 L11 35 L5 29 Z" fill="#c9d3e0" opacity=".9"/><circle cx="12" cy="10" r="3" fill="#0b1018"/><circle cx="24" cy="10" r="3" fill="#0b1018"/></g></svg>
+      <div class="num">09</div>
+      <div class="cap"><span class="l-el">Κάνε κύκλους γύρω από έπιπλα</span><span class="l-en">Run loops around furniture</span><small><span class="l-el">Επιταχύνει όταν σε βλέπει → όχι Hantu, όχι Kormos.</span><span class="l-en">Speeds up when it sees you → not Hantu, not Kormos.</span></small></div>
+    </div>
+    <div class="step">
+      <svg viewBox="0 0 240 150" aria-hidden="true"><rect width="240" height="150" rx="10" fill="#0b1018"/><g transform="translate(30 50)"><rect x="4" y="0" width="28" height="9" rx="3" fill="#c9d3e0"/><rect x="0" y="9" width="36" height="42" rx="7" fill="#e9edf2"/><rect x="0" y="22" width="36" height="13" fill="var(--acc)"/></g><g transform="translate(120 52)"><path d="M0 34 C0 8 8 -4 18 -4 C28 -4 36 8 36 34 L29 29 L23 35 L17 29 L11 35 L5 29 Z" fill="#c9d3e0" opacity=".9"/><circle cx="12" cy="10" r="3" fill="#0b1018"/><circle cx="24" cy="10" r="3" fill="#0b1018"/></g><path d="M172 56 h40 M172 72 h28 M172 88 h40" stroke="#8A93A3" stroke-width="4" stroke-linecap="round"/><text x="200" y="128" text-anchor="middle" fill="var(--danger)" font-family="Special Elite, monospace" font-size="17">slower?</text></svg>
+      <div class="num">10</div>
+      <div class="cap"><span class="l-el">Πάρε pill μέσα στο hunt</span><span class="l-en">Take a pill mid-hunt</span><small><span class="l-el">Δεν επιβράδυνε → όχι Moroi.</span><span class="l-en">Didn't slow down → not Moroi.</span></small></div>
+    </div>
+  </div>
+
+  <div class="phase"><span class="l-el">Τι λες στον Nikos μετά το hunt</span><span class="l-en">What to tell Nikos after the hunt</span></div>
+  <div class="mini">
+    <div><b>👀 ↑</b><span class="l-el">με είδε και επιτάχυνε</span><span class="l-en">saw me and sped up</span><span>≠ Hantu · Kormos</span></div>
+    <div><b>🗿</b><span class="l-el">στάθηκα, ήρθε ίσια</span><span class="l-en">stood still, it came</span><span>≠ Kormos</span></div>
+    <div><b>=</b><span class="l-el">ίδια ταχύτητα κι αν έτρεχα</span><span class="l-en">same speed while I ran</span><span>≠ Dayan</span></div>
+    <div><b>💊</b><span class="l-el">το pill δεν το έκοψε</span><span class="l-en">pill didn't slow it</span><span>≠ Moroi</span></div>
+  </div>
+
+  <div class="rule"><span class="big">🗺️</span><span><span class="l-el">Βρες τον κύκλο σου πριν το πρώτο hunt. Χωρίς διαδρομή, κρύψου.</span><span class="l-en">Find your loop before the first hunt. No route? Hide.</span></span></div>
+</div>
+
+<script>
+(function(){
+  var KEY="phasmo-team-v1", lang="el";
+  try{ var d=JSON.parse(localStorage.getItem(KEY)||"null"); if(d && (d.lang==="en"||d.lang==="el")) lang=d.lang; }catch(e){}
+  var btn=document.getElementById("langBtn");
+  function set(l){
+    lang=l; document.documentElement.setAttribute("lang",l);
+    btn.textContent = l==="el" ? "EN" : "ΕΛ";
+    try{ localStorage.setItem(KEY, JSON.stringify({lang:l})); }catch(e){}
+  }
+  btn.addEventListener("click",function(){ set(lang==="el"?"en":"el"); });
+  set(lang);
+})();
+</script>
+</body>
+</html>
