@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phasmo Journal — Squad of Three</title>
+<meta name="theme-color" content="#0A0D12">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0D12; --bg2:#11161f;
+    --paper:#EDE4CE; --paper2:#E4D9BE;
+    --ink:#2A2620; --ink-soft:#5A5244;
+    --nv:#8FE388; --nv-dim:#57996b;
+    --danger:#E15B5B; --warn:#F0C674; --muted:#8A93A3; --line:#232b38;
+    /* χρώμα ανά ρόλο */
+    --nurse:#7FD1C7; --exor:#E2A65B; --runner:#E07A7A; --detect:#9DB8E0;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0;padding:0}
+  html[lang=en] .l-el{display:none!important}
+  html:not([lang=en]) .l-en{display:none!important}
+  body{
+    background:var(--bg);
+    background-image:radial-gradient(ellipse at 50% -10%, #16202b 0%, var(--bg) 55%);
+    color:#D7DCE4;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    min-height:100vh;
+    padding:20px 14px 60px;
+    line-height:1.45;
+  }
+  .wrap{max-width:1060px;margin:0 auto}
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px;justify-content:space-between}
+  h1{font-family:"Special Elite","Courier New",monospace;font-size:clamp(24px,5vw,36px);color:var(--nv);margin:0;letter-spacing:1px;text-shadow:0 0 18px rgba(143,227,136,.25)}
+  .headerBtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .backLink,#langBtn{
+    font-family:"Special Elite",monospace;font-size:12.5px;letter-spacing:1px;
+    color:var(--muted);text-decoration:none;border:1px solid var(--line);
+    border-radius:20px;padding:6px 13px;white-space:nowrap;background:none;cursor:pointer;
+  }
+  .backLink:hover,#langBtn:hover{border-color:var(--nv);color:var(--nv)}
+  .sub{color:var(--muted);font-size:14px;margin:2px 0 22px;max-width:700px}
+  .panel{border:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),#0d1219);border-radius:10px;padding:18px 18px 16px;margin-bottom:20px}
+  .panel-label{font-family:"Special Elite",monospace;font-size:12px;letter-spacing:3px;color:var(--nv-dim);text-transform:uppercase;margin-bottom:12px}
+  .note{color:var(--muted);font-size:13px}
+  /* coverage */
+  .cov{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px,100%),1fr));gap:8px}
+  .cov-item{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#0c1119;min-width:0}
+  .cov-item .ev{font-family:"Special Elite",monospace;font-size:13px;color:#EAEDF2}
+  .cov-item .who{font-size:12.5px;margin-top:2px}
+  /* role cards */
+  .roles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(470px,100%),1fr));gap:16px}
+  .role{border:1px solid var(--line);border-top:3px solid var(--c);border-radius:10px;background:#0c1119;padding:16px;min-width:0}
+  .role-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .role-ic{font-size:26px;line-height:1}
+  .guide-link{margin-left:auto;font-family:"Special Elite",monospace;font-size:12.5px;color:var(--c);text-decoration:none;border:1px solid var(--c);border-radius:20px;padding:5px 11px;white-space:nowrap}
+  .guide-link:hover,.guide-link:focus-visible{background:rgba(255,255,255,.06);outline:none}
+  .role-head{flex-wrap:wrap}
+  .role-name{font-family:"Special Elite",monospace;font-size:20px;color:#EAEDF2;margin:0}
+  .role-title{font-family:"Special Elite",monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--c)}
+  .mission{color:#B9C2CE;font-size:13.5px;margin:0 0 12px}
+  .role h3{font-family:"Special Elite",monospace;font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:14px 0 6px;font-weight:400}
+  .items{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+  .items li{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:baseline;font-size:13px}
+  .items .it{font-weight:600;color:#EAEDF2;white-space:nowrap}
+  .items .why{color:#B9C2CE;min-width:0}
+  .lo2 .it{color:var(--c)}
+  .duties{margin:0;padding-left:18px;font-size:13px;color:#C7CEDA}
+  .duties li{margin-bottom:3px}
+  .tests{display:flex;flex-wrap:wrap;gap:5px}
+  .tag{font-size:11.5px;border:1px solid var(--line);border-radius:12px;padding:2px 8px;color:#C7CEDA;background:#111823}
+  .swap{margin-top:8px;font-size:12.5px;color:var(--warn);border-left:2px solid #6b5a2a;padding-left:9px}
+  /* phases */
+  .phases{display:grid;gap:10px}
+  .phase{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr);gap:12px;border-bottom:1px solid #171d27;padding-bottom:10px}
+  .phase:last-child{border-bottom:0}
+  .phase .ph{font-family:"Special Elite",monospace;color:var(--nv);font-size:14px}
+  .phase .ph small{display:block;color:var(--muted);font-family:system-ui,sans-serif;font-size:12px;margin-top:2px}
+  .phase ul{margin:0;padding-left:0;list-style:none;font-size:13px;display:grid;gap:4px}
+  .phase li b{color:var(--c)}
+  @media (max-width:560px){.phase{grid-template-columns:minmax(0,1fr)}}
+  /* table */
+  .tw{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:620px}
+  th{text-align:left;font-family:"Special Elite",monospace;font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;padding:6px 10px;border-bottom:1px solid var(--line)}
+  td{padding:7px 10px;border-bottom:1px solid #171d27;color:#C7CEDA;vertical-align:top}
+  td.n{font-family:"Special Elite",monospace;white-space:nowrap}
+  .calls{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:8px}
+  .call{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;background:#0c1119}
+  .call code{font-family:"Special Elite",monospace;color:var(--nv);font-size:13.5px}
+  a{color:var(--nv)}
+  footer{margin-top:34px;color:#5b6473;font-size:12px;text-align:center}
+
+  .pick{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .pick button{font-family:"Special Elite",monospace;font-size:13px;letter-spacing:1px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:6px 14px;background:none;cursor:pointer}
+  .pick button[aria-pressed="true"]{border-color:var(--danger);color:var(--danger);text-decoration:line-through}
+  .pick button:hover,.pick button:focus-visible{border-color:var(--nv);color:var(--nv);outline:none}
+  .pname{font-family:"Special Elite",monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>SQUAD OF THREE</h1>
+    <div class="headerBtns">
+      <button id="langBtn" title="Ελληνικά / English">ΕΛ</button>
+      <a class="backLink" href="team.html">👥 <span class="l-el">Ομάδα των 4</span><span class="l-en">Squad of 4</span></a>
+      <a class="backLink" href="index.html"><span class="l-el">← Αρχική</span><span class="l-en">← Dashboard</span></a>
+    </div>
+  </header>
+  <p class="sub"><span class="l-el">Πλάνο για 3 παίκτες. Οι 4 ρόλοι γίνονται 3: ο Detective στήνει τα «μάτια» και μένει στο van, ο Oracle παίρνει και τη δουλειά του Exorcist, ο Scout κρατά και το pill. Η αρχή καλύπτει και τα 7 evidence.</span><span class="l-en">Plan for 3 players. The 4 roles become 3: the Detective sets up the 'eyes' and stays in the van, the Oracle also takes the Exorcist's work, the Scout also carries the pill. The start covers all 7 evidence.</span></p>
+
+  <div class="panel">
+    <div class="panel-label"><span class="l-el">Ποιος λείπει απόψε;</span><span class="l-en">Who's missing tonight?</span></div>
+    <div class="pick" id="pick">
+      <button type="button" data-p="Paschalia">Paschalia</button>
+      <button type="button" data-p="Kiki">Kiki</button>
+      <button type="button" data-p="Markos">Markos</button>
+      <button type="button" data-p="Nikos">Nikos</button>
+    </div>
+    <p class="note" style="margin:10px 0 0"><span class="l-el">Οι ρόλοι μοιράζονται αυτόματα: η Kiki προτιμά το van, ο Markos τον Scout, η Paschalia τον Oracle. Ο Nikos καλύπτει όποιον λείπει.</span><span class="l-en">Roles assign themselves: Kiki prefers the van, Markos the Scout, Paschalia the Oracle. Nikos covers whoever is missing.</span></p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label"><span class="l-el">Κάλυψη evidence — Αρχή</span><span class="l-en">Evidence coverage — Start</span></div>
+    <div class="cov">
+      <div class="cov-item"><div class="ev">EMF 5</div><div class="who pname" data-role="scout" style="color:var(--runner)">—</div></div>
+      <div class="cov-item"><div class="ev">Ultraviolet</div><div class="who pname" data-role="scout" style="color:var(--runner)">—</div></div>
+      <div class="cov-item"><div class="ev">D.O.T.S.</div><div class="who pname" data-role="watch" style="color:var(--detect)">—</div></div>
+      <div class="cov-item"><div class="ev">Ghost Orbs</div><div class="who pname" data-role="watch" style="color:var(--detect)">—</div></div>
+      <div class="cov-item"><div class="ev">Ghost Writing</div><div class="who pname" data-role="watch" style="color:var(--detect)">—</div></div>
+      <div class="cov-item"><div class="ev">Freezing</div><div class="who pname" data-role="oracle" style="color:var(--nurse)">—</div></div>
+      <div class="cov-item"><div class="ev">Spirit Box</div><div class="who pname" data-role="oracle" style="color:var(--nurse)">—</div></div>
+    </div>
+  </div>
+
+  <div class="roles">
+    <section class="role" style="--c:var(--nurse)">
+      <div class="role-head"><span class="role-ic">🔮</span><div><h2 class="role-name pname" data-role="oracle">—</h2><div class="role-title">Oracle · Exorcist</div></div></div>
+      <p class="mission"><span class="l-el">Μιλάει στο ghost, φυλάει το room και τρέχει τα tests με αλάτι, κεριά και θυμίαμα.</span><span class="l-en">Talks to the ghost, guards the room and runs the salt, candle and incense tests.</span></p>
+      <h3><span class="l-el">Αρχή</span><span class="l-en">Start</span></h3>
+      <ul class="items">
+        <li><span class="it">Thermometer</span><span class="why"><span class="l-el">Βρίσκει το πιο κρύο room. Κάτω από 0 °C = Freezing.</span><span class="l-en">Finds the coldest room. Below 0 °C = Freezing.</span></span></li>
+        <li><span class="it">Spirit Box</span><span class="why"><span class="l-el">Στο ghost room, φώτα σβηστά.</span><span class="l-en">In the ghost room, lights off.</span></span></li>
+        <li><span class="it">Crucifix</span><span class="why"><span class="l-el">Στο κέντρο του ghost room, από την πρώτη στιγμή.</span><span class="l-en">In the center of the ghost room, from the start.</span></span></li>
+      </ul>
+      <h3><span class="l-el">Καθήκοντα</span><span class="l-en">Duties</span></h3>
+      <ul class="duties">
+        <li><span class="l-el">Φωνάζει «ROOM» μόλις βρει το κρύο.</span><span class="l-en">Calls 'ROOM' as soon as she finds the cold.</span></li>
+        <li><span class="l-el">Μετράει sanity σε events (10 / 15 / 20%) και τα δευτερόλεπτα του smudge blind (4 / 5 / 6 / 7).</span><span class="l-en">Measures sanity loss on events (10 / 15 / 20%) and the smudge-blind seconds (4 / 5 / 6 / 7).</span></li>
+        <li><span class="l-el">Σημειώνει πού ξεκινά το hunt σε σχέση με τον σταυρό (×1.5 για Demon).</span><span class="l-en">Notes where a hunt starts relative to the crucifix (×1.5 for Demon).</span></li>
+      </ul>
+      <h3>Rule-out tests</h3>
+      <div class="tests"><span class="tag">Banshee −15%</span><span class="tag">Oni −20%</span><span class="tag">Wraith salt</span><span class="tag">Gallu 2nd salt</span><span class="tag">Onryo 3rd flame</span><span class="tag">Onryo 4 m</span><span class="tag">Demon ×1.5</span><span class="tag">Moroi 7s</span><span class="tag">Spirit 3′</span></div>
+      <h3 class="lo2"><span class="l-el">1η επιστροφή στο van</span><span class="l-en">1st van return</span></h3>
+      <ul class="items lo2">
+        <li><span class="it">Salt</span><span class="why"><span class="l-el">Δύο σωροί με ≥2s διαφορά στην πόρτα: Wraith και Gallu μαζί.</span><span class="l-en">Two piles ≥2s apart at the door: Wraith and Gallu in one go.</span></span></li>
+        <li><span class="it">Firelight</span><span class="why"><span class="l-el">Κεριά στις γωνίες: Onryo tests και περισσότερα interactions.</span><span class="l-en">Candles in the corners: Onryo tests and more interactions.</span></span></li>
+        <li><span class="it">Incense ×1</span><span class="why"><span class="l-el">Το μόνο της ομάδας: έξοδος σε hunt, smudge blind, timer 3′ για Spirit.</span><span class="l-en">The squad's only one: hunt escape, smudge-blind count, 3-min Spirit timer.</span></span></li>
+      </ul>
+      <div class="swap"><span class="l-el">Χωρίς απάντηση στο Spirit Box; Κράτα το <b>Spirit Box</b> αντί για Salt.</span><span class="l-en">No Spirit Box answer yet? Keep the <b>Spirit Box</b> instead of the Salt.</span></div>
+      <h3><span class="l-el">2η επιστροφή · πρόταση</span><span class="l-en">2nd return · suggestion</span></h3>
+      <ul class="items">
+        <li><span class="it">Sound Recorder</span><span class="why"><span class="l-el">Γράφει ήχους (λεφτά) και το Moroi test.</span><span class="l-en">Records sounds (money) and the Moroi test.</span></span></li>
+        <li><span class="it">Firelight</span><span class="why"><span class="l-el">Κι άλλα κεριά στο room.</span><span class="l-en">More candles in the room.</span></span></li>
+        <li><span class="it">Crucifix</span><span class="why"><span class="l-el">2ος σταυρός για προστασία και Demon test.</span><span class="l-en">2nd crucifix for protection and the Demon test.</span></span></li>
+      </ul>
+      <div class="swap"><span class="l-el">Έκαψε το incense; <b>1 Incense</b> αντί για Crucifix. Μένει Myling ή Banshee; <b>Parabolic</b> αντί για Firelight.</span><span class="l-en">Burned the incense? <b>1 Incense</b> instead of the Crucifix. Myling or Banshee left? <b>Parabolic</b> instead of the Firelight.</span></div>
+    </section>
+    <section class="role" style="--c:var(--detect)">
+      <div class="role-head"><span class="role-ic">🔎</span><div><h2 class="role-name pname" data-role="watch">—</h2><div class="role-title">Detective</div></div></div>
+      <p class="mission"><span class="l-el">Στήνει όλα τα «μάτια» στο ghost room και μετά τρέχει την έρευνα από το van.</span><span class="l-en">Sets up every 'eye' in the ghost room, then runs the investigation from the van.</span></p>
+      <h3><span class="l-el">Αρχή</span><span class="l-en">Start</span></h3>
+      <ul class="items">
+        <li><span class="it">Video Camera</span><span class="why"><span class="l-el">Στραμμένη στο ghost room. Orbs και Goryo DOTS μόνο στην οθόνη.</span><span class="l-en">Aimed at the ghost room. Orbs and Goryo DOTS only on the monitor.</span></span></li>
+        <li><span class="it">D.O.T.S. Projector</span><span class="why"><span class="l-el">Μέσα στο room, με θέα εκεί που κινείται το ghost.</span><span class="l-en">Inside the room, covering where the ghost moves.</span></span></li>
+        <li><span class="it">Ghost Writing Book</span><span class="why"><span class="l-el">Στο σημείο όπου «κάθεται» το ghost.</span><span class="l-en">On the spot where the ghost hangs out.</span></span></li>
+      </ul>
+      <h3><span class="l-el">Καθήκοντα</span><span class="l-en">Duties</span></h3>
+      <ul class="duties">
+        <li><span class="l-el">Περιμένει το «ROOM» και στήνει και τα τρία μαζί.</span><span class="l-en">Waits for the 'ROOM' call and sets up all three at once.</span></li>
+        <li><span class="l-el">Από το van: κάμερες, χάρτης, average sanity, Evidence Board, ρολόι Obambo.</span><span class="l-en">From the van: cameras, map, average sanity, Evidence Board, Obambo clock.</span></li>
+        <li><span class="l-el">Στα hunts φωνάζει «HUNT», χρονομετρά και βλέπει από το Head Gear του Scout.</span><span class="l-en">In hunts calls “HUNT”, times it and watches through the Scout's Head Gear.</span></li>
+      </ul>
+      <h3>Rule-out tests</h3>
+      <div class="tests"><span class="tag">Orbs</span><span class="tag">Goryo DOTS</span><span class="tag">Goryo room change</span><span class="tag">Yurei 90s</span><span class="tag">Shade same room</span><span class="tag">Obambo phase</span><span class="tag">Phantom / Oni blink</span><span class="tag">Obake shapeshift</span></div>
+      <h3 class="lo2"><span class="l-el">1η επιστροφή στο van</span><span class="l-en">1st van return</span></h3>
+      <ul class="items lo2">
+        <li><span class="it">Motion Sensor ×2</span><span class="why"><span class="l-el">Σε κάθε έξοδο του room. Τα στήνει και γυρίζει στο van.</span><span class="l-en">On every exit of the room. Sets them, then heads back to the van.</span></span></li>
+        <li><span class="it">Tripod</span><span class="why"><span class="l-el">Η κάμερα ψηλά, να βλέπει όλο το room.</span><span class="l-en">Camera up high, seeing the whole room.</span></span></li>
+      </ul>
+      <div class="swap"><span class="l-el">Μένει μετά στο van. Χωρίς Orbs ακόμα; <b>2η Video Camera</b> αντί για 1 sensor.</span><span class="l-en">Stays in the van after. No Orbs yet? <b>2nd Video Camera</b> instead of one sensor.</span></div>
+      <h3><span class="l-el">2η επιστροφή · πρόταση</span><span class="l-en">2nd return · suggestion</span></h3>
+      <ul class="items">
+        <li><span class="it">—</span><span class="why"><span class="l-el">Μένει στο van.</span><span class="l-en">Stays in the van.</span></span></li>
+      </ul>
+      <div class="swap"><span class="l-el">Μπαίνει μόνο αν άλλαξε room: Video Camera + Motion Sensor στο νέο.</span><span class="l-en">Goes in only if the room changed: Video Camera + Motion Sensor to the new one.</span></div>
+    </section>
+    <section class="role" style="--c:var(--runner)">
+      <div class="role-head"><span class="role-ic">🏃</span><div><h2 class="role-name pname" data-role="scout">—</h2><div class="role-title">Scout · Medic</div></div></div>
+      <p class="mission"><span class="l-el">Τρέχει σε όλο το σπίτι για ίχνη, βγάζει τις φωτογραφίες και κρατά το pill της ομάδας.</span><span class="l-en">Runs the whole house for clues, takes the photos and carries the squad's pill.</span></p>
+      <h3><span class="l-el">Αρχή</span><span class="l-en">Start</span></h3>
+      <ul class="items">
+        <li><span class="it">UV Light</span><span class="why"><span class="l-el">Πόρτες, switches, παράθυρα. 6 δάχτυλα = Obake.</span><span class="l-en">Doors, switches, windows. Six fingers = Obake.</span></span></li>
+        <li><span class="it">EMF Reader</span><span class="why"><span class="l-el">Σε κάθε interaction για EMF 5.</span><span class="l-en">To every interaction for EMF 5.</span></span></li>
+        <li><span class="it">Photo Camera</span><span class="why"><span class="l-el">Φωτογραφία σε κάθε event (λεφτά + Phantom test).</span><span class="l-en">Photo of every event (money + Phantom test).</span></span></li>
+      </ul>
+      <h3><span class="l-el">Καθήκοντα</span><span class="l-en">Duties</span></h3>
+      <ul class="duties">
+        <li><span class="l-el">Breaker, dirty water, window knock, πόρτες που κουνήθηκαν μισές.</span><span class="l-en">Breaker, dirty water, window knocks, doors moved partway.</span></li>
+        <li><span class="l-el">Στα hunts κάνει loop: LOS, Dayan, Kormos speed tests.</span><span class="l-en">Loops in hunts: LOS, Dayan, Kormos speed tests.</span></li>
+        <li><span class="l-el">Δίνει το pill σε όποιον πέσει κάτω από 40%.</span><span class="l-en">Gives the pill to anyone below 40%.</span></li>
+      </ul>
+      <h3>Rule-out tests</h3>
+      <div class="tests"><span class="tag">Phantom photo</span><span class="tag">Poltergeist</span><span class="tag">Jinn / Hantu breaker</span><span class="tag">Mare light</span><span class="tag">Yurei door</span><span class="tag">LOS speed-up</span><span class="tag">Dayan</span><span class="tag">Moroi pill</span></div>
+      <h3 class="lo2"><span class="l-el">1η επιστροφή στο van</span><span class="l-en">1st van return</span></h3>
+      <ul class="items lo2">
+        <li><span class="it">Photo Camera</span><span class="why"><span class="l-el">Ghost photo, bone, cursed item.</span><span class="l-en">Ghost photo, bone, cursed item.</span></span></li>
+        <li><span class="it">Head Gear</span><span class="why"><span class="l-el">Ο Detective βλέπει τα hunts από το van.</span><span class="l-en">The Detective watches the hunts from the van.</span></span></li>
+        <li><span class="it">Sanity Pill ×1</span><span class="why"><span class="l-el">Το μόνο της ομάδας. Ή για το Moroi test μέσα σε hunt.</span><span class="l-en">The squad's only one. Or for the Moroi test mid-hunt.</span></span></li>
+      </ul>
+      <div class="swap"><span class="l-el">Ανοιχτό UV ή EMF; Κράτα αυτό που λείπει αντί για το Photo Camera.</span><span class="l-en">UV or EMF still open? Keep the missing one instead of the Photo Camera.</span></div>
+      <h3><span class="l-el">2η επιστροφή · πρόταση</span><span class="l-en">2nd return · suggestion</span></h3>
+      <ul class="items">
+        <li><span class="it">Photo Camera</span><span class="why"><span class="l-el">Ό,τι φωτογραφία λείπει.</span><span class="l-en">Any photo still missing.</span></span></li>
+        <li><span class="it">Head Gear</span><span class="why"><span class="l-el">Παραμένει.</span><span class="l-en">Stays on.</span></span></li>
+        <li><span class="it">Firelight</span><span class="why"><span class="l-el">Κεριά στη διαδρομή του: σβήνει; EMF.</span><span class="l-en">Candles along his route: one goes out? EMF.</span></span></li>
+      </ul>
+      <div class="swap"><span class="l-el">Δόθηκε το pill; Φέρε <b>1 Sanity Pill</b> αντί για Firelight.</span><span class="l-en">Pill used? Bring <b>1 Sanity Pill</b> instead of the Firelight.</span></div>
+    </section>
+  </div>
+
+  <div class="panel" style="margin-top:20px">
+    <div class="panel-label"><span class="l-el">Φάσεις</span><span class="l-en">Phases</span></div>
+    <div class="phases">
+      <div class="phase"><div class="ph">1 · <span class="l-el">Είσοδος</span><span class="l-en">Entry</span><small><span class="l-el">πρώτα 2–3 λεπτά</span><span class="l-en">first 2–3 min</span></small></div><ul>
+        <li style="--c:var(--nurse)"><b class="pname" data-role="oracle">—</b>: <span class="l-el">thermometer και σταυρός, ψάχνει το κρύο.</span><span class="l-en">thermometer and crucifix, hunts for the cold.</span></li>
+        <li style="--c:var(--runner)"><b class="pname" data-role="scout">—</b>: <span class="l-el">breaker, UV, EMF σε ό,τι κουνηθεί.</span><span class="l-en">breaker, UV, EMF on anything that moves.</span></li>
+        <li style="--c:var(--detect)"><b class="pname" data-role="watch">—</b>: <span class="l-el">περιμένει το «ROOM» και φέρνει κάμερα, D.O.T.S., βιβλίο.</span><span class="l-en">waits for 'ROOM', then brings camera, D.O.T.S., book.</span></li></ul></div>
+      <div class="phase"><div class="ph">2 · <span class="l-el">1η επιστροφή</span><span class="l-en">1st return</span><small><span class="l-el">όταν το room είναι στημένο</span><span class="l-en">once the room is set up</span></small></div><ul>
+        <li><span class="l-el">Ό,τι evidence έχει κλείσει μένει στο van.</span><span class="l-en">Settled evidence gear stays in the van.</span></li>
+        <li style="--c:var(--detect)"><b class="pname" data-role="watch">—</b>: <span class="l-el">sensors και tripod, μετά μένει στο van.</span><span class="l-en">sensors and tripod, then stays in the van.</span></li></ul></div>
+      <div class="phase"><div class="ph">3 · Hunt<small><span class="l-el">πρωτόκολλο</span><span class="l-en">protocol</span></small></div><ul>
+        <li style="--c:var(--detect)"><b class="pname" data-role="watch">—</b> (van): <span class="l-el">«HUNT», χρόνος, blink και shapeshift από το Head Gear.</span><span class="l-en">“HUNT”, timing, blink and shapeshift through the Head Gear.</span></li>
+        <li style="--c:var(--runner)"><b class="pname" data-role="scout">—</b>: <span class="l-el">loop, μετά λέει αν υπήρξε LOS speed-up.</span><span class="l-en">loops, then reports any LOS speed-up.</span></li>
+        <li style="--c:var(--nurse)"><b class="pname" data-role="oracle">—</b>: <span class="l-el">incense αν τη βρει, μετράει δευτερόλεπτα.</span><span class="l-en">incense if it finds her, counts the seconds.</span></li></ul></div>
+      <div class="phase"><div class="ph">4 · <span class="l-el">2η επιστροφή</span><span class="l-en">2nd return</span><small><span class="l-el">2–3 ghosts ή sanity &lt;40%</span><span class="l-en">2–3 ghosts or sanity &lt;40%</span></small></div><ul>
+        <li><span class="l-el">Pill και incense μόνο αν χρησιμοποιήθηκαν τα πρώτα. Οι κενές θέσεις γίνονται Firelight.</span><span class="l-en">Pill and incense only if the first ones were used. Empty slots become Firelights.</span></li></ul></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label"><span class="l-el">Σύνοψη</span><span class="l-en">Summary</span></div>
+    <div class="tw"><table>
+      <thead><tr><th><span class="l-el">Παίκτης</span><span class="l-en">Player</span></th><th><span class="l-el">Ρόλος</span><span class="l-en">Role</span></th><th><span class="l-el">Αρχή</span><span class="l-en">Start</span></th><th><span class="l-el">1η επιστροφή</span><span class="l-en">1st return</span></th><th><span class="l-el">2η (πρόταση)</span><span class="l-en">2nd (suggestion)</span></th></tr></thead>
+      <tbody>
+        <tr><td class="n pname" data-role="oracle" style="color:var(--nurse)">—</td><td>Oracle · Exorcist</td><td>Thermometer · Spirit Box · Crucifix</td><td>Salt · Firelight · Incense ×1</td><td>Sound Recorder · Firelight · Crucifix</td></tr>
+        <tr><td class="n pname" data-role="watch" style="color:var(--detect)">—</td><td>Detective</td><td>Video Camera · D.O.T.S. · Ghost Writing Book</td><td>Motion Sensor ×2 · Tripod → van</td><td><span class="l-el">μένει στο van</span><span class="l-en">stays in the van</span></td></tr>
+        <tr><td class="n pname" data-role="scout" style="color:var(--runner)">—</td><td>Scout · Medic</td><td>UV Light · EMF Reader · Photo Camera</td><td>Photo Camera · Head Gear · Sanity Pill ×1</td><td>Photo Camera · Head Gear · Firelight</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note" style="margin:10px 0 0">💊 <span class="l-el">Pills και incense: μόνο 1 + 1 για όλη την ομάδα, μία φορά. Τα υπόλοιπα μένουν στο van μέχρι να χρειαστούν.</span><span class="l-en">Pills and incense: only 1 + 1 for the whole squad, once. The rest stay in the van until needed.</span></p>
+    <p class="note" style="margin:6px 0 0">⚠️ <span class="l-el">Με 3 άτομα και έναν στο van, μέσα είστε μόνο δύο. Αν ο χάρτης είναι μεγάλος, ο Detective μπαίνει ξανά μετά την 1η επιστροφή.</span><span class="l-en">With 3 players and one in the van, only two are inside. On a large map, the Detective goes back in after the 1st return.</span></p>
+  </div>
+
+  <footer>Phasmo Journal · Squad of Three</footer>
+</div>
+<script>
+const LS_KEY="phasmo-team-v1", LS3="phasmo-team3-missing";
+let lang="en", missing="Nikos";
+try{ const d=JSON.parse(localStorage.getItem(LS_KEY)||"null"); if(d && (d.lang==="en"||d.lang==="el")) lang=d.lang; }catch(e){}
+try{ const m=localStorage.getItem(LS3); if(["Paschalia","Kiki","Markos","Nikos"].includes(m)) missing=m; }catch(e){}
+// Ποιος παίρνει ποιον ρόλο ανάλογα με το ποιος λείπει (ο Nikos καλύπτει πάντα το κενό)
+const ASSIGN={
+  Paschalia:{oracle:"Nikos",watch:"Kiki",scout:"Markos"},
+  Kiki:{oracle:"Paschalia",watch:"Nikos",scout:"Markos"},
+  Markos:{oracle:"Paschalia",watch:"Kiki",scout:"Nikos"},
+  Nikos:{oracle:"Paschalia",watch:"Kiki",scout:"Markos"},
+};
+function paint(){
+  const a=ASSIGN[missing];
+  document.querySelectorAll(".pname[data-role]").forEach(el=>el.textContent=a[el.dataset.role]);
+  document.querySelectorAll("#pick button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.p===missing)));
+  try{ localStorage.setItem(LS3,missing); }catch(e){}
+}
+document.getElementById("pick").addEventListener("click",e=>{const b=e.target.closest("button[data-p]"); if(!b) return; missing=b.dataset.p; paint();});
+const langBtn=document.getElementById("langBtn");
+function setLang(l){ lang=l; document.documentElement.setAttribute("lang",l); langBtn.textContent=l==="el"?"EN":"ΕΛ"; try{ localStorage.setItem(LS_KEY,JSON.stringify({lang})); }catch(e){} }
+langBtn.onclick=()=>setLang(lang==="el"?"en":"el");
+setLang(lang); paint();
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
