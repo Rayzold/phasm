@@ -399,8 +399,8 @@ Q(2,"s",e("Smudge σε hunt: πόσο «τυφλώνεται» το Moroi;","Mid
   ["4″","5″","6″","7″"],[3],
   e("7″. Κανονικά 5″, Gallu 4″ (angry) ή 6″ (weak).","7s. Normally 5s; Gallu 4s (angry) or 6s (weak)."));
 Q(2,"m",e("Ποια ghosts ΔΕΝ επιταχύνουν με line-of-sight;","Which ghosts do NOT speed up with line-of-sight?"),
-  ["Hantu","Kormos","Deildegast","Banshee","Wraith","Oni","Spirit","Yurei"],[0,1,2],
-  e("Hantu (θερμοκρασία), Kormos (τυφλό), Deildegast (σταθερή ταχύτητα).","Hantu (temperature), Kormos (blind), Deildegast (fixed speed)."));
+  ["Hantu","Kormos","Deildegast","Thaye","Deogen","Banshee","Wraith","Oni"],[0,1,2,3,4],
+  e("Hantu (θερμοκρασία), Kormos (τυφλό), Deildegast (σταθερή ταχύτητα), Thaye (ηλικία), Deogen (απόσταση). Το Revenant είναι οριακό: πηδά απευθείας στο max.","Hantu (temperature), Kormos (blind), Deildegast (fixed speed), Thaye (age), Deogen (distance). The Revenant is borderline: it jumps straight to max."));
 Q(2,"s",e("Το Aswang σε βρίσκει μέσα σε locker. Τι γίνεται;","An Aswang reaches you inside a locker. What happens?"),
   [["Το hunt τελειώνει αμέσως","The hunt ends instantly"],["Πεθαίνεις","You die"],["Χάνεις 50% sanity","You lose 50% sanity"],["Τίποτα","Nothing"]],[0],
   e("Στο επόμενο hunt όμως πάει κατευθείαν εκεί. Άλλαξε κρυψώνα.","But next hunt it goes straight there. Change spots."));
@@ -541,7 +541,7 @@ const BASE_EX = {
   male:e("Ανδρικό μοντέλο σε event","Male model in an event"),
   airball:e("Airball event","Airball event"),
 };
-const RO_IDS = ["eventToward","photoVisible","salt2","dirtyWater","windowKnock","singEvent","throwAtYou","roomChange","partialDoor","thirdFlameNoHunt","drain10","singNo15","mareLitHunt","spiritSmudge3","sameRoom","normalBlink","noShapeshift","heardFar","dayanFlat","stillApproach","hantuNoBreath","smudgeNot7"];
+const RO_IDS = ["eventToward","photoVisible","salt2","dirtyWater","windowKnock","singEvent","throwAtYou","roomChange","partialDoor","thirdFlameNoHunt","drain10","singNo15","mareLitHunt","spiritSmudge3","sameRoom","normalBlink","noShapeshift","heardFar","dayanFlat","losSpeedup","stillApproach","hantuNoBreath","smudgeNot7"];
 const EXCL = [];
 BEHAVIOR_RULES.forEach(r=>{
   if(!r.exclude) return;
