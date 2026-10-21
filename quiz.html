@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phasmo Journal — Exams</title>
+<meta name="theme-color" content="#0A0D12">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0D12; --bg2:#11161f;
+    --nv:#8FE388; --nv-dim:#57996b;
+    --danger:#E15B5B; --warn:#F0C674; --muted:#8A93A3; --line:#232b38;
+    --l1:#7FD1C7; --l2:#E2A65B; --l3:#C38BE8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html[lang=en] .l-el{display:none!important}
+  html:not([lang=en]) .l-en{display:none!important}
+  body{
+    background:var(--bg);
+    background-image:radial-gradient(ellipse at 50% -10%, #16202b 0%, var(--bg) 55%);
+    color:#D7DCE4;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    min-height:100vh;padding:20px 16px 60px;line-height:1.45;
+  }
+  .wrap{max-width:820px;margin:0 auto}
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px;justify-content:space-between}
+  h1{font-family:"Special Elite","Courier New",monospace;font-size:clamp(26px,6vw,38px);color:var(--nv);margin:0;letter-spacing:1px;text-shadow:0 0 18px rgba(143,227,136,.25)}
+  .headerBtns{display:flex;gap:8px;flex-wrap:wrap}
+  .pill,#langBtn{font-family:"Special Elite",monospace;font-size:12.5px;letter-spacing:1px;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:6px 13px;white-space:nowrap;background:none;cursor:pointer}
+  .pill:hover,#langBtn:hover{border-color:var(--nv);color:var(--nv)}
+  .sub{color:var(--muted);font-size:14px;margin:2px 0 22px}
+  .panel{border:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),#0d1219);border-radius:12px;padding:18px;margin-bottom:18px}
+  .label{font-family:"Special Elite",monospace;font-size:12px;letter-spacing:3px;color:var(--nv-dim);text-transform:uppercase;margin-bottom:12px}
+  button{font:inherit}
+
+  /* ---------- level cards ---------- */
+  .levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:14px}
+  .lvl{position:relative;text-align:left;border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;background:#0c1119;padding:18px 16px 16px;color:inherit;cursor:pointer;transition:transform .15s, box-shadow .15s;min-width:0}
+  .lvl:hover,.lvl:focus-visible{transform:translateY(-3px);box-shadow:0 8px 26px rgba(0,0,0,.45),0 0 0 1px var(--c);outline:none}
+  .lvl .ic{font-size:34px;line-height:1}
+  .lvl h2{font-family:"Special Elite",monospace;color:var(--c);font-size:22px;margin:10px 0 4px;letter-spacing:.5px}
+  .lvl p{margin:0 0 12px;font-size:13.5px;color:#BFC6D1}
+  .lvl .meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  .lvl .meta span{border:1px solid var(--line);border-radius:12px;padding:2px 8px}
+  .lvl .best{margin-top:12px;font-size:12.5px;color:var(--muted)}
+  .lvl .best b{color:var(--c)}
+  .stamp{position:absolute;top:12px;right:12px;font-family:"Special Elite",monospace;font-size:11px;letter-spacing:2px;color:var(--nv);border:2px solid var(--nv);border-radius:6px;padding:2px 6px;transform:rotate(8deg);opacity:.85}
+  .opts{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .toggle{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:20px;padding:7px 13px;cursor:pointer;font-size:13.5px;user-select:none;background:#0c1119;color:#D7DCE4}
+  .toggle input{accent-color:var(--danger)}
+  .toggle.on{border-color:var(--danger);color:#ffd6d6}
+  .nameIn{background:#0c1119;border:1px solid var(--line);border-radius:20px;padding:7px 13px;color:#EAEDF2;font-size:13.5px;min-width:0;width:200px;max-width:100%}
+
+  /* ---------- exam ---------- */
+  #exam{display:none}
+  .topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .lvTag{font-family:"Special Elite",monospace;color:var(--c);border:1px solid var(--c);border-radius:20px;padding:4px 11px;font-size:13px}
+  .counter{font-family:"Special Elite",monospace;color:var(--muted);font-size:14px}
+  .streak{margin-left:auto;font-size:14px;color:var(--warn);min-width:60px;text-align:right}
+  .quit{border:1px solid var(--line);background:none;color:var(--muted);border-radius:20px;padding:4px 11px;cursor:pointer;font-size:12.5px}
+  .quit:hover{color:var(--danger);border-color:var(--danger)}
+  .bar{height:6px;background:#141b26;border-radius:4px;overflow:hidden;margin-bottom:16px}
+  .bar>i{display:block;height:100%;width:0;background:var(--c);transition:width .3s}
+  .timer{height:8px;background:#141b26;border-radius:4px;overflow:hidden;margin:-6px 0 16px;display:none}
+  .timer>i{display:block;height:100%;width:100%;background:var(--danger)}
+  .timer.low>i{animation:pulse .5s infinite alternate}
+  @keyframes pulse{from{opacity:1}to{opacity:.35}}
+  .qcard{border:1px solid var(--line);border-radius:12px;background:#0c1119;padding:20px 18px}
+  .qtype{display:inline-block;font-size:11.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border:1px dashed var(--line);border-radius:10px;padding:2px 8px;margin-bottom:10px}
+  .qtype.multi{color:var(--warn);border-color:rgba(240,198,116,.5)}
+  .qtext{font-size:clamp(17px,4.2vw,21px);color:#F1F3F6;margin:0 0 16px;line-height:1.4}
+  .qtext .evchip{display:inline-block;border:1px solid var(--line);border-radius:14px;padding:0 8px;margin:2px 2px;font-size:.85em;background:#121925;white-space:nowrap}
+  .qtext .obs{display:block;margin-top:8px;font-size:.88em;color:#C9D0DA}
+  .answers{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:9px}
+  .ans{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);border-radius:10px;background:#101722;color:#E3E7ED;padding:12px 13px;cursor:pointer;font-size:15px;min-width:0;transition:border-color .12s, background .12s}
+  .ans:hover:not(:disabled){border-color:#3a4658;background:#131c29}
+  .ans .box{flex:0 0 auto;width:20px;height:20px;border:2px solid #4a5568;border-radius:50%;display:grid;place-items:center;font-size:12px}
+  .multiQ .ans .box{border-radius:5px}
+  .ans.sel{border-color:var(--c);background:rgba(255,255,255,.04)}
+  .ans.sel .box{border-color:var(--c);background:var(--c);color:#0A0D12}
+  .ans.right{border-color:var(--nv);background:rgba(143,227,136,.10)}
+  .ans.right .box{border-color:var(--nv);background:var(--nv);color:#0A0D12}
+  .ans.wrong{border-color:var(--danger);background:rgba(225,91,91,.12)}
+  .ans.wrong .box{border-color:var(--danger);background:var(--danger);color:#0A0D12}
+  .ans.missed{border-color:var(--nv);border-style:dashed}
+  .ans:disabled{cursor:default}
+  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+  .btn{font-family:"Special Elite",monospace;letter-spacing:1px;border:1px solid var(--c);background:var(--c);color:#0A0D12;border-radius:22px;padding:9px 20px;cursor:pointer;font-size:14.5px}
+  .btn:disabled{opacity:.35;cursor:default}
+  .btn.ghost{background:none;color:var(--c)}
+  .fb{display:none;margin-top:14px;border-radius:10px;padding:12px 14px;font-size:14.5px;border:1px solid var(--line);background:#0f151f}
+  .fb.ok{border-color:rgba(143,227,136,.5)}
+  .fb.bad{border-color:rgba(225,91,91,.55)}
+  .fb.part{border-color:rgba(240,198,116,.55)}
+  .fb b{display:block;margin-bottom:4px;font-family:"Special Elite",monospace;letter-spacing:.5px}
+  .fb.ok b{color:var(--nv)} .fb.bad b{color:var(--danger)} .fb.part b{color:var(--warn)}
+  /* flashlight flicker on wrong, NV glow on right */
+  body.flicker .qcard{animation:flick .45s steps(2) 1}
+  @keyframes flick{0%{opacity:1}20%{opacity:.15}40%{opacity:1}60%{opacity:.25}100%{opacity:1}}
+  body.glow .qcard{animation:glow .6s ease-out 1}
+  @keyframes glow{0%{box-shadow:0 0 0 rgba(143,227,136,0)}40%{box-shadow:0 0 28px rgba(143,227,136,.45)}100%{box-shadow:0 0 0 rgba(143,227,136,0)}}
+
+  /* ---------- results ---------- */
+  #results{display:none}
+  .cert{position:relative;text-align:center;border:2px solid var(--c);border-radius:14px;padding:26px 18px 22px;background:radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.05), transparent 70%),#0c1119;overflow:hidden}
+  .cert .big{font-family:"Special Elite",monospace;font-size:clamp(46px,14vw,74px);color:var(--c);line-height:1;margin:6px 0}
+  .cert .rank{font-family:"Special Elite",monospace;font-size:clamp(19px,5vw,25px);color:#F1F3F6;margin:6px 0 4px}
+  .cert .who{color:var(--muted);font-size:14px}
+  .cert .verdict{position:absolute;top:16px;right:-6px;transform:rotate(12deg);font-family:"Special Elite",monospace;font-size:15px;letter-spacing:3px;border:3px solid;border-radius:8px;padding:3px 10px}
+  .cert .verdict.pass{color:var(--nv);border-color:var(--nv)}
+  .cert .verdict.fail{color:var(--danger);border-color:var(--danger)}
+  .statsRow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .statsRow span{border:1px solid var(--line);border-radius:14px;padding:4px 11px;font-size:13px;color:#C9D0DA}
+  .review{margin-top:6px}
+  .rv{border-left:3px solid var(--danger);background:#0c1119;border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:9px;font-size:14px}
+  .rv.part{border-left-color:var(--warn)}
+  .rv .rq{color:#F1F3F6;margin-bottom:4px}
+  .rv .ra{color:var(--nv);font-size:13.5px}
+  .rv .rx{color:var(--muted);font-size:13px;margin-top:3px}
+  footer{margin-top:30px;text-align:center;color:#4d5666;font-size:12px;font-family:"Special Elite",monospace;letter-spacing:2px}
+  @media (prefers-reduced-motion:reduce){ body.flicker .qcard, body.glow .qcard, .timer.low>i{animation:none} .lvl{transition:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎓 <span class="l-el">Εξετάσεις</span><span class="l-en">Exams</span></h1>
+    <div class="headerBtns">
+      <a class="pill" href="index.html">← Dashboard</a>
+      <a class="pill" href="team.html">👥 <span class="l-el">Ομάδα</span><span class="l-en">Squad</span></a>
+      <button id="langBtn" title="Ελληνικά / English">EN</button>
+    </div>
+  </header>
+  <p class="sub"><span class="l-el">Τρία επίπεδα, από το «τι κάνει το UV» μέχρι το ρολόι του Obambo. Κάθε γύρος τραβάει τυχαίες ερωτήσεις, οπότε ξαναπαίξε. Πέρασμα με 70%.</span><span class="l-en">Three levels, from "what does UV do" to the Obambo clock. Every run draws random questions, so play again. Pass mark 70%.</span></p>
+
+  <!-- ===== landing ===== -->
+  <section id="landing">
+    <div class="levels" id="levels"></div>
+    <div class="panel" style="margin-top:18px">
+      <div class="label"><span class="l-el">Ρυθμίσεις</span><span class="l-en">Settings</span></div>
+      <div class="opts">
+        <label class="toggle" id="huntTgl"><input type="checkbox" id="huntMode"> ⏱️ <span class="l-el">Hunt mode — 25″ ανά ερώτηση</span><span class="l-en">Hunt mode — 25s per question</span></label>
+        <input class="nameIn" id="nameIn" maxlength="24" placeholder="Όνομα για το δίπλωμα">
+      </div>
+      <p style="margin:12px 0 0;font-size:13px;color:var(--muted)"><span class="l-el">Στις ερωτήσεις «επίλεξε όλα όσα ισχύουν» παίρνεις μερικούς πόντους: κάθε λάθος επιλογή αφαιρεί μια σωστή.</span><span class="l-en">"Select all that apply" questions give partial credit: each wrong pick cancels a right one.</span></p>
+    </div>
+  </section>
+
+  <!-- ===== exam ===== -->
+  <section id="exam">
+    <div class="topbar">
+      <span class="lvTag" id="lvTag"></span>
+      <span class="counter" id="counter"></span>
+      <span class="streak" id="streak"></span>
+      <button class="quit" id="quitBtn">✕ <span class="l-el">Έξοδος</span><span class="l-en">Quit</span></button>
+    </div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="timer" id="timer"><i id="timerFill"></i></div>
+    <div class="qcard" id="qcard">
+      <span class="qtype" id="qtype"></span>
+      <p class="qtext" id="qtext"></p>
+      <div class="answers" id="answers"></div>
+      <div class="fb" id="fb"></div>
+      <div class="actions">
+        <button class="btn" id="submitBtn"><span class="l-el">Υποβολή</span><span class="l-en">Submit</span></button>
+        <button class="btn" id="nextBtn" style="display:none"><span class="l-el">Επόμενη →</span><span class="l-en">Next →</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== results ===== -->
+  <section id="results">
+    <div class="cert" id="cert"></div>
+    <div class="actions" style="justify-content:center;margin:16px 0 20px">
+      <button class="btn ghost" id="homeBtn"><span class="l-el">← Επίπεδα</span><span class="l-en">← Levels</span></button>
+      <button class="btn" id="retryBtn"><span class="l-el">Ξανά ↻</span><span class="l-en">Retry ↻</span></button>
+      <button class="btn" id="nextLvBtn"><span class="l-el">Επόμενο επίπεδο →</span><span class="l-en">Next level →</span></button>
+    </div>
+    <div class="panel" id="reviewPanel">
+      <div class="label"><span class="l-el">Τι ξέφυγε</span><span class="l-en">What slipped</span></div>
+      <div class="review" id="review"></div>
+    </div>
+  </section>
+
+  <footer>Phasmo Journal · Exams</footer>
+</div>
+
+<script src="ghosts-data.js"></script>
+<script>
+// ======================================================================================
+// UI strings
+// ======================================================================================
+const T = {
+  single:{el:"Μία απάντηση",en:"Single answer"},
+  multi:{el:"Επίλεξε όλα όσα ισχύουν",en:"Select all that apply"},
+  q:{el:"Ερώτηση",en:"Question"},
+  correct:{el:["Σωστό!","Μπράβο!","Ακριβώς!","Το έπιασες!","Καθαρό evidence!"],en:["Correct!","Nice!","Exactly!","Nailed it!","Clean evidence!"]},
+  wrong:{el:["Λάθος.","Όχι αυτό.","Σε έπιασε το ghost.","Πάτησες salt.","Η μπαταρία τελείωσε."],en:["Wrong.","Not that one.","The ghost got you.","You stepped in the salt.","Flashlight died."]},
+  partial:{el:"Μισό σωστό",en:"Partly right"},
+  timeout:{el:"⏱️ Τέλος χρόνου — το hunt σε βρήκε.",en:"⏱️ Time's up — the hunt found you."},
+  answerWas:{el:"Σωστή απάντηση",en:"Correct answer"},
+  pass:{el:"ΠΕΡΑΣΕΣ",en:"PASSED"}, fail:{el:"ΚΟΠΗΚΕΣ",en:"FAILED"},
+  best:{el:"Καλύτερο",en:"Best"}, qs:{el:"ερωτήσεις",en:"questions"},
+  noMiss:{el:"Τίποτα. Καθαρό run. 👻",en:"Nothing. Flawless run. 👻"},
+  score:{el:"Πόντοι",en:"Points"}, streakMax:{el:"Max streak",en:"Max streak"},
+  name:{el:"Όνομα για το δίπλωμα",en:"Name for the diploma"},
+  anon:{el:"Ανώνυμος ghost hunter",en:"Anonymous ghost hunter"},
+  remain:{el:"Ποια ghosts παραμένουν πιθανά;",en:"Which ghosts are still possible?"},
+  seen:{el:"Παρατήρησες:",en:"You observed:"},
+  evid:{el:"Evidence:",en:"Evidence:"},
+};
+let lang="el";
+const L = v => v==null ? "" : (typeof v==="object" && !Array.isArray(v) ? (v[lang] ?? v.el) : v);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// ======================================================================================
+// LEVELS
+// ======================================================================================
+const LEVELS = [
+  {id:1, key:"101", c:"var(--l1)", ic:"🔦", name:"Phasmo 101", n:15, hand:11,
+   desc:{el:"Evidence, βασικά tells, thresholds. Αν ξέρεις τι κάνει το UV, ξεκίνα εδώ.",en:"Evidence, basic tells, thresholds. If you know what UV does, start here."},
+   ranks:[{el:"💀 Ghost food",en:"💀 Ghost food"},{el:"🔦 Rookie",en:"🔦 Rookie"},{el:"📸 Trainee Investigator",en:"📸 Trainee Investigator"},{el:"🧂 Certified Ghost Hunter",en:"🧂 Certified Ghost Hunter"},{el:"🎓 Αριστούχος του 101",en:"🎓 Valedictorian of 101"}]},
+  {id:2, key:"adv", c:"var(--l2)", ic:"🕯️", name:"Phasmo Advanced", n:20, hand:14,
+   desc:{el:"Rule-outs, sanity drains, ranges, smudge timers και συνδυασμοί evidence.",en:"Rule-outs, sanity drains, ranges, smudge timers and evidence combos."},
+   ranks:[{el:"💀 Κυνηγήθηκες",en:"💀 Hunted down"},{el:"🕯️ Amateur",en:"🕯️ Amateur"},{el:"📻 Professional",en:"📻 Professional"},{el:"🌑 Nightmare-ready",en:"🌑 Nightmare-ready"},{el:"👁️ Ghost Whisperer",en:"👁️ Ghost Whisperer"}]},
+  {id:3, key:"master", c:"var(--l3)", ic:"👑", name:"Phasmo Master", n:20, hand:11,
+   desc:{el:"Ρολόι Obambo, μαθηματικά Deildegast, Gallu stages και σενάρια αποκλεισμού με παγίδες.",en:"Obambo clock, Deildegast math, Gallu stages and elimination scenarios with traps."},
+   ranks:[{el:"💀 Έγινες κι εσύ ghost",en:"💀 Became a ghost yourself"},{el:"🧪 Intermediate",en:"🧪 Intermediate"},{el:"🩸 Insanity survivor",en:"🩸 Insanity survivor"},{el:"🔥 Apocalypse Challenger",en:"🔥 Apocalypse Challenger"},{el:"👑 Phasmo Master",en:"👑 Phasmo Master"}]},
+];
+
+// ======================================================================================
+// HAND-WRITTEN QUESTIONS
+// Q(level, type "s"|"m", {el,en} question, options[], correct indices[], {el,en} explanation)
+// option: string (ghost/number — same in both languages) or [el,en]
+// ======================================================================================
+const BANK=[];
+function Q(lv,t,q,o,a,x){ BANK.push({lv,t,q,o:o.map(v=>Array.isArray(v)?{el:v[0],en:v[1]}:v),a,x}); }
+const e=(el,en)=>({el,en});
+
+// ---------------------------------------------------------------- PHASMO 101
+Q(1,"s",e("Ποιο ghost δεν πατάει ΠΟΤΕ salt;","Which ghost NEVER steps in salt?"),
+  ["Wraith","Gallu","Phantom","Spirit"],[0],
+  e("Το Wraith δεν αφήνει ποτέ footprints στο salt. Το Gallu το αποφεύγει μόνο όταν είναι angry.","The Wraith never leaves footprints in salt. The Gallu only avoids it while angry."));
+Q(1,"m",e("Ποια ghosts δεν κάνουν ΠΟΤΕ airball event;","Which ghosts NEVER do the airball event?"),
+  ["Oni","Kormos","Shade","Banshee","Yurei","Phantom"],[0,1],
+  e("Το Oni δεν έχει airball. Το Kormos δεν κάνει κανένα event που κινείται προς εσένα, άρα ούτε airball.","The Oni can't airball. The Kormos never does an event that moves toward you, so no airball either."));
+Q(1,"s",e("Ποιο ghost δεν ανάβει ΠΟΤΕ φως;","Which ghost NEVER turns a light on?"),
+  ["Mare","Jinn","Hantu","Yokai"],[0],
+  e("Το Mare μόνο σβήνει φώτα. Μετράνε και TV/PC.","The Mare only turns lights off. TVs/PCs count too."));
+Q(1,"m",e("Ποια ghosts έχουν ΠΑΝΤΑ γυναικείο μοντέλο;","Which ghosts ALWAYS use a female model?"),
+  ["Banshee","Dayan","Yurei","Mare","Moroi","Onryo"],[0,1],
+  e("Banshee και Dayan είναι πάντα γυναίκες. Ανδρικό μοντέλο = αποκλείονται και τα δύο.","Banshee and Dayan are always female. A male model rules out both."));
+Q(1,"s",e("Fingerprints με 6 δάχτυλα σημαίνουν…","Six-fingered prints mean…"),
+  ["Obake","Goryo","Myling","Poltergeist"],[0],
+  e("Instant confirm για Obake. Τα prints του ξεθωριάζουν και στον μισό χρόνο.","Instant Obake confirm. Its prints also fade in half the time."));
+Q(1,"s",e("Βαριά, λαχανιασμένη ανάσα στο Spirit Box από κοντά;","Heavy, wheezing breath on the Spirit Box up close?"),
+  ["Deogen","Moroi","Yokai","Hantu"],[0],
+  e("Unique tell του Deogen.","A unique Deogen tell."));
+Q(1,"s",e("Σε ποιο sanity κάνουν hunt τα περισσότερα ghosts;","At what sanity do most ghosts start hunting?"),
+  ["40%","50%","60%","70%"],[1],
+  e("Default 50%. Οι εξαιρέσεις είναι αυτές που πρέπει να μάθεις.","Default is 50%. The exceptions are what you need to learn."));
+Q(1,"s",e("Το threshold του Shade είναι…","The Shade's hunt threshold is…"),
+  ["25%","35%","45%","50%"],[1],
+  e("35% — το πιο χαμηλό σταθερό threshold.","35% — the lowest fixed threshold."));
+Q(1,"s",e("Πόσα evidence έχει κάθε ghost (εκτός Mimic);","How many evidence types does each ghost have (Mimic aside)?"),
+  ["2","3","4","5"],[1],
+  e("Τρία. Το Mimic δείχνει και ψεύτικα Ghost Orbs ως 4ο.","Three. The Mimic also shows fake Ghost Orbs as a 4th."));
+Q(1,"s",e("Με ποιο εργαλείο βλέπεις Ghost Orbs;","Which tool shows Ghost Orbs?"),
+  ["Video Camera","UV Light","EMF Reader","D.O.T.S. Projector"],[0],
+  e("Video Camera με night vision.","A video camera with night vision."));
+Q(1,"s",e("Freezing Temperatures επιβεβαιώνεις με…","You confirm Freezing Temperatures with…"),
+  ["Thermometer","Spirit Box","Parabolic Microphone","Sound Recorder"],[0],
+  e("Θερμόμετρο κάτω από 0°C.","A thermometer reading below 0°C."));
+Q(1,"s",e("Ποιο EMF level μετράει ως evidence;","Which EMF level counts as evidence?"),
+  ["EMF 3","EMF 4","EMF 5","EMF 2"],[2],
+  e("Μόνο το EMF 5.","Only EMF 5."));
+Q(1,"s",e("Ποιο ghost δείχνει ΠΑΝΤΑ ψεύτικα Ghost Orbs;","Which ghost ALWAYS shows fake Ghost Orbs?"),
+  ["The Mimic","Goryo","Obake","Raiju"],[0],
+  e("Το Mimic: 3 πραγματικά evidence + orbs.","The Mimic: 3 real evidence + orbs."));
+Q(1,"s",e("Hunt από Kormos. Τι κάνεις;","A Kormos is hunting. What do you do?"),
+  [["Μένω ΤΕΛΕΙΩΣ ακίνητος (όχι δίπλα στο path του)","Stand COMPLETELY still (not next to its path)"],["Sprint στο truck","Sprint to the truck"],["Locker και μιλάω στο walkie","Locker and talk on the walkie"],["Ανάβω όλα τα φώτα","Turn every light on"]],[0],
+  e("Το Kormos είναι τυφλό και σε εντοπίζει από τα βήματα. Σκοτώνει όμως σε 1.5 m ακόμα και μέσα από τοίχους.","The Kormos is blind and tracks footsteps. It still kills within 1.5 m, even through walls."));
+Q(1,"s",e("Hunt από Deogen. Η καλύτερη τακτική;","A Deogen is hunting. Best play?"),
+  [["Loop γύρω από έπιπλα","Loop around furniture"],["Κρύψου σε closet","Hide in a closet"],["Μείνε ακίνητος","Stand still"],["Τρέξε σε ευθεία","Run in a straight line"]],[0],
+  e("Το Deogen σε βρίσκει πάντα, αλλά από κοντά γίνεται πολύ αργό.","The Deogen always finds you, but it's very slow up close."));
+Q(1,"s",e("Ποιο ghost ΔΕΝ φαίνεται στη φωτογραφία ενός ghost event;","Which ghost does NOT show up in a photo of a ghost event?"),
+  ["Phantom","Oni","Banshee","Wraith"],[0],
+  e("Το Phantom εξαφανίζεται στη φωτογραφία.","The Phantom vanishes from the photo."));
+Q(1,"s",e("Το Revenant γίνεται τρομερά γρήγορο όταν…","The Revenant becomes terrifyingly fast when…"),
+  [["σε βλέπει","it can see you"],["είναι κρύο το δωμάτιο","the room is cold"],["μιλάς","you talk"],["τρέχεις","you sprint"]],[0],
+  e("1.0 m/s όταν ψάχνει, 3.0 m/s όταν σε βλέπει. Σπάσε το line-of-sight αμέσως.","1.0 m/s while searching, 3.0 m/s once it sees you. Break line-of-sight right away."));
+Q(1,"s",e("Ποιο ghost διαλέγει ΕΝΑΝ στόχο και κυνηγά κυρίως αυτόν;","Which ghost picks ONE target and mostly chases them?"),
+  ["Banshee","Dayan","Yurei","Oni"],[0],
+  e("Η Banshee. Ακούγεται και σαν κραυγή στο Parabolic.","The Banshee. It also screams on the Parabolic."));
+Q(1,"s",e("Ποιο ghost το εξαγριώνει η φωνή σου κοντά του;","Which ghost gets angry when you talk near it?"),
+  ["Yokai","Kormos","Myling","Shade"],[0],
+  e("Το Yokai: hunt από 80% αν μιλάς κοντά του. Σε hunt σε ακούει μόνο ως 2.5 m.","The Yokai: hunts from 80% if you talk near it. Mid-hunt it only hears you within 2.5 m."));
+Q(1,"s",e("Ποιο ghost γίνεται γρήγορο κοντά σε ΑΝΑΜΜΕΝΟ εξοπλισμό;","Which ghost speeds up near SWITCHED-ON equipment?"),
+  ["Raiju","Jinn","Hantu","Twins"],[0],
+  e("Raiju: πιο γρήγορο και hunt από 65% δίπλα σε ηλεκτρονικά.","Raiju: faster, and hunts from 65% next to electronics."));
+Q(1,"s",e("Παγωμένη ανάσα σε hunt με breaker off σημαίνει…","Freezing breath during a hunt with the breaker off means…"),
+  ["Hantu","Jinn","Revenant","Onryo"],[0],
+  e("100% confirm για Hantu.","A 100% Hantu confirm."));
+Q(1,"s",e("Μετά από smudge, πόσο δεν μπορεί να κάνει hunt ένα κανονικό ghost;","After a smudge, how long can a normal ghost not hunt?"),
+  ["60″","90″","120″","180″"],[1],
+  e("90 sec. Demon 60″, Spirit 180″.","90 seconds. Demon 60s, Spirit 180s."));
+Q(1,"s",e("Ποιο ghost είναι «ντροπαλό» και σχεδόν δεν κάνει τίποτα όσο είσαι κοντά;","Which ghost is 'shy' and barely does anything while you're near?"),
+  ["Shade","Goryo","Spirit","Mare"],[0],
+  e("Shade: δεν κάνει hunt αν είσαι στο ίδιο δωμάτιο.","Shade: won't hunt while you're in its room."));
+Q(1,"s",e("Ποιο ghost «γερνάει» και ηρεμεί όσο περνά η ώρα;","Which ghost 'ages' and calms down as time passes?"),
+  ["Thaye","Moroi","Onryo","Obambo"],[0],
+  e("Thaye: από 75% και γρήγορο, σε 15% και αργό.","Thaye: from 75% and fast down to 15% and slow."));
+Q(1,"s",e("Interactions σε δύο σημεία σχεδόν ταυτόχρονα;","Interactions in two places almost at once?"),
+  ["The Twins","Poltergeist","Banshee","Raiju"],[0],
+  e("The Twins: ο «δίδυμος» αλληλεπιδρά από απόσταση.","The Twins: the 'twin' interacts from a distance."));
+Q(1,"s",e("Ποιο ghost δεν κλείνει ΠΟΤΕ τον breaker;","Which ghost NEVER turns the breaker off?"),
+  ["Jinn","Hantu","Mare","Raiju"],[0],
+  e("Το Jinn τον χρειάζεται ανοιχτό για το speed boost.","The Jinn needs it on for its speed boost."));
+Q(1,"s",e("Το Hantu ΠΟΤΕ δεν…","The Hantu NEVER…"),
+  [["ανοίγει τον breaker","turns the breaker on"],["πατάει salt","steps in salt"],["πετάει αντικείμενα","throws items"],["κάνει airball","does an airball"]],[0],
+  e("Τον κλείνει, αλλά δεν τον ανοίγει ποτέ.","It turns it off, but never on."));
+Q(1,"s",e("Τι βλέπεις στο salt με το UV;","What does UV show on salt?"),
+  [["Footprints","Footprints"],["Ghost Orbs","Ghost Orbs"],["EMF","EMF"],["Τίποτα","Nothing"]],[0],
+  e("Πράσινα footprints. Αν μένει ανέγγιχτο, σκέψου Wraith.","Green footprints. If it stays untouched, think Wraith."));
+Q(1,"s",e("Τι «σβήνει» την κατάρα του Moroi;","What clears the Moroi's curse?"),
+  ["Sanity Pills","Crucifix","Salt",["Φώτα αναμμένα","Lights on"]],[0],
+  e("Sanity pills. Το smudge το τυφλώνει και για 7″ αντί 5″.","Sanity pills. Smudge also blinds it for 7s instead of 5s."));
+Q(1,"s",e("Το D.O.T.S. του Goryo φαίνεται μόνο…","The Goryo's D.O.T.S. only shows…"),
+  [["μέσα από video camera, με άδειο δωμάτιο","through a video camera, with the room empty"],["με γυμνό μάτι","with the naked eye"],["με σβηστό breaker","with the breaker off"],["όταν μιλάς","when you talk"]],[0],
+  e("Και δεν αλλάζει ποτέ ghost room.","And it never changes ghost room."));
+Q(1,"s",e("Hunt από Dayan, είσαι κοντά. Τι κάνεις;","A Dayan hunts and you're close. What do you do?"),
+  [["Παγώνω στη θέση μου","Freeze in place"],["Τρέχω","Run"],["Ανάβω φως","Turn on a light"],["Ρίχνω salt","Drop salt"]],[0],
+  e("Σε <10 m: ακίνητος → επιβραδύνει, τρέξιμο → επιταχύνει.","Within 10 m: still → it slows, running → it speeds up."));
+Q(1,"s",e("Tarot: η κάρτα «The Sun» σου δίνει…","Tarot: 'The Sun' card gives you…"),
+  [["100% sanity","100% sanity"],["0% sanity","0% sanity"],["Cursed hunt","A cursed hunt"],["Revive","A revive"]],[0],
+  e("Sun = full sanity. Moon = 0%.","Sun = full sanity. Moon = 0%."));
+Q(1,"s",e("Ποιο ghost σβήνει φλόγες και κάνει hunt στην 3η;","Which ghost blows out flames and hunts on the 3rd?"),
+  ["Onryo","Mare","Hantu","Thaye"],[0],
+  e("Onryo — ανεξαρτήτως sanity.","Onryo — regardless of sanity."));
+
+// ---------------------------------------------------------------- ADVANCED
+Q(2,"m",e("Ghost event όπου το ghost ήρθε ΠΡΟΣ εσένα. Τι αποκλείεις;","A ghost event where it came TOWARD you. What does it rule out?"),
+  ["Kormos","Oni","Shade","Phantom","Banshee","Wraith"],[0],
+  e("Μόνο το Kormos. Το Oni αποκλείεται μόνο από το airball.","Only the Kormos. The Oni is ruled out by the airball specifically."));
+Q(2,"s",e("Ghost event σε χτυπά. Πόσο sanity παίρνει το Oni;","A ghost event hits you. How much sanity does an Oni drain?"),
+  ["10%","15%","20%","25%"],[2],
+  e("20%. Τα υπόλοιπα 10%. Μέτρα στο truck πριν και μετά.","20%. Everything else drains 10%. Check the truck before and after."));
+Q(2,"s",e("Singing event της Banshee: πόσο sanity;","A Banshee singing event: how much sanity?"),
+  ["10%","15%","20%","5%"],[1],
+  e("15%, τα άλλα ghosts 10%.","15%; other ghosts 10%."));
+Q(2,"m",e("Είδες singing ghost event. Ποιο ghost αποκλείεις;","You saw a singing ghost event. Which ghost does it rule out?"),
+  ["Shade","Banshee","Oni","Phantom","Yurei","Goryo"],[0],
+  e("Το Shade δεν κάνει singing events.","The Shade can't do singing events."));
+Q(2,"m",e("Dirty water στον νεροχύτη. Τι αποκλείεις;","Dirty water in the sink. What does it rule out?"),
+  ["Poltergeist","Shade","Mare","Yurei","Wraith","Banshee"],[0],
+  e("Το Poltergeist κάνει μόνο throws, lights, doors και κεριά.","The Poltergeist only throws, flips lights, touches doors and candles."));
+Q(2,"m",e("Ποια αποκλείουν το SHADE;","Which of these rule out the SHADE?"),
+  [["Singing ghost event","Singing ghost event"],["Item πετάχτηκε πάνω σου","Item thrown straight at you"],["Hunt ενώ ήσουν στο ίδιο room","Hunt while you were in its room"],["Voodoo pin → interaction","Voodoo pin → interaction"],["Dirty water","Dirty water"],["Άναψε φως","Turned a light on"]],[0,1,2,3],
+  e("Dirty water και φώτα τα κάνει κανονικά.","It does dirty water and lights just fine."));
+Q(2,"m",e("Ποια αποκλείουν το POLTERGEIST;","Which of these rule out the POLTERGEIST?"),
+  [["Dirty water","Dirty water"],["Window knock","Window knock"],["Hunt σε room γεμάτο items χωρίς throw κάθε ~0.5″","Hunt in an item-filled room with no throw every ~0.5s"],["Άναψε φως","Turned a light on"],["Πάτησε salt","Stepped in salt"],["Έσβησε κερί","Blew out a candle"]],[0,1,2],
+  e("Φώτα, κεριά, πόρτες και throws είναι το repertoire του.","Lights, candles, doors and throws are its whole repertoire."));
+Q(2,"s",e("Η πόρτα κουνήθηκε ΜΙΣΗ (κανονική πόρτα). Τι αποκλείεις;","A normal door moved only PARTWAY. What does it rule out?"),
+  ["Yurei","Poltergeist","Twins","Oni"],[0],
+  e("Το Yurei κουνάει πόρτες μόνο τέρμα. Βαριές πόρτες και lockers δεν μετράνε.","The Yurei only moves doors fully. Heavy doors and lockers don't count."));
+Q(2,"s",e("Ποιο ghost δεν αλλάζει ΠΟΤΕ ghost room;","Which ghost NEVER changes ghost room?"),
+  ["Goryo","Shade","Wraith","Banshee"],[0],
+  e("Αν το room άλλαξε → όχι Goryo.","If the room changed → not Goryo."));
+Q(2,"s",e("Πόσο δεν μπορεί να κάνει hunt το Spirit μετά από smudge;","How long can a Spirit not hunt after a smudge?"),
+  ["60″","90″","120″","180″"],[3],
+  e("3 λεπτά. Μέτρα από το ΠΡΩΤΟ smudge.","3 minutes. Count from the FIRST smudge."));
+Q(2,"s",e("Και ο Demon μετά από smudge;","And a Demon after a smudge?"),
+  ["30″","60″","90″","120″"],[1],
+  e("Μόνο 60″, και cooldown 20″ μεταξύ hunts.","Only 60s, plus a 20s cooldown between hunts."));
+Q(2,"s",e("Range του Tier 1 crucifix;","Range of a Tier 1 crucifix?"),
+  ["2 m","3 m","4 m","5 m"],[1],
+  e("T1 3 m, T2 4 m, T3 5 m. Στον Demon ×1.5.","T1 3 m, T2 4 m, T3 5 m. ×1.5 on a Demon."));
+Q(2,"s",e("Range του Tier 3 crucifix (όχι Demon);","Range of a Tier 3 crucifix (non-Demon)?"),
+  ["4 m","5 m","6 m","7.5 m"],[1],
+  e("5 m. Στον Demon 7.5 m.","5 m. On a Demon 7.5 m."));
+Q(2,"s",e("Ως πόσα μέτρα κάνει electronic interference το Raiju;","How far does a Raiju's electronic interference reach?"),
+  ["10 m","12 m","15 m","20 m"],[2],
+  e("15 m, ενώ τα άλλα ghosts 10 m.","15 m, versus 10 m for other ghosts."));
+Q(2,"s",e("Από πόσο μακριά ακούγονται τα footsteps του Myling σε hunt;","How far do a Myling's hunt footsteps carry?"),
+  ["~6 m","~12 m","~20 m","~30 m"],[1],
+  e("~12 m, ενώ τα άλλα ~20 m. Silent killer.","~12 m, versus ~20 m for others. Silent killer."));
+Q(2,"s",e("Σε hunt, από πόσο κοντά σε ακούει το Yokai;","Mid-hunt, how close does a Yokai need to be to hear you?"),
+  ["1.5 m","2.5 m","5 m","10 m"],[1],
+  e("2.5 m, ενώ τα άλλα 10 m. Κρύψου και σώπα.","2.5 m, versus 10 m for others. Hide and stay quiet."));
+Q(2,"s",e("Threshold του Mare με ΑΝΑΜΜΕΝΑ φώτα στο room του;","The Mare's threshold with its room LIT?"),
+  ["30%","40%","50%","60%"],[1],
+  e("40% στο φως, 60% στο σκοτάδι.","40% in light, 60% in the dark."));
+Q(2,"s",e("Smudge σε hunt: πόσο «τυφλώνεται» το Moroi;","Mid-hunt smudge: how long is a Moroi blinded?"),
+  ["4″","5″","6″","7″"],[3],
+  e("7″. Κανονικά 5″, Gallu 4″ (angry) ή 6″ (weak).","7s. Normally 5s; Gallu 4s (angry) or 6s (weak)."));
+Q(2,"m",e("Ποια ghosts ΔΕΝ επιταχύνουν με line-of-sight;","Which ghosts do NOT speed up with line-of-sight?"),
+  ["Hantu","Kormos","Deildegast","Banshee","Wraith","Oni","Spirit","Yurei"],[0,1,2],
+  e("Hantu (θερμοκρασία), Kormos (τυφλό), Deildegast (σταθερή ταχύτητα).","Hantu (temperature), Kormos (blind), Deildegast (fixed speed)."));
+Q(2,"s",e("Το Aswang σε βρίσκει μέσα σε locker. Τι γίνεται;","An Aswang reaches you inside a locker. What happens?"),
+  [["Το hunt τελειώνει αμέσως","The hunt ends instantly"],["Πεθαίνεις","You die"],["Χάνεις 50% sanity","You lose 50% sanity"],["Τίποτα","Nothing"]],[0],
+  e("Στο επόμενο hunt όμως πάει κατευθείαν εκεί. Άλλαξε κρυψώνα.","But next hunt it goes straight there. Change spots."));
+Q(2,"s",e("Σε πόσα δευτερόλεπτα φτάνει το Aswang σε max LOS speed;","How fast does an Aswang hit max LOS speed?"),
+  ["~5″","~9″","~13″","~20″"],[1],
+  e("~9″, τα άλλα ~13″.","~9s; others ~13s."));
+Q(2,"s",e("Με τι ταχύτητα ξεκινά το Deildegast;","What speed does a Deildegast start at?"),
+  ["1.0 m/s","1.7 m/s","2.5 m/s","3.0 m/s"],[3],
+  e("3.0 m/s σαν Revenant, και δεν επιταχύνει με LOS.","3.0 m/s like a Revenant, and no LOS speed-up."));
+Q(2,"s",e("Smudge ΜΕΣΑ στο room του Yurei. Τι γίνεται;","Smudge INSIDE a Yurei's room. What happens?"),
+  [["Μένει εκεί 90″","It stays pinned there 90s"],["Κάνει hunt","It hunts"],["Αλλάζει room","It changes room"],["Τίποτα ιδιαίτερο","Nothing special"]],[0],
+  e("Δεν roamάρει για 90″. Αν βγει ή κάνει DOTS → όχι Yurei.","No roaming for 90s. If it leaves or does DOTS → not Yurei."));
+Q(2,"s",e("Αναμμένη φλόγα μπλοκάρει hunt Onryo σε ακτίνα…","A lit flame blocks an Onryo hunt within…"),
+  ["2 m","3 m","4 m","6 m"],[2],
+  e("4 m, με προτεραιότητα έναντι T1/T2 crucifix.","4 m, taking priority over a T1/T2 crucifix."));
+Q(2,"m",e("Τι εξαγριώνει το Gallu;","What enrages a Gallu?"),
+  ["Salt","Crucifix","Incense",["Φωνή","Your voice"],["Φώτα","Lights"],["Sanity pills","Sanity pills"]],[0,1,2],
+  e("Τα defensive items. Angry → πιο γρήγορο, μετά exhausted.","Defensive items. Angry → faster, then exhausted."));
+Q(2,"s",e("Τα fingerprints του Obake ξεθωριάζουν…","An Obake's fingerprints fade…"),
+  [["στον μισό χρόνο","in half the time"],["στον διπλό χρόνο","in double the time"],["ποτέ","never"],["αμέσως","instantly"]],[0],
+  e("Γι' αυτό πρέπει να τα βρεις γρήγορα.","So find them quickly."));
+Q(2,"s",e("Πού βγάζει EMF το ability του Jinn;","Where does the Jinn's ability leave EMF?"),
+  [["Στον breaker","At the breaker"],["Στην πόρτα","At the front door"],["Στο truck","In the truck"],["Στο ghost room","In the ghost room"]],[0],
+  e("EMF στο breaker box.","EMF at the breaker box."));
+Q(2,"s",e("Από τι εξαρτάται η ταχύτητα του Hantu;","What does a Hantu's speed depend on?"),
+  [["Θερμοκρασία δωματίου","Room temperature"],["Το sanity σου","Your sanity"],["Τα ηλεκτρονικά","Electronics"],["Τα αντικείμενα","Items moved"]],[0],
+  e("Πιο κρύο → πιο γρήγορο. Κράτα το σπίτι ζεστό.","Colder → faster. Keep the house warm."));
+Q(2,"s",e("Το Moroi γίνεται πιο γρήγορο όσο…","A Moroi gets faster as…"),
+  [["πέφτει το sanity σου","your sanity drops"],["κρυώνει το room","the room gets colder"],["μιλάς","you talk"],["σε βλέπει","it sees you"]],[0],
+  e("Γι' αυτό τα pills το επιβραδύνουν.","That's why pills slow it."));
+Q(2,"s",e("Το Kormos κάνει hunt από 70% όταν…","A Kormos hunts from 70% when…"),
+  [["τρέχεις κοντά του","you sprint near it"],["μιλάς","you talk"],["είναι σβηστά τα φώτα","the lights are off"],["κουβαλάς ηλεκτρονικά","you carry electronics"]],[0],
+  e("Αλλιώς 50%. Τυφλό, ακούει βήματα.","Otherwise 50%. Blind, listens for footsteps."));
+Q(2,"s",e("Thresholds της Dayan;","The Dayan's thresholds?"),
+  [["45% ακίνητος / 60% σε κίνηση","45% still / 60% moving"],["50% / 70%","50% / 70%"],["35% / 50%","35% / 50%"],["60% / 40%","60% / 40%"]],[0],
+  e("Η κίνησή σου κοντά της την ανεβάζει.","Moving near her raises it."));
+Q(2,"m",e("Ποια ghosts ΜΠΟΡΟΥΝ (υπό κάποια συνθήκη) να κάνουν hunt πάνω από 50%;","Which ghosts CAN (under some condition) hunt above 50%?"),
+  ["Demon","Mare","Yokai","Raiju","Wraith","Shade","Deogen","Banshee"],[0,1,2,3],
+  e("Demon 70%, Mare 60% (σκοτάδι), Yokai 80% (φωνή), Raiju 65% (ηλεκτρονικά).","Demon 70%, Mare 60% (dark), Yokai 80% (voice), Raiju 65% (electronics)."));
+Q(2,"m",e("Ποια ghosts κάνουν hunt ΜΟΝΟ κάτω από 50%;","Which ghosts can ONLY hunt below 50%?"),
+  ["Shade","Deogen","Spirit","Mare","Dayan","Wraith"],[0,1],
+  e("Shade 35%, Deogen 40%. Mare και Dayan ανεβαίνουν στο 60%.","Shade 35%, Deogen 40%. Mare and Dayan can reach 60%."));
+Q(2,"m",e("Tarot: ποιες κάρτες είναι ΚΑΚΑ νέα;","Tarot: which cards are BAD news?"),
+  ["Death","The Moon","Hanged Man","The Sun","High Priestess","The Fool"],[0,1,2],
+  e("Death = cursed hunt, Moon = 0% sanity, Hanged Man = θάνατος. Sun = 100%, High Priestess = revive, Fool = τίποτα.","Death = cursed hunt, Moon = 0% sanity, Hanged Man = death. Sun = 100%, High Priestess = revive, Fool = nothing."));
+
+// ---------------------------------------------------------------- MASTER
+Q(3,"s",e("Obambo, το watch γράφει 5:30. Διάθεση;","Obambo, the watch shows 5:30. Mood?"),
+  [["Aggressive","Aggressive"],["Calm","Calm"]],[0],
+  e("Angry 1:00–3:00, 5:00–7:00, 9:00–11:00… Calm 0:00–1:00, 3:00–5:00, 7:00–9:00…","Angry 1:00–3:00, 5:00–7:00, 9:00–11:00… Calm 0:00–1:00, 3:00–5:00, 7:00–9:00…"));
+Q(3,"s",e("Obambo, watch 8:00. Διάθεση;","Obambo, watch at 8:00. Mood?"),
+  [["Calm","Calm"],["Aggressive","Aggressive"]],[0],
+  e("7:00–9:00 είναι calm.","7:00–9:00 is calm."));
+Q(3,"s",e("Obambo, watch 10:15. Διάθεση;","Obambo, watch at 10:15. Mood?"),
+  [["Aggressive","Aggressive"],["Calm","Calm"]],[0],
+  e("9:00–11:00 είναι aggressive. Στο 11:00 γυρνά calm.","9:00–11:00 is aggressive. It flips to calm at 11:00."));
+Q(3,"s",e("Με τι είναι συγχρονισμένο το ρολόι του Obambo;","What is the Obambo clock synced to?"),
+  [["Το άνοιγμα της front door","The front door opening"],["Το πρώτο evidence","The first evidence"],["Το πρώτο hunt","The first hunt"],["Το truck timer","The truck timer"]],[0],
+  e("Αλλάζει διάθεση κάθε 2 λεπτά, στα μονά λεπτά.","It flips every 2 minutes, on odd minutes."));
+Q(3,"s",e("Calm Obambo: σε ποιο sanity μπορεί να κάνει hunt;","A calm Obambo can hunt at what sanity?"),
+  ["≤10%","≤25%","≤35%","≤50%"],[0],
+  e("Μόνο ≤10%. Hunt πάνω από 10% σε calm παράθυρο → όχι Obambo.","Only ≤10%. A hunt above 10% in a calm window → not Obambo."));
+Q(3,"s",e("Aggressive Obambo: threshold;","Aggressive Obambo threshold?"),
+  ["50%","60%","65%","75%"],[2],
+  e("65%, πιο γρήγορο, αλλά 20% πιο σύντομο hunt.","65%, faster, but a 20% shorter hunt."));
+Q(3,"s",e("Deildegast: μετακίνησες 12 μοναδικά αντικείμενα πριν το hunt. Ταχύτητα;","Deildegast: you moved 12 unique items before the hunt. Speed?"),
+  ["1.2 m/s","1.8 m/s","2.4 m/s","3.0 m/s"],[1],
+  e("3.0 − 12 × 0.1 = 1.8 m/s.","3.0 − 12 × 0.1 = 1.8 m/s."));
+Q(3,"s",e("Deildegast: ποιο είναι το ελάχιστο speed;","Deildegast: what's the speed floor?"),
+  ["0.2 m/s","0.4 m/s","0.8 m/s","1.0 m/s"],[1],
+  e("0.4 m/s, στα ~26 αντικείμενα.","0.4 m/s, at ~26 items."));
+Q(3,"m",e("Deildegast: τι μετράει στον μετρητή αντικειμένων;","Deildegast: what counts toward the item counter?"),
+  [["Αντικείμενα του σπιτιού που μετακίνησες","House items you moved"],["Νεκροί παίκτες","Dead players"],["Ο δικός σου εξοπλισμός","Your own equipment"],["Αντικείμενα πριν το προηγούμενο hunt","Items moved before its previous hunt"]],[0,1],
+  e("Ο εξοπλισμός δεν μετράει, και ο μετρητής μηδενίζεται μετά από κάθε hunt.","Equipment doesn't count, and the counter resets after every hunt."));
+Q(3,"s",e("Demon με Tier 2 crucifix: range;","Demon vs a Tier 2 crucifix: range?"),
+  ["4 m","5 m","6 m","7.5 m"],[2],
+  e("4 m × 1.5 = 6 m.","4 m × 1.5 = 6 m."));
+Q(3,"s",e("Demon με Tier 3 crucifix: range;","Demon vs a Tier 3 crucifix: range?"),
+  ["5 m","6 m","7.5 m","9 m"],[2],
+  e("5 m × 1.5 = 7.5 m.","5 m × 1.5 = 7.5 m."));
+Q(3,"s",e("Hunt ξεκίνησε 5.5 m από T3 crucifix, που ΔΕΝ κάηκε. Τι αποκλείεις;","A hunt started 5.5 m from a T3 crucifix, which did NOT burn. What do you rule out?"),
+  ["Demon","Onryo","Gallu","Spirit"],[0],
+  e("Έξω από τα 5 m, αλλά μέσα στα 7.5 m του Demon. Ένας Demon θα το είχε κάψει.","Outside 5 m but inside the Demon's 7.5 m. A Demon would have burned it."));
+Q(3,"m",e("Gallu: πόσο κρατά το smudge blind σε κάθε stage;","Gallu: how long does smudge blind last per stage?"),
+  [["Angry: 4″","Angry: 4s"],["Weak: 6″","Weak: 6s"],["Angry: 7″","Angry: 7s"],["Weak: 3″","Weak: 3s"],["Normal: 5″","Normal: 5s"]],[0,1,4],
+  e("Normal 5″, Angry 4″, Weak 6″.","Normal 5s, Angry 4s, Weak 6s."));
+Q(3,"s",e("Μετά από hunt, χωρίς salt/smudge/crucifix, ξανά hunt στο 50%. Τι αποκλείεις;","After a hunt, no salt/smudge/crucifix since, it hunts again at 50%. What's ruled out?"),
+  ["Gallu","Demon","Mare","Raiju"],[0],
+  e("Exhausted Gallu δεν κάνει hunt στο 50%.","An exhausted Gallu can't hunt at 50%."));
+Q(3,"s",e("Salt test για Gallu: πόσο περιμένεις πριν το 2ο salt;","Gallu salt test: how long before the 2nd salt pile?"),
+  ["≥2″","≥10″","≥30″","≥90″"],[0],
+  e("Πάτησε και τα δύο, χωρίς hunt ενδιάμεσα → όχι Gallu.","Steps in both with no hunt in between → not Gallu."));
+Q(3,"s",e("Το truck δείχνει sanity 61, 62, 63, 64, 65. Πόσο είναι το πραγματικό;","The truck cycles 61, 62, 63, 64, 65. What's your real sanity?"),
+  ["61%","63%","65%","62%"],[1],
+  e("Το μεσαίο νούμερο.","The middle number."));
+Q(3,"s",e("Το Cursed Mirror χρειάζεται τουλάχιστον…","The Cursed Mirror needs at least…"),
+  ["10% sanity","20% sanity","35% sanity","50% sanity"],[1],
+  e("Με 10–15% σπάει.","At 10–15% it breaks."));
+Q(3,"s",e("Monkey Paw «wish for sanity». Τι κοστίζει;","Monkey Paw 'wish for sanity'. What's the cost?"),
+  [["Το ghost room πάει σε τυχαίο σημείο","The ghost room moves somewhere random"],["Cursed hunt","A cursed hunt"],["Χάνεις ένα evidence","You lose an evidence"],["Τίποτα","Nothing"]],[0],
+  e("Πέφτεις στο 50% και δεν ξέρεις πού πήγε.","You drop to 50% and don't know where it went."));
+Q(3,"s",e("Thaye test: πόσο μένεις κοντά του ανάμεσα στις δύο ερωτήσεις ηλικίας στο Ouija;","Thaye test: how long do you stay near it between the two Ouija age questions?"),
+  ["~30″","~1′","~3′","~10′"],[2],
+  e("Αν η ηλικία δεν ανέβηκε → όχι Thaye.","If the age didn't go up → not Thaye."));
+Q(3,"s",e("Sound recording και στέκεσαι σε φωτισμένο room. Το sanity ΔΕΝ πέφτει. Τι αποκλείεις;","A sound recording, and you stand in a lit room. Sanity does NOT drop. What's ruled out?"),
+  ["Moroi","Myling","Banshee","Yokai"],[0],
+  e("Η κατάρα του Moroi θα έριχνε sanity ×2.","The Moroi's curse would drain at 2x."));
+Q(3,"s",e("Onryo: αναμμένο κερί + T2 crucifix στο ίδιο range. Ποιο «πιάνει» πρώτα;","Onryo: lit candle and a T2 crucifix in the same range. Which triggers first?"),
+  [["Η φλόγα","The flame"],["Το crucifix","The crucifix"],["Και τα δύο","Both"],["Κανένα","Neither"]],[0],
+  e("Η φλόγα έχει προτεραιότητα έναντι T1/T2 crucifix. Hunt σε 4 m από φλόγα → όχι Onryo.","The flame takes priority over a T1/T2 crucifix. A hunt within 4 m of a flame → not Onryo."));
+Q(3,"s",e("Phantom: πόσο sanity χάνεις όσο το κοιτάς σε event;","Phantom: how much sanity do you lose while looking at it in an event?"),
+  ["0.5%/sec","1%/sec","2%/sec","5%/sec"],[0],
+  e("Δύσκολο να μετρηθεί, το photo test είναι ευκολότερο.","Hard to measure; the photo test is easier."));
+Q(3,"s",e("Jinn speed boost: ποιες συνθήκες;","Jinn speed boost: what conditions?"),
+  [["Breaker ON + σε βλέπει από >3 m","Breaker ON + sees you from >3 m"],["Breaker OFF + κοντά","Breaker OFF + close"],["Κρύο room","Cold room"],["Μιλάς","You talk"]],[0],
+  e("Breaker on, LOS >3 m χωρίς boost → όχι Jinn.","Breaker on, LOS >3 m and no boost → not Jinn."));
+Q(3,"s",e("Raiju test: ποια ηλεκτρονικά ΔΕΝ μετράνε;","Raiju test: which electronics do NOT count?"),
+  [["Τα ηλεκτρονικά του σπιτιού","The house's own electronics"],["Η αναμμένη video camera σου","Your switched-on video camera"],["Το EMF reader σου","Your EMF reader"],["Ο φακός σου","Your flashlight"]],[0],
+  e("Μόνο εξοπλισμός από το truck.","Only equipment from the truck."));
+Q(3,"s",e("Το Mimic εμφανίζεται σε ποιες λίστες αποκλεισμού;","The Mimic appears in which rule-out lists?"),
+  [["Σε καμία — δεν αποκλείεται από συμπεριφορά","None — behavior never rules it out"],["Salt","Salt"],["Airball","Airball"],["Male model","Male model"]],[0],
+  e("Μπορεί να μιμηθεί οτιδήποτε, οπότε μόνο τα evidence το αποκλείουν.","It can mimic anything, so only evidence rules it out."));
+
+// ======================================================================================
+// GENERATED QUESTIONS (από ghosts-data.js — συμφωνούν πάντα με το site)
+// ======================================================================================
+const EVN = Object.fromEntries(EV.map(x=>[x.k,x]));
+const evChip = k => `<span class="evchip">${EVN[k].ic} ${esc(EVN[k].n)}</span>`;
+const has = (g,k) => effEv(g).includes(k);
+const REAL = GHOSTS.filter(g=>!g.mimic);
+
+// Labels για exclusion rules (τα βασικά ζουν στο index.html· τα rule-outs στο ghosts-data.js)
+const BASE_EX = {
+  salt:e("Πάτησε salt","Stepped in salt"),
+  lightOn:e("Το ghost άναψε φως","The ghost turned a light on"),
+  breakerOn:e("Το ghost άνοιξε τον breaker","The ghost turned the breaker on"),
+  breakerOff:e("Το ghost έκλεισε τον breaker","The ghost turned the breaker off"),
+  male:e("Ανδρικό μοντέλο σε event","Male model in an event"),
+  airball:e("Airball event","Airball event"),
+};
+const RO_IDS = ["eventToward","photoVisible","salt2","dirtyWater","windowKnock","singEvent","throwAtYou","roomChange","partialDoor","thirdFlameNoHunt","drain10","singNo15","mareLitHunt","spiritSmudge3","sameRoom","normalBlink","noShapeshift","heardFar","dayanFlat","stillApproach","hantuNoBreath","smudgeNot7"];
+const EXCL = [];
+BEHAVIOR_RULES.forEach(r=>{
+  if(!r.exclude) return;
+  if(BASE_EX[r.id]) EXCL.push({id:r.id,lab:BASE_EX[r.id],ex:r.exclude});
+  else if(RO_IDS.includes(r.id)){ const b=RULEOUT_BEHAVIORS.find(x=>x.id===r.id); if(b) EXCL.push({id:r.id,lab:e(b.label,b.en),ex:r.exclude}); }
+});
+
+function genEvidenceToGhost(){
+  const g=pick(REAL);
+  const others=shuffle(REAL.filter(o=>o!==g)).sort((a,b)=>b.ev.filter(k=>g.ev.includes(k)).length-a.ev.filter(k=>g.ev.includes(k)).length).slice(0,3);
+  const opts=shuffle([g,...others]);
+  return {t:"s",
+    q:{el:`Ποιο ghost έχει ${g.ev.map(evChip).join(" + ")} ;`,en:`Which ghost has ${g.ev.map(evChip).join(" + ")} ?`},html:true,
+    o:opts.map(x=>x.name), a:[opts.indexOf(g)],
+    x:{el:opts.filter(x=>x!==g).map(x=>`${x.name}: ${x.ev.join(", ")}`).join(" · "),en:opts.filter(x=>x!==g).map(x=>`${x.name}: ${x.ev.join(", ")}`).join(" · ")}};
+}
+function genGhostToEvidence(){
+  const g=pick(REAL);
+  const o=EV.map(x=>`${x.ic} ${x.n}`);
+  return {t:"m",q:{el:`Ποια evidence έχει το <b>${esc(g.name)}</b>;`,en:`Which evidence does the <b>${esc(g.name)}</b> have?`},html:true,
+    o, a:EV.map((x,i)=>g.ev.includes(x.k)?i:-1).filter(i=>i>=0),
+    x:{el:`${g.name}: ${g.ev.map(k=>EVN[k].n).join(" · ")}`,en:`${g.name}: ${g.ev.map(k=>EVN[k].n).join(" · ")}`}};
+}
+function genWhoHasEvidence(){
+  for(let tries=0;tries<50;tries++){
+    const k=pick(EV).k;
+    const yes=shuffle(GHOSTS.filter(g=>has(g,k))), no=shuffle(GHOSTS.filter(g=>!has(g,k)));
+    const ny=2+Math.floor(Math.random()*3);
+    const opts=shuffle([...yes.slice(0,ny),...no.slice(0,8-ny)]);
+    const mim=opts.find(g=>g.mimic) && k==="ORB";
+    return {t:"m",q:{el:`Ποια από αυτά τα ghosts έχουν ${evChip(k)} ;`,en:`Which of these ghosts have ${evChip(k)} ?`},html:true,
+      o:opts.map(g=>g.name), a:opts.map((g,i)=>has(g,k)?i:-1).filter(i=>i>=0),
+      x:{el:`Με ${EVN[k].n}: ${opts.filter(g=>has(g,k)).map(g=>g.name).join(", ")}.${mim?" (Το Mimic δείχνει ψεύτικα orbs.)":""}`,
+         en:`With ${EVN[k].n}: ${opts.filter(g=>has(g,k)).map(g=>g.name).join(", ")}.${mim?" (The Mimic shows fake orbs.)":""}`}};
+  }
+}
+function genTwoEvidence(){
+  for(let tries=0;tries<80;tries++){
+    const [a,b]=shuffle(EV).slice(0,2).map(x=>x.k);
+    const cand=GHOSTS.filter(g=>has(g,a)&&has(g,b));
+    if(cand.length<1||cand.length>5) continue;
+    const near=shuffle(GHOSTS.filter(g=>!cand.includes(g)&&(has(g,a)||has(g,b))));
+    const opts=shuffle([...cand,...near.slice(0,Math.min(8,cand.length+4)-cand.length)]);
+    return {t:"m",q:{el:`Έχεις ${evChip(a)} + ${evChip(b)}. Ποια ghosts ταιριάζουν;`,en:`You have ${evChip(a)} + ${evChip(b)}. Which ghosts fit?`},html:true,
+      o:opts.map(g=>g.name),a:opts.map((g,i)=>cand.includes(g)?i:-1).filter(i=>i>=0),
+      x:{el:cand.map(g=>`${g.name} (${effEv(g).join(", ")})`).join(" · "),en:cand.map(g=>`${g.name} (${effEv(g).join(", ")})`).join(" · ")}};
+  }
+}
+function genScenario(){
+  for(let tries=0;tries<300;tries++){
+    const nEv=Math.random()<.6?2:1;
+    const evs=shuffle(EV).slice(0,nEv).map(x=>x.k);
+    const match=GHOSTS.filter(g=>evs.every(k=>has(g,k)));
+    if(match.length<2) continue;
+    const useful=shuffle(EXCL.filter(r=>r.ex.some(n=>match.some(g=>g.name===n)) && r.ex.some(n=>true)));
+    if(!useful.length) continue;
+    const nR=nEv===1?2:(Math.random()<.5?1:2);
+    const rules=[]; for(const r of useful){ if(rules.length>=nR) break; if(!rules.some(x=>x.ex.join()===r.ex.join())) rules.push(r); }
+    const out=new Set(rules.flatMap(r=>r.ex));
+    const cand=match.filter(g=>!out.has(g.name));
+    if(cand.length<1||cand.length>4) continue;
+    const traps=match.filter(g=>out.has(g.name));
+    const rest=shuffle(GHOSTS.filter(g=>!match.includes(g)));
+    const total=Math.min(8,Math.max(5,cand.length+traps.length+2));
+    const opts=shuffle([...cand,...traps,...rest].slice(0,total));
+    if(!cand.every(c=>opts.includes(c))) continue;
+    const obsHTML = l => `<span class="obs">👁️ ${T.seen[l]} ${rules.map(r=>"«"+esc(r.lab[l])+"»").join(" · ")}</span>`;
+    const why = l => {
+      const lines=[`${l==="el"?"Ταιριάζουν στα evidence":"Match the evidence"}: ${match.map(g=>g.name).join(", ")}.`];
+      traps.forEach(g=>{ const r=rules.find(r=>r.ex.includes(g.name)); lines.push(`✕ ${g.name} — ${r.lab[l]}`); });
+      lines.push(`${l==="el"?"Μένουν":"Remaining"}: ${cand.map(g=>g.name).join(", ")}.`);
+      return lines.join("<br>");
+    };
+    return {t:"m",html:true,xhtml:true,
+      q:{el:`${T.evid.el} ${evs.map(evChip).join(" + ")}${obsHTML("el")}<span class="obs">${T.remain.el}</span>`,
+         en:`${T.evid.en} ${evs.map(evChip).join(" + ")}${obsHTML("en")}<span class="obs">${T.remain.en}</span>`},
+      o:opts.map(g=>g.name),a:opts.map((g,i)=>cand.includes(g)?i:-1).filter(i=>i>=0),
+      x:{el:why("el"),en:why("en")}};
+  }
+}
+const GEN = {1:[genEvidenceToGhost,genEvidenceToGhost,genGhostToEvidence,genWhoHasEvidence],
+             2:[genTwoEvidence,genTwoEvidence,genWhoHasEvidence,genScenario],
+             3:[genScenario,genScenario,genScenario,genTwoEvidence]};
+
+// ======================================================================================
+// STATE
+// ======================================================================================
+const LS_KEY="phasmo-exam-v1";
+let store={lang:"el",best:{},name:"",hunt:false};
+try{ const d=JSON.parse(localStorage.getItem(LS_KEY)||"null"); if(d) store={...store,...d}; }catch(err){}
+const save=()=>{ try{ localStorage.setItem(LS_KEY,JSON.stringify(store)); }catch(err){} };
+lang = store.lang==="en" ? "en" : "el";
+
+let run=null; // {lv, qs[], i, score, streak, maxStreak, log[], sel:Set, answered, timerId, t0}
+const $=id=>document.getElementById(id);
+
+function buildRun(lv){
+  const hand=shuffle(BANK.filter(q=>q.lv===lv.id)).slice(0,lv.hand);
+  const gens=[]; for(let i=0;i<lv.n-hand.length;i++){ const g=GEN[lv.id][i%GEN[lv.id].length](); if(g) gens.push(g); }
+  // ανακάτεμα επιλογών για τις χειρόγραφες ερωτήσεις
+  const prepped=hand.map(q=>{
+    const idx=shuffle(q.o.map((_,i)=>i));
+    return {...q,o:idx.map(i=>q.o[i]),a:idx.map((orig,i)=>q.a.includes(orig)?i:-1).filter(i=>i>=0)};
+  });
+  return shuffle([...prepped,...gens]);
+}
+
+// ======================================================================================
+// RENDER: landing
+// ======================================================================================
+function renderLanding(){
+  $("levels").innerHTML = LEVELS.map(lv=>{
+    const b=store.best[lv.key];
+    return `<button class="lvl" style="--c:${lv.c}" data-lv="${lv.id}">
+      ${b!=null && b>=70 ? `<span class="stamp">${T.pass[lang]}</span>`:""}
+      <div class="ic">${lv.ic}</div>
+      <h2>${lv.name}</h2>
+      <p>${esc(L(lv.desc))}</p>
+      <div class="meta"><span>${lv.n} ${T.qs[lang]}</span><span>${["★☆☆","★★☆","★★★"][lv.id-1]}</span></div>
+      <div class="best">${T.best[lang]}: <b>${b!=null? b+"%" : "—"}</b></div>
+    </button>`;
+  }).join("");
+  document.querySelectorAll(".lvl").forEach(el=>el.onclick=()=>start(LEVELS.find(l=>l.id==el.dataset.lv)));
+  $("huntMode").checked=!!store.hunt; $("huntTgl").classList.toggle("on",!!store.hunt);
+  $("nameIn").value=store.name||""; $("nameIn").placeholder=T.name[lang];
+}
+$("huntMode").onchange=e2=>{ store.hunt=e2.target.checked; $("huntTgl").classList.toggle("on",store.hunt); save(); };
+$("nameIn").oninput=e2=>{ store.name=e2.target.value.trim(); save(); };
+
+function show(id){ ["landing","exam","results"].forEach(s=>$(s).style.display = s===id ? "block":"none"); window.scrollTo({top:0}); }
+
+// ======================================================================================
+// RENDER: exam
+// ======================================================================================
+function start(lv){
+  run={lv,qs:buildRun(lv),i:0,score:0,streak:0,maxStreak:0,log:[],sel:new Set(),answered:false};
+  document.documentElement.style.setProperty("--c",lv.c);
+  $("exam").style.setProperty("--c",lv.c); $("results").style.setProperty("--c",lv.c);
+  show("exam"); renderQ();
+}
+function renderQ(){
+  const q=run.qs[run.i], lv=run.lv;
+  run.sel=new Set(); run.answered=false;
+  $("lvTag").textContent=lv.name;
+  $("counter").textContent=`${T.q[lang]} ${run.i+1}/${run.qs.length}`;
+  $("streak").textContent = run.streak>=2 ? `🔥 ×${run.streak}` : "";
+  $("barFill").style.width=(run.i/run.qs.length*100)+"%";
+  const multi=q.t==="m";
+  $("qcard").classList.toggle("multiQ",multi);
+  $("qtype").className="qtype"+(multi?" multi":"");
+  $("qtype").textContent = multi ? "☑ "+T.multi[lang] : "◉ "+T.single[lang];
+  $("qtext").innerHTML = q.html ? L(q.q) : esc(L(q.q));
+  $("answers").innerHTML = q.o.map((o,i)=>`<button class="ans" data-i="${i}"><span class="box"></span><span>${esc(L(o))}</span></button>`).join("");
+  document.querySelectorAll(".ans").forEach(b=>b.onclick=()=>choose(+b.dataset.i));
+  $("fb").style.display="none"; $("fb").className="fb";
+  $("submitBtn").style.display = multi ? "" : "none";
+  $("submitBtn").disabled=true;
+  $("nextBtn").style.display="none";
+  startTimer();
+}
+function choose(i){
+  if(run.answered) return;
+  const q=run.qs[run.i];
+  if(q.t==="s"){ run.sel=new Set([i]); grade(); return; }
+  run.sel.has(i)?run.sel.delete(i):run.sel.add(i);
+  document.querySelectorAll(".ans").forEach(b=>{ const on=run.sel.has(+b.dataset.i); b.classList.toggle("sel",on); b.querySelector(".box").textContent=on?"✓":""; });
+  $("submitBtn").disabled = run.sel.size===0;
+}
+$("submitBtn").onclick=()=>{ if(!run.answered && run.sel.size) grade(); };
+
+function grade(timedOut){
+  stopTimer();
+  run.answered=true;
+  const q=run.qs[run.i], A=new Set(q.a);
+  let pts;
+  if(timedOut) pts=0;
+  else if(q.t==="s") pts = A.has([...run.sel][0]) ? 1 : 0;
+  else { const hit=[...run.sel].filter(i=>A.has(i)).length, miss=[...run.sel].filter(i=>!A.has(i)).length; pts=Math.max(0,(hit-miss)/A.size); }
+  run.score+=pts;
+  if(pts===1){ run.streak++; run.maxStreak=Math.max(run.maxStreak,run.streak); } else run.streak=0;
+  document.querySelectorAll(".ans").forEach(b=>{
+    const i=+b.dataset.i; b.disabled=true; b.classList.remove("sel");
+    const box=b.querySelector(".box");
+    if(A.has(i) && run.sel.has(i)){ b.classList.add("right"); box.textContent="✓"; }
+    else if(A.has(i)){ b.classList.add(q.t==="m"?"missed":"right"); if(q.t==="s") box.textContent="✓"; }
+    else if(run.sel.has(i)){ b.classList.add("wrong"); box.textContent="✕"; }
+  });
+  const fb=$("fb");
+  const kind = pts===1 ? "ok" : pts>0 ? "part" : "bad";
+  const head = timedOut ? T.timeout[lang] : kind==="ok" ? pick(T.correct[lang]) : kind==="part" ? `${T.partial[lang]} (+${pts.toFixed(2).replace(/\.?0+$/,"")})` : pick(T.wrong[lang]);
+  const expl = q.xhtml ? L(q.x) : esc(L(q.x));
+  fb.className="fb "+kind; fb.innerHTML=`<b>${head}</b>${expl}`; fb.style.display="block";
+  document.body.classList.remove("flicker","glow"); void document.body.offsetWidth;
+  document.body.classList.add(kind==="ok"?"glow":kind==="bad"?"flicker":"glow");
+  if(pts<1) run.log.push({q,pts,timedOut});
+  $("streak").textContent = run.streak>=2 ? `🔥 ×${run.streak}` : "";
+  $("submitBtn").style.display="none";
+  $("nextBtn").style.display="";
+  $("nextBtn").focus({preventScroll:true});
+}
+$("nextBtn").onclick=()=>{ run.i++; if(run.i>=run.qs.length) finish(); else { renderQ(); } };
+$("quitBtn").onclick=()=>{ stopTimer(); run=null; renderLanding(); show("landing"); };
+
+// ---------- hunt-mode timer ----------
+const TLIM=25000; let raf=null;
+function startTimer(){
+  stopTimer();
+  const on=!!store.hunt; $("timer").style.display=on?"block":"none"; if(!on) return;
+  const t0=performance.now();
+  const tick=now=>{
+    const left=Math.max(0,TLIM-(now-t0));
+    $("timerFill").style.width=(left/TLIM*100)+"%";
+    $("timer").classList.toggle("low",left<8000);
+    if(left<=0){ raf=null; if(!run.answered){ run.sel=new Set(); grade(true); } return; }
+    raf=requestAnimationFrame(tick);
+  };
+  raf=requestAnimationFrame(tick);
+}
+function stopTimer(){ if(raf) cancelAnimationFrame(raf); raf=null; $("timer").classList.remove("low"); }
+
+// ======================================================================================
+// RENDER: results
+// ======================================================================================
+function finish(){
+  stopTimer();
+  const lv=run.lv, pct=Math.round(run.score/run.qs.length*100);
+  const prev=store.best[lv.key]; if(prev==null||pct>prev){ store.best[lv.key]=pct; save(); }
+  run.pct=pct; show("results"); renderResults();
+}
+function renderResults(){
+  const lv=run.lv, pct=run.pct, pass=pct>=70;
+  const ri = pct===100?4 : pct>=85?3 : pct>=70?2 : pct>=50?1 : 0;
+  const date=new Date().toLocaleDateString(lang==="el"?"el-GR":"en-GB",{day:"numeric",month:"long",year:"numeric"});
+  $("cert").innerHTML=`
+    <span class="verdict ${pass?"pass":"fail"}">${pass?T.pass[lang]:T.fail[lang]}</span>
+    <div style="font-size:36px">${lv.ic}</div>
+    <div style="font-family:'Special Elite',monospace;letter-spacing:3px;color:var(--muted);font-size:13px">${lv.name.toUpperCase()}</div>
+    <div class="big">${pct}%</div>
+    <div class="rank">${esc(L(lv.ranks[ri]))}</div>
+    <div class="who">${esc(store.name||T.anon[lang])} · ${date}</div>
+    <div class="statsRow"><span>${T.score[lang]}: ${(+run.score.toFixed(2))}/${run.qs.length}</span><span>${T.streakMax[lang]}: 🔥 ${run.maxStreak}</span>${store.hunt?'<span>⏱️ Hunt mode</span>':""}</div>`;
+  const nxt=LEVELS.find(l=>l.id===lv.id+1);
+  $("nextLvBtn").style.display = nxt ? "" : "none";
+  $("review").innerHTML = run.log.length ? run.log.map(({q,pts,timedOut})=>{
+    const qt = q.html ? L(q.q).replace(/<span class="obs">/g,"<br><span>") : esc(L(q.q));
+    const ans = q.a.map(i=>esc(L(q.o[i]))).join(", ");
+    return `<div class="rv ${pts>0?"part":""}"><div class="rq">${qt}</div><div class="ra">✓ ${T.answerWas[lang]}: ${ans}${timedOut?" · ⏱️":""}</div><div class="rx">${q.xhtml?L(q.x):esc(L(q.x))}</div></div>`;
+  }).join("") : `<p style="margin:0;color:var(--nv)">${T.noMiss[lang]}</p>`;
+}
+$("homeBtn").onclick=()=>{ run=null; renderLanding(); show("landing"); };
+$("retryBtn").onclick=()=>start(run.lv);
+$("nextLvBtn").onclick=()=>{ const n=LEVELS.find(l=>l.id===run.lv.id+1); if(n) start(n); };
+
+// ======================================================================================
+// LANGUAGE
+// ======================================================================================
+const langBtn=$("langBtn");
+function setLang(l){
+  lang=l; store.lang=l; save();
+  document.documentElement.setAttribute("lang",l);
+  langBtn.textContent = l==="el" ? "EN" : "ΕΛ";
+  renderLanding();
+  if(run && $("exam").style.display==="block"){
+    // ξαναζωγράφισε την τρέχουσα ερώτηση χωρίς να χαθεί η πρόοδος
+    if(!run.answered){ const s=new Set(run.sel); renderQ(); s.forEach(i=>choose(i)); }
+    else { $("qtype").textContent = run.qs[run.i].t==="m" ? "☑ "+T.multi[lang] : "◉ "+T.single[lang]; $("counter").textContent=`${T.q[lang]} ${run.i+1}/${run.qs.length}`; }
+  }
+  if(run && $("results").style.display==="block") renderResults();
+}
+langBtn.onclick=()=>setLang(lang==="el"?"en":"el");
+setLang(lang);
+show("landing");
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
