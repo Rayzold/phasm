@@ -134,7 +134,7 @@
       <button id="langBtn" title="Ελληνικά / English">EN</button>
     </div>
   </header>
-  <p class="sub"><span class="l-el">Τρία επίπεδα, από το «τι κάνει το UV» μέχρι το ρολόι του Obambo. Κάθε γύρος τραβάει τυχαίες ερωτήσεις, οπότε ξαναπαίξε. Πέρασμα με 70%.</span><span class="l-en">Three levels, from "what does UV do" to the Obambo clock. Every run draws random questions, so play again. Pass mark 70%.</span></p>
+  <p class="sub"><span class="l-el">Τρία επίπεδα, από το «τι κάνει το UV» μέχρι σενάρια αποκλεισμού με παγίδες. Κάθε γύρος τραβάει τυχαίες ερωτήσεις, οπότε ξαναπαίξε. Πέρασμα με 70%.</span><span class="l-en">Three levels, from "what does UV do" to elimination scenarios with traps. Every run draws random questions, so play again. Pass mark 70%.</span></p>
 
   <!-- ===== landing ===== -->
   <section id="landing">
@@ -222,14 +222,14 @@ const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 // LEVELS
 // ======================================================================================
 const LEVELS = [
-  {id:1, key:"101", c:"var(--l1)", ic:"🔦", name:"Phasmo 101", n:15, hand:11,
+  {id:1, key:"101", c:"var(--l1)", ic:"🔦", name:"Phasmo 101", n:15, hand:15,
    desc:{el:"Evidence, βασικά tells, thresholds. Αν ξέρεις τι κάνει το UV, ξεκίνα εδώ.",en:"Evidence, basic tells, thresholds. If you know what UV does, start here."},
    ranks:[{el:"💀 Ghost food",en:"💀 Ghost food"},{el:"🔦 Rookie",en:"🔦 Rookie"},{el:"📸 Trainee Investigator",en:"📸 Trainee Investigator"},{el:"🧂 Certified Ghost Hunter",en:"🧂 Certified Ghost Hunter"},{el:"🎓 Αριστούχος του 101",en:"🎓 Valedictorian of 101"}]},
-  {id:2, key:"adv", c:"var(--l2)", ic:"🕯️", name:"Phasmo Advanced", n:20, hand:14,
-   desc:{el:"Rule-outs, sanity drains, ranges, smudge timers και συνδυασμοί evidence.",en:"Rule-outs, sanity drains, ranges, smudge timers and evidence combos."},
+  {id:2, key:"adv", c:"var(--l2)", ic:"🕯️", name:"Phasmo Advanced", n:20, hand:20,
+   desc:{el:"Rule-outs, hunt tactics, sanity drains, ranges, smudge timers, ρολόι Obambo και tests.",en:"Rule-outs, hunt tactics, sanity drains, ranges, smudge timers, the Obambo clock and tests."},
    ranks:[{el:"💀 Κυνηγήθηκες",en:"💀 Hunted down"},{el:"🕯️ Amateur",en:"🕯️ Amateur"},{el:"📻 Professional",en:"📻 Professional"},{el:"🌑 Nightmare-ready",en:"🌑 Nightmare-ready"},{el:"👁️ Ghost Whisperer",en:"👁️ Ghost Whisperer"}]},
-  {id:3, key:"master", c:"var(--l3)", ic:"👑", name:"Phasmo Master", n:20, hand:11,
-   desc:{el:"Ρολόι Obambo, μαθηματικά Deildegast, Gallu stages και σενάρια αποκλεισμού με παγίδες.",en:"Obambo clock, Deildegast math, Gallu stages and elimination scenarios with traps."},
+  {id:3, key:"master", c:"var(--l3)", ic:"👑", name:"Phasmo Master", n:20, hand:9,
+   desc:{el:"Μαθηματικά Deildegast, Demon crucifix, Gallu stages και σενάρια evidence με παγίδες.",en:"Deildegast math, Demon crucifix, Gallu stages and evidence scenarios with traps."},
    ranks:[{el:"💀 Έγινες κι εσύ ghost",en:"💀 Became a ghost yourself"},{el:"🧪 Intermediate",en:"🧪 Intermediate"},{el:"🩸 Insanity survivor",en:"🩸 Insanity survivor"},{el:"🔥 Apocalypse Challenger",en:"🔥 Apocalypse Challenger"},{el:"👑 Phasmo Master",en:"👑 Phasmo Master"}]},
 ];
 
@@ -258,7 +258,7 @@ Q(1,"m",e("Ποια ghosts έχουν ΠΑΝΤΑ γυναικείο μοντέλ
 Q(1,"s",e("Fingerprints με 6 δάχτυλα σημαίνουν…","Six-fingered prints mean…"),
   ["Obake","Goryo","Myling","Poltergeist"],[0],
   e("Instant confirm για Obake. Τα prints του ξεθωριάζουν και στον μισό χρόνο.","Instant Obake confirm. Its prints also fade in half the time."));
-Q(1,"s",e("Βαριά, λαχανιασμένη ανάσα στο Spirit Box από κοντά;","Heavy, wheezing breath on the Spirit Box up close?"),
+Q(2,"s",e("Βαριά, λαχανιασμένη ανάσα στο Spirit Box από κοντά;","Heavy, wheezing breath on the Spirit Box up close?"),
   ["Deogen","Moroi","Yokai","Hantu"],[0],
   e("Unique tell του Deogen.","A unique Deogen tell."));
 Q(1,"s",e("Σε ποιο sanity κάνουν hunt τα περισσότερα ghosts;","At what sanity do most ghosts start hunting?"),
@@ -282,10 +282,10 @@ Q(1,"s",e("Ποιο EMF level μετράει ως evidence;","Which EMF level co
 Q(1,"s",e("Ποιο ghost δείχνει ΠΑΝΤΑ ψεύτικα Ghost Orbs;","Which ghost ALWAYS shows fake Ghost Orbs?"),
   ["The Mimic","Goryo","Obake","Raiju"],[0],
   e("Το Mimic: 3 πραγματικά evidence + orbs.","The Mimic: 3 real evidence + orbs."));
-Q(1,"s",e("Hunt από Kormos. Τι κάνεις;","A Kormos is hunting. What do you do?"),
+Q(2,"s",e("Hunt από Kormos. Τι κάνεις;","A Kormos is hunting. What do you do?"),
   [["Μένω ΤΕΛΕΙΩΣ ακίνητος (όχι δίπλα στο path του)","Stand COMPLETELY still (not next to its path)"],["Sprint στο truck","Sprint to the truck"],["Locker και μιλάω στο walkie","Locker and talk on the walkie"],["Ανάβω όλα τα φώτα","Turn every light on"]],[0],
   e("Το Kormos είναι τυφλό και σε εντοπίζει από τα βήματα. Σκοτώνει όμως σε 1.5 m ακόμα και μέσα από τοίχους.","The Kormos is blind and tracks footsteps. It still kills within 1.5 m, even through walls."));
-Q(1,"s",e("Hunt από Deogen. Η καλύτερη τακτική;","A Deogen is hunting. Best play?"),
+Q(2,"s",e("Hunt από Deogen. Η καλύτερη τακτική;","A Deogen is hunting. Best play?"),
   [["Loop γύρω από έπιπλα","Loop around furniture"],["Κρύψου σε closet","Hide in a closet"],["Μείνε ακίνητος","Stand still"],["Τρέξε σε ευθεία","Run in a straight line"]],[0],
   e("Το Deogen σε βρίσκει πάντα, αλλά από κοντά γίνεται πολύ αργό.","The Deogen always finds you, but it's very slow up close."));
 Q(1,"s",e("Ποιο ghost ΔΕΝ φαίνεται στη φωτογραφία ενός ghost event;","Which ghost does NOT show up in a photo of a ghost event?"),
@@ -297,13 +297,13 @@ Q(1,"s",e("Το Revenant γίνεται τρομερά γρήγορο όταν�
 Q(1,"s",e("Ποιο ghost διαλέγει ΕΝΑΝ στόχο και κυνηγά κυρίως αυτόν;","Which ghost picks ONE target and mostly chases them?"),
   ["Banshee","Dayan","Yurei","Oni"],[0],
   e("Η Banshee. Ακούγεται και σαν κραυγή στο Parabolic.","The Banshee. It also screams on the Parabolic."));
-Q(1,"s",e("Ποιο ghost το εξαγριώνει η φωνή σου κοντά του;","Which ghost gets angry when you talk near it?"),
+Q(2,"s",e("Ποιο ghost το εξαγριώνει η φωνή σου κοντά του;","Which ghost gets angry when you talk near it?"),
   ["Yokai","Kormos","Myling","Shade"],[0],
   e("Το Yokai: hunt από 80% αν μιλάς κοντά του. Σε hunt σε ακούει μόνο ως 2.5 m.","The Yokai: hunts from 80% if you talk near it. Mid-hunt it only hears you within 2.5 m."));
-Q(1,"s",e("Ποιο ghost γίνεται γρήγορο κοντά σε ΑΝΑΜΜΕΝΟ εξοπλισμό;","Which ghost speeds up near SWITCHED-ON equipment?"),
+Q(2,"s",e("Ποιο ghost γίνεται γρήγορο κοντά σε ΑΝΑΜΜΕΝΟ εξοπλισμό;","Which ghost speeds up near SWITCHED-ON equipment?"),
   ["Raiju","Jinn","Hantu","Twins"],[0],
   e("Raiju: πιο γρήγορο και hunt από 65% δίπλα σε ηλεκτρονικά.","Raiju: faster, and hunts from 65% next to electronics."));
-Q(1,"s",e("Παγωμένη ανάσα σε hunt με breaker off σημαίνει…","Freezing breath during a hunt with the breaker off means…"),
+Q(2,"s",e("Παγωμένη ανάσα σε hunt με breaker off σημαίνει…","Freezing breath during a hunt with the breaker off means…"),
   ["Hantu","Jinn","Revenant","Onryo"],[0],
   e("100% confirm για Hantu.","A 100% Hantu confirm."));
 Q(1,"s",e("Μετά από smudge, πόσο δεν μπορεί να κάνει hunt ένα κανονικό ghost;","After a smudge, how long can a normal ghost not hunt?"),
@@ -321,7 +321,7 @@ Q(1,"s",e("Interactions σε δύο σημεία σχεδόν ταυτόχρον
 Q(1,"s",e("Ποιο ghost δεν κλείνει ΠΟΤΕ τον breaker;","Which ghost NEVER turns the breaker off?"),
   ["Jinn","Hantu","Mare","Raiju"],[0],
   e("Το Jinn τον χρειάζεται ανοιχτό για το speed boost.","The Jinn needs it on for its speed boost."));
-Q(1,"s",e("Το Hantu ΠΟΤΕ δεν…","The Hantu NEVER…"),
+Q(2,"s",e("Το Hantu ΠΟΤΕ δεν…","The Hantu NEVER…"),
   [["ανοίγει τον breaker","turns the breaker on"],["πατάει salt","steps in salt"],["πετάει αντικείμενα","throws items"],["κάνει airball","does an airball"]],[0],
   e("Τον κλείνει, αλλά δεν τον ανοίγει ποτέ.","It turns it off, but never on."));
 Q(1,"s",e("Τι βλέπεις στο salt με το UV;","What does UV show on salt?"),
@@ -330,13 +330,13 @@ Q(1,"s",e("Τι βλέπεις στο salt με το UV;","What does UV show on 
 Q(1,"s",e("Τι «σβήνει» την κατάρα του Moroi;","What clears the Moroi's curse?"),
   ["Sanity Pills","Crucifix","Salt",["Φώτα αναμμένα","Lights on"]],[0],
   e("Sanity pills. Το smudge το τυφλώνει και για 7″ αντί 5″.","Sanity pills. Smudge also blinds it for 7s instead of 5s."));
-Q(1,"s",e("Το D.O.T.S. του Goryo φαίνεται μόνο…","The Goryo's D.O.T.S. only shows…"),
+Q(2,"s",e("Το D.O.T.S. του Goryo φαίνεται μόνο…","The Goryo's D.O.T.S. only shows…"),
   [["μέσα από video camera, με άδειο δωμάτιο","through a video camera, with the room empty"],["με γυμνό μάτι","with the naked eye"],["με σβηστό breaker","with the breaker off"],["όταν μιλάς","when you talk"]],[0],
   e("Και δεν αλλάζει ποτέ ghost room.","And it never changes ghost room."));
-Q(1,"s",e("Hunt από Dayan, είσαι κοντά. Τι κάνεις;","A Dayan hunts and you're close. What do you do?"),
+Q(2,"s",e("Hunt από Dayan, είσαι κοντά. Τι κάνεις;","A Dayan hunts and you're close. What do you do?"),
   [["Παγώνω στη θέση μου","Freeze in place"],["Τρέχω","Run"],["Ανάβω φως","Turn on a light"],["Ρίχνω salt","Drop salt"]],[0],
   e("Σε <10 m: ακίνητος → επιβραδύνει, τρέξιμο → επιταχύνει.","Within 10 m: still → it slows, running → it speeds up."));
-Q(1,"s",e("Tarot: η κάρτα «The Sun» σου δίνει…","Tarot: 'The Sun' card gives you…"),
+Q(2,"s",e("Tarot: η κάρτα «The Sun» σου δίνει…","Tarot: 'The Sun' card gives you…"),
   [["100% sanity","100% sanity"],["0% sanity","0% sanity"],["Cursed hunt","A cursed hunt"],["Revive","A revive"]],[0],
   e("Sun = full sanity. Moon = 0%.","Sun = full sanity. Moon = 0%."));
 Q(1,"s",e("Ποιο ghost σβήνει φλόγες και κάνει hunt στην 3η;","Which ghost blows out flames and hunts on the 3rd?"),
@@ -425,7 +425,7 @@ Q(2,"s",e("Τα fingerprints του Obake ξεθωριάζουν…","An Obake's
 Q(2,"s",e("Πού βγάζει EMF το ability του Jinn;","Where does the Jinn's ability leave EMF?"),
   [["Στον breaker","At the breaker"],["Στην πόρτα","At the front door"],["Στο truck","In the truck"],["Στο ghost room","In the ghost room"]],[0],
   e("EMF στο breaker box.","EMF at the breaker box."));
-Q(2,"s",e("Από τι εξαρτάται η ταχύτητα του Hantu;","What does a Hantu's speed depend on?"),
+Q(1,"s",e("Από τι εξαρτάται η ταχύτητα του Hantu;","What does a Hantu's speed depend on?"),
   [["Θερμοκρασία δωματίου","Room temperature"],["Το sanity σου","Your sanity"],["Τα ηλεκτρονικά","Electronics"],["Τα αντικείμενα","Items moved"]],[0],
   e("Πιο κρύο → πιο γρήγορο. Κράτα το σπίτι ζεστό.","Colder → faster. Keep the house warm."));
 Q(2,"s",e("Το Moroi γίνεται πιο γρήγορο όσο…","A Moroi gets faster as…"),
@@ -435,44 +435,44 @@ Q(2,"s",e("Το Kormos κάνει hunt από 70% όταν…","A Kormos hunts f
   [["τρέχεις κοντά του","you sprint near it"],["μιλάς","you talk"],["είναι σβηστά τα φώτα","the lights are off"],["κουβαλάς ηλεκτρονικά","you carry electronics"]],[0],
   e("Αλλιώς 50%. Τυφλό, ακούει βήματα.","Otherwise 50%. Blind, listens for footsteps."));
 Q(2,"s",e("Thresholds της Dayan;","The Dayan's thresholds?"),
-  [["45% ακίνητος / 60% σε κίνηση","45% still / 60% moving"],["50% / 70%","50% / 70%"],["35% / 50%","35% / 50%"],["60% / 40%","60% / 40%"]],[0],
+  [["45% ακίνητος / 65% σε κίνηση","45% still / 65% moving"],["45% / 60%","45% / 60%"],["40% / 60%","40% / 60%"],["35% / 50%","35% / 50%"]],[0],
   e("Η κίνησή σου κοντά της την ανεβάζει.","Moving near her raises it."));
 Q(2,"m",e("Ποια ghosts ΜΠΟΡΟΥΝ (υπό κάποια συνθήκη) να κάνουν hunt πάνω από 50%;","Which ghosts CAN (under some condition) hunt above 50%?"),
   ["Demon","Mare","Yokai","Raiju","Wraith","Shade","Deogen","Banshee"],[0,1,2,3],
   e("Demon 70%, Mare 60% (σκοτάδι), Yokai 80% (φωνή), Raiju 65% (ηλεκτρονικά).","Demon 70%, Mare 60% (dark), Yokai 80% (voice), Raiju 65% (electronics)."));
 Q(2,"m",e("Ποια ghosts κάνουν hunt ΜΟΝΟ κάτω από 50%;","Which ghosts can ONLY hunt below 50%?"),
   ["Shade","Deogen","Spirit","Mare","Dayan","Wraith"],[0,1],
-  e("Shade 35%, Deogen 40%. Mare και Dayan ανεβαίνουν στο 60%.","Shade 35%, Deogen 40%. Mare and Dayan can reach 60%."));
+  e("Shade 35%, Deogen 40%. Mare ανεβαίνει στο 60%, Dayan στο 65%.","Shade 35%, Deogen 40%. Mare can reach 60%, Dayan 65%."));
 Q(2,"m",e("Tarot: ποιες κάρτες είναι ΚΑΚΑ νέα;","Tarot: which cards are BAD news?"),
   ["Death","The Moon","Hanged Man","The Sun","High Priestess","The Fool"],[0,1,2],
   e("Death = cursed hunt, Moon = 0% sanity, Hanged Man = θάνατος. Sun = 100%, High Priestess = revive, Fool = τίποτα.","Death = cursed hunt, Moon = 0% sanity, Hanged Man = death. Sun = 100%, High Priestess = revive, Fool = nothing."));
 
 // ---------------------------------------------------------------- MASTER
-Q(3,"s",e("Obambo, το watch γράφει 5:30. Διάθεση;","Obambo, the watch shows 5:30. Mood?"),
+Q(2,"s",e("Obambo, το watch γράφει 5:30. Διάθεση;","Obambo, the watch shows 5:30. Mood?"),
   [["Aggressive","Aggressive"],["Calm","Calm"]],[0],
   e("Angry 1:00–3:00, 5:00–7:00, 9:00–11:00… Calm 0:00–1:00, 3:00–5:00, 7:00–9:00…","Angry 1:00–3:00, 5:00–7:00, 9:00–11:00… Calm 0:00–1:00, 3:00–5:00, 7:00–9:00…"));
-Q(3,"s",e("Obambo, watch 8:00. Διάθεση;","Obambo, watch at 8:00. Mood?"),
+Q(2,"s",e("Obambo, watch 8:00. Διάθεση;","Obambo, watch at 8:00. Mood?"),
   [["Calm","Calm"],["Aggressive","Aggressive"]],[0],
   e("7:00–9:00 είναι calm.","7:00–9:00 is calm."));
-Q(3,"s",e("Obambo, watch 10:15. Διάθεση;","Obambo, watch at 10:15. Mood?"),
+Q(2,"s",e("Obambo, watch 10:15. Διάθεση;","Obambo, watch at 10:15. Mood?"),
   [["Aggressive","Aggressive"],["Calm","Calm"]],[0],
   e("9:00–11:00 είναι aggressive. Στο 11:00 γυρνά calm.","9:00–11:00 is aggressive. It flips to calm at 11:00."));
-Q(3,"s",e("Με τι είναι συγχρονισμένο το ρολόι του Obambo;","What is the Obambo clock synced to?"),
+Q(2,"s",e("Με τι είναι συγχρονισμένο το ρολόι του Obambo;","What is the Obambo clock synced to?"),
   [["Το άνοιγμα της front door","The front door opening"],["Το πρώτο evidence","The first evidence"],["Το πρώτο hunt","The first hunt"],["Το truck timer","The truck timer"]],[0],
   e("Αλλάζει διάθεση κάθε 2 λεπτά, στα μονά λεπτά.","It flips every 2 minutes, on odd minutes."));
-Q(3,"s",e("Calm Obambo: σε ποιο sanity μπορεί να κάνει hunt;","A calm Obambo can hunt at what sanity?"),
+Q(2,"s",e("Calm Obambo: σε ποιο sanity μπορεί να κάνει hunt;","A calm Obambo can hunt at what sanity?"),
   ["≤10%","≤25%","≤35%","≤50%"],[0],
   e("Μόνο ≤10%. Hunt πάνω από 10% σε calm παράθυρο → όχι Obambo.","Only ≤10%. A hunt above 10% in a calm window → not Obambo."));
-Q(3,"s",e("Aggressive Obambo: threshold;","Aggressive Obambo threshold?"),
+Q(2,"s",e("Aggressive Obambo: threshold;","Aggressive Obambo threshold?"),
   ["50%","60%","65%","75%"],[2],
   e("65%, πιο γρήγορο, αλλά 20% πιο σύντομο hunt.","65%, faster, but a 20% shorter hunt."));
 Q(3,"s",e("Deildegast: μετακίνησες 12 μοναδικά αντικείμενα πριν το hunt. Ταχύτητα;","Deildegast: you moved 12 unique items before the hunt. Speed?"),
   ["1.2 m/s","1.8 m/s","2.4 m/s","3.0 m/s"],[1],
   e("3.0 − 12 × 0.1 = 1.8 m/s.","3.0 − 12 × 0.1 = 1.8 m/s."));
-Q(3,"s",e("Deildegast: ποιο είναι το ελάχιστο speed;","Deildegast: what's the speed floor?"),
+Q(2,"s",e("Deildegast: ποιο είναι το ελάχιστο speed;","Deildegast: what's the speed floor?"),
   ["0.2 m/s","0.4 m/s","0.8 m/s","1.0 m/s"],[1],
   e("0.4 m/s, στα ~26 αντικείμενα.","0.4 m/s, at ~26 items."));
-Q(3,"m",e("Deildegast: τι μετράει στον μετρητή αντικειμένων;","Deildegast: what counts toward the item counter?"),
+Q(2,"m",e("Deildegast: τι μετράει στον μετρητή αντικειμένων;","Deildegast: what counts toward the item counter?"),
   [["Αντικείμενα του σπιτιού που μετακίνησες","House items you moved"],["Νεκροί παίκτες","Dead players"],["Ο δικός σου εξοπλισμός","Your own equipment"],["Αντικείμενα πριν το προηγούμενο hunt","Items moved before its previous hunt"]],[0,1],
   e("Ο εξοπλισμός δεν μετράει, και ο μετρητής μηδενίζεται μετά από κάθε hunt.","Equipment doesn't count, and the counter resets after every hunt."));
 Q(3,"s",e("Demon με Tier 2 crucifix: range;","Demon vs a Tier 2 crucifix: range?"),
@@ -490,13 +490,13 @@ Q(3,"m",e("Gallu: πόσο κρατά το smudge blind σε κάθε stage;","G
 Q(3,"s",e("Μετά από hunt, χωρίς salt/smudge/crucifix, ξανά hunt στο 50%. Τι αποκλείεις;","After a hunt, no salt/smudge/crucifix since, it hunts again at 50%. What's ruled out?"),
   ["Gallu","Demon","Mare","Raiju"],[0],
   e("Exhausted Gallu δεν κάνει hunt στο 50%.","An exhausted Gallu can't hunt at 50%."));
-Q(3,"s",e("Salt test για Gallu: πόσο περιμένεις πριν το 2ο salt;","Gallu salt test: how long before the 2nd salt pile?"),
+Q(2,"s",e("Salt test για Gallu: πόσο περιμένεις πριν το 2ο salt;","Gallu salt test: how long before the 2nd salt pile?"),
   ["≥2″","≥10″","≥30″","≥90″"],[0],
   e("Πάτησε και τα δύο, χωρίς hunt ενδιάμεσα → όχι Gallu.","Steps in both with no hunt in between → not Gallu."));
-Q(3,"s",e("Το truck δείχνει sanity 61, 62, 63, 64, 65. Πόσο είναι το πραγματικό;","The truck cycles 61, 62, 63, 64, 65. What's your real sanity?"),
+Q(2,"s",e("Το truck δείχνει sanity 61, 62, 63, 64, 65. Πόσο είναι το πραγματικό;","The truck cycles 61, 62, 63, 64, 65. What's your real sanity?"),
   ["61%","63%","65%","62%"],[1],
   e("Το μεσαίο νούμερο.","The middle number."));
-Q(3,"s",e("Το Cursed Mirror χρειάζεται τουλάχιστον…","The Cursed Mirror needs at least…"),
+Q(2,"s",e("Το Cursed Mirror χρειάζεται τουλάχιστον…","The Cursed Mirror needs at least…"),
   ["10% sanity","20% sanity","35% sanity","50% sanity"],[1],
   e("Με 10–15% σπάει.","At 10–15% it breaks."));
 Q(3,"s",e("Monkey Paw «wish for sanity». Τι κοστίζει;","Monkey Paw 'wish for sanity'. What's the cost?"),
@@ -505,22 +505,22 @@ Q(3,"s",e("Monkey Paw «wish for sanity». Τι κοστίζει;","Monkey Paw '
 Q(3,"s",e("Thaye test: πόσο μένεις κοντά του ανάμεσα στις δύο ερωτήσεις ηλικίας στο Ouija;","Thaye test: how long do you stay near it between the two Ouija age questions?"),
   ["~30″","~1′","~3′","~10′"],[2],
   e("Αν η ηλικία δεν ανέβηκε → όχι Thaye.","If the age didn't go up → not Thaye."));
-Q(3,"s",e("Sound recording και στέκεσαι σε φωτισμένο room. Το sanity ΔΕΝ πέφτει. Τι αποκλείεις;","A sound recording, and you stand in a lit room. Sanity does NOT drop. What's ruled out?"),
+Q(2,"s",e("Sound recording και στέκεσαι σε φωτισμένο room. Το sanity ΔΕΝ πέφτει. Τι αποκλείεις;","A sound recording, and you stand in a lit room. Sanity does NOT drop. What's ruled out?"),
   ["Moroi","Myling","Banshee","Yokai"],[0],
   e("Η κατάρα του Moroi θα έριχνε sanity ×2.","The Moroi's curse would drain at 2x."));
-Q(3,"s",e("Onryo: αναμμένο κερί + T2 crucifix στο ίδιο range. Ποιο «πιάνει» πρώτα;","Onryo: lit candle and a T2 crucifix in the same range. Which triggers first?"),
+Q(2,"s",e("Onryo: αναμμένο κερί + T2 crucifix στο ίδιο range. Ποιο «πιάνει» πρώτα;","Onryo: lit candle and a T2 crucifix in the same range. Which triggers first?"),
   [["Η φλόγα","The flame"],["Το crucifix","The crucifix"],["Και τα δύο","Both"],["Κανένα","Neither"]],[0],
   e("Η φλόγα έχει προτεραιότητα έναντι T1/T2 crucifix. Hunt σε 4 m από φλόγα → όχι Onryo.","The flame takes priority over a T1/T2 crucifix. A hunt within 4 m of a flame → not Onryo."));
 Q(3,"s",e("Phantom: πόσο sanity χάνεις όσο το κοιτάς σε event;","Phantom: how much sanity do you lose while looking at it in an event?"),
   ["0.5%/sec","1%/sec","2%/sec","5%/sec"],[0],
   e("Δύσκολο να μετρηθεί, το photo test είναι ευκολότερο.","Hard to measure; the photo test is easier."));
-Q(3,"s",e("Jinn speed boost: ποιες συνθήκες;","Jinn speed boost: what conditions?"),
+Q(2,"s",e("Jinn speed boost: ποιες συνθήκες;","Jinn speed boost: what conditions?"),
   [["Breaker ON + σε βλέπει από >3 m","Breaker ON + sees you from >3 m"],["Breaker OFF + κοντά","Breaker OFF + close"],["Κρύο room","Cold room"],["Μιλάς","You talk"]],[0],
   e("Breaker on, LOS >3 m χωρίς boost → όχι Jinn.","Breaker on, LOS >3 m and no boost → not Jinn."));
-Q(3,"s",e("Raiju test: ποια ηλεκτρονικά ΔΕΝ μετράνε;","Raiju test: which electronics do NOT count?"),
+Q(2,"s",e("Raiju test: ποια ηλεκτρονικά ΔΕΝ μετράνε;","Raiju test: which electronics do NOT count?"),
   [["Τα ηλεκτρονικά του σπιτιού","The house's own electronics"],["Η αναμμένη video camera σου","Your switched-on video camera"],["Το EMF reader σου","Your EMF reader"],["Ο φακός σου","Your flashlight"]],[0],
   e("Μόνο εξοπλισμός από το truck.","Only equipment from the truck."));
-Q(3,"s",e("Το Mimic εμφανίζεται σε ποιες λίστες αποκλεισμού;","The Mimic appears in which rule-out lists?"),
+Q(2,"s",e("Το Mimic εμφανίζεται σε ποιες λίστες αποκλεισμού;","The Mimic appears in which rule-out lists?"),
   [["Σε καμία — δεν αποκλείεται από συμπεριφορά","None — behavior never rules it out"],["Salt","Salt"],["Airball","Airball"],["Male model","Male model"]],[0],
   e("Μπορεί να μιμηθεί οτιδήποτε, οπότε μόνο τα evidence το αποκλείουν.","It can mimic anything, so only evidence rules it out."));
 
@@ -622,9 +622,9 @@ function genScenario(){
       x:{el:why("el"),en:why("en")}};
   }
 }
-const GEN = {1:[genEvidenceToGhost,genEvidenceToGhost,genGhostToEvidence,genWhoHasEvidence],
-             2:[genTwoEvidence,genTwoEvidence,genWhoHasEvidence,genScenario],
-             3:[genScenario,genScenario,genScenario,genTwoEvidence]};
+// Όλοι οι αυτόματοι τύποι ζουν μόνο στο Master (επιλογή Μάρκου, Οκτ. 2026).
+const GEN = {1:[], 2:[],
+             3:[genScenario,genTwoEvidence,genScenario,genEvidenceToGhost,genScenario,genWhoHasEvidence,genGhostToEvidence]};
 
 // ======================================================================================
 // STATE
@@ -640,7 +640,7 @@ const $=id=>document.getElementById(id);
 
 function buildRun(lv){
   const hand=shuffle(BANK.filter(q=>q.lv===lv.id)).slice(0,lv.hand);
-  const gens=[]; for(let i=0;i<lv.n-hand.length;i++){ const g=GEN[lv.id][i%GEN[lv.id].length](); if(g) gens.push(g); }
+  const gens=[]; if(GEN[lv.id].length) for(let i=0;i<lv.n-hand.length;i++){ const g=GEN[lv.id][i%GEN[lv.id].length](); if(g) gens.push(g); }
   // ανακάτεμα επιλογών για τις χειρόγραφες ερωτήσεις
   const prepped=hand.map(q=>{
     const idx=shuffle(q.o.map((_,i)=>i));

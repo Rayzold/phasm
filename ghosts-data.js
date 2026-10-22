@@ -43,7 +43,7 @@ const GHOSTS = [
  {name:"Moroi", ev:["WRT","FRZ","SB"], hunt:"50%", thMax:50, tell:"Σε «καταριέται» μέσω Spirit Box ή Parabolic → το sanity σου πέφτει πιο γρήγορα μετά. Πιο γρήγορο όσο πέφτει το sanity σου. Counter: sanity pills σβήνουν την κατάρα, smudge το τυφλώνει παραπάνω. Smudge blind 7s (τα άλλα 5s). Sound recording → 2x drain μετά."},
  {name:"Deogen", ev:["DOTS","WRT","SB"], hunt:"40%", thMax:40, tell:"Βαριά, λαχανιασμένη ανάσα στο Spirit Box από κοντινή απόσταση (unique). Σε hunt ΣΕ ΒΡΙΣΚΕΙ πάντα — μην κρυφτείς! Counter: από κοντά γίνεται πολύ αργό, κάνε loop γύρω από έπιπλα."},
  {name:"Thaye", ev:["DOTS","WRT","ORB"], hunt:"75% αρχικά → 15% τελικά", thMax:75, tell:"«Γερνάει»: ξεκινά υπερδραστήριο, γρήγορο και επιθετικό, και όσο περνά η ώρα (και είσαι κοντά του) γίνεται αργό και ήσυχο. Αν το ghost «κουράστηκε» → Thaye. Test: ρώτα την ηλικία στο Ouija, μείνε κοντά ~3′, ξαναρώτα — αν δεν μεγάλωσε, όχι Thaye."},
- {name:"Dayan", ev:["EMF","ORB","SB"], hunt:"45% ακίνητος / 60% σε κίνηση", thMax:60, tell:"ΠΑΝΤΑ θηλυκό όνομα & μοντέλο (όπως και το Banshee). Κοντά της (<10m): αν μείνεις ακίνητος επιβραδύνει, αν τρέξεις επιταχύνει. Counter: πάγωσε στη θέση σου σε hunt."},
+ {name:"Dayan", ev:["EMF","ORB","SB"], hunt:"45% ακίνητος / 65% σε κίνηση", thMax:65, tell:"ΠΑΝΤΑ θηλυκό όνομα & μοντέλο (όπως και το Banshee). Κοντά της (<10m): αν μείνεις ακίνητος επιβραδύνει, αν τρέξεις επιταχύνει. Counter: πάγωσε στη θέση σου σε hunt."},
  {name:"Gallu", ev:["EMF","UV","SB"], hunt:"50% (νωρίτερα όταν enraged)", thMax:50, tell:"Crucifix, incense και salt το ΕΞΑΓΡΙΩΝΟΥΝ → πιο γρήγορο στο επόμενο hunt, μετά «εξαντλείται» και τα defensive items πιάνουν καλύτερα. Enraged δεν πατάει salt (μην το μπερδέψεις με Wraith — το Gallu πάτησε το πρώτο pile). 3 stages: Normal → (salt/smudge/crucifix) Angry: γρήγορο, smudge 4s, δεν πατάει salt → μετά από hunt Weak/exhausted: αργό, smudge 6s, δεν κάνει hunt στο 50%."},
  {name:"Obambo", ev:["WRT","UV","DOTS"], hunt:"10% calm / 65% aggressive", thMax:65, tell:"Δύο «διαθέσεις» που εναλλάσσονται κάθε 2 λεπτά: calm = αργό και ακίνδυνο, aggressive = hunt από 65% sanity, πιο γρήγορο, αλλά 20% πιο σύντομο hunt. Ghost με mood swings = Obambo. Calm phase: hunt μόνο ≤10% — κοίτα το watch (synced με το άνοιγμα της πόρτας)."},
  {name:"Aswang", ev:["DOTS","FRZ","WRT"], hunt:"50%", thMax:50, tell:"Επιταχύνει ΠΟΛΥ γρήγορα με line-of-sight (max speed σε ~9s αντί 13s) και προτιμά να κυνηγά παρά να ψάχνει. Unique: αν σε φτάσει σε ΕΠΙΣΗΜΟ hiding spot (locker/closet), το hunt τελειώνει αμέσως — αλλά στο επόμενο πάει κατευθείαν εκεί. Άλλαξε κρυψώνα!"},
@@ -91,7 +91,7 @@ const HUNT_EN = {
  "Raiju":"65% near electronics",
  "The Mimic":"mimics others",
  "Thaye":"75% fresh → 15% aged",
- "Dayan":"45% still / 60% moving",
+ "Dayan":"45% still / 65% moving",
  "Gallu":"50% (earlier when enraged)",
  "Kormos":"50% / 70% if you sprint near it",
 };
