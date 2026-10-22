@@ -13,7 +13,7 @@
     --bg:#0A0D12; --bg2:#11161f;
     --nv:#8FE388; --nv-dim:#57996b;
     --danger:#E15B5B; --warn:#F0C674; --muted:#8A93A3; --line:#232b38;
-    --l1:#7FD1C7; --l2:#E2A65B; --l3:#C38BE8;
+    --l1:#7FD1C7; --l2:#E2A65B; --l3:#C38BE8; --p4:#E07A7A;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -120,6 +120,37 @@
   .rv .rq{color:#F1F3F6;margin-bottom:4px}
   .rv .ra{color:var(--nv);font-size:13.5px}
   .rv .rx{color:var(--muted);font-size:13px;margin-top:3px}
+  [hidden]{display:none!important}
+  /* ---------- party ---------- */
+  .party{border-color:rgba(143,227,136,.35)}
+  .psub{margin:-4px 0 14px;font-size:13.5px;color:#BFC6D1}
+  .pnames{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:8px;margin-bottom:12px}
+  .pnames input{background:#0c1119;border:1px solid var(--line);border-left:4px solid var(--pc);border-radius:8px;padding:9px 11px;color:#EAEDF2;font-size:14.5px;min-width:0;width:100%}
+  .pnames input:focus{outline:none;border-color:var(--pc)}
+  .prow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .plab{font-size:13px;color:var(--muted);min-width:150px}
+  .seg2{display:flex;flex-wrap:wrap;gap:6px}
+  .seg2 button{border:1px solid var(--line);background:#0c1119;color:#C9D0DA;border-radius:16px;padding:5px 12px;cursor:pointer;font-size:13.5px}
+  .seg2 button[aria-pressed="true"]{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.08)}
+  .seg2 button:focus-visible,.pnames input:focus-visible{outline:2px solid var(--nv);outline-offset:2px}
+  .perr{color:var(--danger);font-size:13px;margin:8px 0 0;min-height:1em}
+  .board{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 14px}
+  .pl{flex:1 1 120px;min-width:0;border:1px solid var(--line);border-top:3px solid var(--pc);border-radius:8px;padding:6px 10px;background:#0c1119;display:flex;justify-content:space-between;align-items:baseline;gap:8px;opacity:.6}
+  .pl.cur{opacity:1;box-shadow:0 0 0 1px var(--pc)}
+  .pl .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+  .pl .sc{font-family:"Special Elite",monospace;color:var(--pc);font-size:18px;font-variant-numeric:tabular-nums}
+  .handoff{text-align:center;border:2px dashed var(--pc);border-radius:14px;padding:34px 18px;background:#0c1119}
+  .handoff .hlab{font-family:"Special Elite",monospace;letter-spacing:3px;color:var(--muted);font-size:13px;text-transform:uppercase}
+  .handoff .hname{font-family:"Special Elite",monospace;color:var(--pc);font-size:clamp(34px,10vw,54px);margin:8px 0 6px;word-break:break-word}
+  .handoff p{color:#BFC6D1;margin:0 0 18px;font-size:14px}
+  .handoff .btn{--c:var(--pc)}
+  .podium{display:flex;flex-direction:column;gap:8px;margin-top:16px;text-align:left}
+  .prank{display:grid;grid-template-columns:2.2em minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-left:4px solid var(--pc);border-radius:8px;padding:9px 12px;background:#0f151f}
+  .prank.win{background:rgba(143,227,136,.06)}
+  .prank .md{font-size:22px;text-align:center}
+  .prank .nm{font-size:16px;color:#F1F3F6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .prank .nm small{display:block;font-size:12px;color:var(--muted)}
+  .prank .sc{font-family:"Special Elite",monospace;font-size:24px;color:var(--pc);font-variant-numeric:tabular-nums}
   footer{margin-top:30px;text-align:center;color:#4d5666;font-size:12px;font-family:"Special Elite",monospace;letter-spacing:2px}
   @media (prefers-reduced-motion:reduce){ body.flicker .qcard, body.glow .qcard, .timer.low>i{animation:none} .lvl{transition:none} }
 </style>
@@ -139,6 +170,22 @@
   <!-- ===== landing ===== -->
   <section id="landing">
     <div class="levels" id="levels"></div>
+    <div class="panel party" id="partyPanel" style="margin-top:18px">
+      <div class="label">🎉 Party mode</div>
+      <p class="psub"><span class="l-el">2–4 παίκτες σε μία συσκευή. Ο καθένας απαντά με τη σειρά τη δική του ερώτηση. Κερδίζει όποιος μαζέψει τους περισσότερους πόντους.</span><span class="l-en">2–4 players on one device. Each answers their own question in turn. Most points wins.</span></p>
+      <div class="pnames">
+        <input id="pn1" maxlength="16" style="--pc:var(--l1)" autocomplete="off">
+        <input id="pn2" maxlength="16" style="--pc:var(--l2)" autocomplete="off">
+        <input id="pn3" maxlength="16" style="--pc:var(--l3)" autocomplete="off">
+        <input id="pn4" maxlength="16" style="--pc:var(--p4)" autocomplete="off">
+      </div>
+      <div class="prow"><span class="plab"><span class="l-el">Επίπεδο</span><span class="l-en">Level</span></span>
+        <div class="seg2" id="pLevel"><button data-v="1">101</button><button data-v="2">Advanced</button><button data-v="3">Master</button><button data-v="mix">🎲 Mix</button></div></div>
+      <div class="prow"><span class="plab"><span class="l-el">Ερωτήσεις ανά παίκτη</span><span class="l-en">Questions per player</span></span>
+        <div class="seg2" id="pRounds"><button data-v="5">5</button><button data-v="8">8</button><button data-v="10">10</button></div></div>
+      <div class="actions" style="justify-content:flex-start"><button class="btn" id="partyStart" style="--c:var(--nv)">🎉 <span class="l-el">Ξεκίνα</span><span class="l-en">Start</span></button></div>
+      <p class="perr" id="partyErr"></p>
+    </div>
     <div class="panel" style="margin-top:18px">
       <div class="label"><span class="l-el">Ρυθμίσεις</span><span class="l-en">Settings</span></div>
       <div class="opts">
@@ -159,6 +206,13 @@
     </div>
     <div class="bar"><i id="barFill"></i></div>
     <div class="timer" id="timer"><i id="timerFill"></i></div>
+    <div class="board" id="board" hidden></div>
+    <div class="handoff" id="handoff" hidden>
+      <div class="hlab" id="hLab"></div>
+      <div class="hname" id="hName"></div>
+      <p id="hHint"></p>
+      <button class="btn" id="readyBtn"></button>
+    </div>
     <div class="qcard" id="qcard">
       <span class="qtype" id="qtype"></span>
       <p class="qtext" id="qtext"></p>
@@ -211,6 +265,15 @@ const T = {
   remain:{el:"Ποια ghosts παραμένουν πιθανά;",en:"Which ghosts are still possible?"},
   seen:{el:"Παρατήρησες:",en:"You observed:"},
   evid:{el:"Evidence:",en:"Evidence:"},
+  turn:{el:"Σειρά",en:"Up next"},
+  hint:{el:"Δώσε τη συσκευή. Οι υπόλοιποι, μην κοιτάτε 👀",en:"Hand over the device. Everyone else, no peeking 👀"},
+  ready:{el:"Έτοιμος/η 👻",en:"Ready 👻"},
+  round:{el:"Γύρος",en:"Round"},
+  wins:{el:"κερδίζει!",en:"wins!"}, tie:{el:"Ισοπαλία!",en:"It's a tie!"},
+  correctN:{el:"σωστές",en:"correct"}, pts:{el:"πόντοι",en:"points"},
+  player:{el:"Παίκτης",en:"Player"},
+  needTwo:{el:"Γράψε τουλάχιστον 2 ονόματα.",en:"Enter at least 2 names."},
+  partyAgain:{el:"Ρεβάνς ↻",en:"Rematch ↻"},
 };
 let lang="el";
 const L = v => v==null ? "" : (typeof v==="object" && !Array.isArray(v) ? (v[lang] ?? v.el) : v);
@@ -689,14 +752,28 @@ const GEN = {1:[], 2:[],
 // STATE
 // ======================================================================================
 const LS_KEY="phasmo-exam-v1";
-let store={lang:"el",best:{},name:"",hunt:false};
-try{ const d=JSON.parse(localStorage.getItem(LS_KEY)||"null"); if(d) store={...store,...d}; }catch(err){}
+let store={lang:"el",best:{},name:"",hunt:false,party:{names:["","","",""],level:"1",rounds:5}};
+try{ const d=JSON.parse(localStorage.getItem(LS_KEY)||"null"); if(d) store={...store,...d,party:{...store.party,...(d.party||{})}}; }catch(err){}
 const save=()=>{ try{ localStorage.setItem(LS_KEY,JSON.stringify(store)); }catch(err){} };
 lang = store.lang==="en" ? "en" : "el";
 
 let run=null; // {lv, qs[], i, score, streak, maxStreak, log[], sel:Set, answered, timerId, t0}
 const $=id=>document.getElementById(id);
 
+function prep(q){
+  const idx=shuffle(q.o.map((_,i)=>i));
+  return {...q,o:idx.map(i=>q.o[i]),a:idx.map((orig,i)=>q.a.includes(orig)?i:-1).filter(i=>i>=0)};
+}
+// Party: total = παίκτες × γύροι. Master/Mix ανακατεύουν και αυτόματες ερωτήσεις·
+// αν δεν φτάνουν οι γραμμένες ενός επιπέδου, συμπληρώνει με τις πιο απλές αυτόματες.
+function buildParty(level,total){
+  const hand=shuffle(level==="mix"?BANK:BANK.filter(q=>q.lv==level)).map(prep);
+  const share = level==="3" ? .65 : level==="mix" ? .8 : 1;
+  const out=hand.slice(0,Math.min(hand.length,Math.round(total*share)));
+  const fill = level==="1" ? [genEvidenceToGhost] : level==="2" ? [genTwoEvidence,genEvidenceToGhost] : GEN[3];
+  for(let i=0; out.length<total && i<total*3; i++){ const g=fill[i%fill.length](); if(g) out.push(g); }
+  return shuffle(out);
+}
 function buildRun(lv){
   const hand=shuffle(BANK.filter(q=>q.lv===lv.id)).slice(0,lv.hand);
   const gens=[]; if(GEN[lv.id].length) for(let i=0;i<lv.n-hand.length;i++){ const g=GEN[lv.id][i%GEN[lv.id].length](); if(g) gens.push(g); }
@@ -726,7 +803,18 @@ function renderLanding(){
   document.querySelectorAll(".lvl").forEach(el=>el.onclick=()=>start(LEVELS.find(l=>l.id==el.dataset.lv)));
   $("huntMode").checked=!!store.hunt; $("huntTgl").classList.toggle("on",!!store.hunt);
   $("nameIn").value=store.name||""; $("nameIn").placeholder=T.name[lang];
+  renderPartyPanel();
 }
+function renderPartyPanel(){
+  const P=store.party;
+  [1,2,3,4].forEach(i=>{ const el=$("pn"+i); if(document.activeElement!==el) el.value=P.names[i-1]||""; el.placeholder=`${T.player[lang]} ${i}${i>2?" (opt.)":""}`; });
+  document.querySelectorAll("#pLevel button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===P.level));
+  document.querySelectorAll("#pRounds button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===P.rounds));
+}
+[1,2,3,4].forEach(i=>$("pn"+i).oninput=e2=>{ store.party.names[i-1]=e2.target.value.trim(); save(); });
+document.querySelectorAll("#pLevel button").forEach(b=>b.onclick=()=>{ store.party.level=b.dataset.v; save(); renderPartyPanel(); });
+document.querySelectorAll("#pRounds button").forEach(b=>b.onclick=()=>{ store.party.rounds=+b.dataset.v; save(); renderPartyPanel(); });
+$("partyStart").onclick=startParty;
 $("huntMode").onchange=e2=>{ store.hunt=e2.target.checked; $("huntTgl").classList.toggle("on",store.hunt); save(); };
 $("nameIn").oninput=e2=>{ store.name=e2.target.value.trim(); save(); };
 
@@ -735,18 +823,55 @@ function show(id){ ["landing","exam","results"].forEach(s=>$(s).style.display = 
 // ======================================================================================
 // RENDER: exam
 // ======================================================================================
+const PCOL=["var(--l1)","var(--l2)","var(--l3)","var(--p4)"];
+function startParty(){
+  const P=store.party;
+  const names=[1,2,3,4].map(i=>$("pn"+i).value.trim());
+  const players=names.map((n,i)=>({name:n,col:PCOL[i],score:0,correct:0})).filter(p=>p.name);
+  if(players.length<2){ $("partyErr").textContent=T.needTwo[lang]; return; }
+  $("partyErr").textContent="";
+  const lvObj = P.level==="mix" ? {id:0,key:"mix",name:"Mix",c:"var(--nv)",ic:"🎲"} : LEVELS.find(l=>l.id==P.level);
+  const lv={...lvObj,name:"🎉 "+lvObj.name};
+  run={lv,party:{players,rounds:P.rounds},qs:buildParty(P.level,players.length*P.rounds),i:0,score:0,streak:0,maxStreak:0,log:[],sel:new Set(),answered:false};
+  document.documentElement.style.setProperty("--c",lv.c);
+  $("exam").style.setProperty("--c",lv.c); $("results").style.setProperty("--c",lv.c);
+  show("exam"); renderQ();
+}
+const curPlayer=()=>run.party.players[run.i % run.party.players.length];
+function renderBoard(){
+  const cp=curPlayer();
+  $("board").innerHTML=run.party.players.map(p=>`<div class="pl ${p===cp?"cur":""}" style="--pc:${p.col}"><span class="nm">${p===cp?"▶ ":""}${esc(p.name)}</span><span class="sc">${+p.score.toFixed(2)}</span></div>`).join("");
+}
+function renderHandoff(){
+  const cp=curPlayer();
+  $("handoff").style.setProperty("--pc",cp.col);
+  $("hLab").textContent=T.turn[lang];
+  $("hName").textContent=cp.name;
+  $("hHint").textContent=T.hint[lang];
+  $("readyBtn").textContent=T.ready[lang];
+}
+$("readyBtn").onclick=()=>{ $("handoff").hidden=true; $("qcard").hidden=false; startTimer(); };
 function start(lv){
   run={lv,qs:buildRun(lv),i:0,score:0,streak:0,maxStreak:0,log:[],sel:new Set(),answered:false};
   document.documentElement.style.setProperty("--c",lv.c);
   $("exam").style.setProperty("--c",lv.c); $("results").style.setProperty("--c",lv.c);
   show("exam"); renderQ();
 }
-function renderQ(){
+function renderQ(keepView){
   const q=run.qs[run.i], lv=run.lv;
   run.sel=new Set(); run.answered=false;
   $("lvTag").textContent=lv.name;
-  $("counter").textContent=`${T.q[lang]} ${run.i+1}/${run.qs.length}`;
-  $("streak").textContent = run.streak>=2 ? `🔥 ×${run.streak}` : "";
+  const party=!!run.party;
+  $("board").hidden=!party;
+  if(party){
+    const np=run.party.players.length;
+    $("counter").textContent=`${T.round[lang]} ${Math.floor(run.i/np)+1}/${run.party.rounds}`;
+    $("streak").textContent="";
+    renderBoard(); renderHandoff();
+  } else {
+    $("counter").textContent=`${T.q[lang]} ${run.i+1}/${run.qs.length}`;
+    $("streak").textContent = run.streak>=2 ? `🔥 ×${run.streak}` : "";
+  }
   $("barFill").style.width=(run.i/run.qs.length*100)+"%";
   const multi=q.t==="m";
   $("qcard").classList.toggle("multiQ",multi);
@@ -759,7 +884,8 @@ function renderQ(){
   $("submitBtn").style.display = multi ? "" : "none";
   $("submitBtn").disabled=true;
   $("nextBtn").style.display="none";
-  startTimer();
+  if(party && !keepView){ $("handoff").hidden=false; $("qcard").hidden=true; stopTimer(); $("timer").style.display="none"; }
+  else { $("handoff").hidden=true; $("qcard").hidden=false; if(!(party && keepView)) startTimer(); }
 }
 function choose(i){
   if(run.answered) return;
@@ -780,6 +906,7 @@ function grade(timedOut){
   else if(q.t==="s") pts = A.has([...run.sel][0]) ? 1 : 0;
   else { const hit=[...run.sel].filter(i=>A.has(i)).length, miss=[...run.sel].filter(i=>!A.has(i)).length; pts=Math.max(0,(hit-miss)/A.size); }
   run.score+=pts;
+  if(run.party){ const cp=curPlayer(); cp.score+=pts; if(pts===1) cp.correct++; renderBoard(); }
   if(pts===1){ run.streak++; run.maxStreak=Math.max(run.maxStreak,run.streak); } else run.streak=0;
   document.querySelectorAll(".ans").forEach(b=>{
     const i=+b.dataset.i; b.disabled=true; b.classList.remove("sel");
@@ -796,13 +923,13 @@ function grade(timedOut){
   document.body.classList.remove("flicker","glow"); void document.body.offsetWidth;
   document.body.classList.add(kind==="ok"?"glow":kind==="bad"?"flicker":"glow");
   if(pts<1) run.log.push({q,pts,timedOut});
-  $("streak").textContent = run.streak>=2 ? `🔥 ×${run.streak}` : "";
+  if(!run.party) $("streak").textContent = run.streak>=2 ? `🔥 ×${run.streak}` : "";
   $("submitBtn").style.display="none";
   $("nextBtn").style.display="";
   $("nextBtn").focus({preventScroll:true});
 }
 $("nextBtn").onclick=()=>{ run.i++; if(run.i>=run.qs.length) finish(); else { renderQ(); } };
-$("quitBtn").onclick=()=>{ stopTimer(); run=null; renderLanding(); show("landing"); };
+$("quitBtn").onclick=()=>{ stopTimer(); run=null; $("handoff").hidden=true; $("qcard").hidden=false; $("board").hidden=true; renderLanding(); show("landing"); };
 
 // ---------- hunt-mode timer ----------
 const TLIM=25000; let raf=null;
@@ -826,11 +953,32 @@ function stopTimer(){ if(raf) cancelAnimationFrame(raf); raf=null; $("timer").cl
 // ======================================================================================
 function finish(){
   stopTimer();
+  if(run.party){ show("results"); renderResults(); return; }
   const lv=run.lv, pct=Math.round(run.score/run.qs.length*100);
   const prev=store.best[lv.key]; if(prev==null||pct>prev){ store.best[lv.key]=pct; save(); }
   run.pct=pct; show("results"); renderResults();
 }
+function renderPartyResults(){
+  const ps=[...run.party.players].sort((a,b)=>b.score-a.score);
+  const top=ps[0].score, winners=ps.filter(p=>Math.abs(p.score-top)<1e-9);
+  const medal=["🥇","🥈","🥉","👻"];
+  let rank=0;
+  const rows=ps.map((p,i)=>{ if(i>0 && Math.abs(p.score-ps[i-1].score)>1e-9) rank=i;
+    return `<div class="prank ${rank===0?"win":""}" style="--pc:${p.col}"><span class="md">${medal[Math.min(rank,3)]}</span><span class="nm">${esc(p.name)}<small>${p.correct}/${run.party.rounds} ${T.correctN[lang]}</small></span><span class="sc">${+p.score.toFixed(2)}</span></div>`; }).join("");
+  const head = winners.length>1 ? `🤝 ${T.tie[lang]}` : `👑 ${esc(winners[0].name)} ${T.wins[lang]}`;
+  $("cert").innerHTML=`
+    <div style="font-size:36px">🎉</div>
+    <div style="font-family:'Special Elite',monospace;letter-spacing:3px;color:var(--muted);font-size:13px">PARTY · ${esc(run.lv.name.replace("🎉 ","").toUpperCase())}</div>
+    <div class="rank" style="font-size:clamp(24px,7vw,34px);margin-top:10px">${head}</div>
+    <div class="podium">${rows}</div>`;
+  $("nextLvBtn").style.display="none";
+  $("retryBtn").innerHTML=`<span>${T.partyAgain[lang]}</span>`;
+  $("reviewPanel").hidden=true;
+}
 function renderResults(){
+  if(run.party) return renderPartyResults();
+  $("reviewPanel").hidden=false;
+  $("retryBtn").innerHTML='<span class="l-el">Ξανά ↻</span><span class="l-en">Retry ↻</span>';
   const lv=run.lv, pct=run.pct, pass=pct>=70;
   const ri = pct===100?4 : pct>=85?3 : pct>=70?2 : pct>=50?1 : 0;
   const date=new Date().toLocaleDateString(lang==="el"?"el-GR":"en-GB",{day:"numeric",month:"long",year:"numeric"});
@@ -851,7 +999,7 @@ function renderResults(){
   }).join("") : `<p style="margin:0;color:var(--nv)">${T.noMiss[lang]}</p>`;
 }
 $("homeBtn").onclick=()=>{ run=null; renderLanding(); show("landing"); };
-$("retryBtn").onclick=()=>start(run.lv);
+$("retryBtn").onclick=()=>{ if(run.party) startParty(); else start(run.lv); };
 $("nextLvBtn").onclick=()=>{ const n=LEVELS.find(l=>l.id===run.lv.id+1); if(n) start(n); };
 
 // ======================================================================================
@@ -865,7 +1013,8 @@ function setLang(l){
   renderLanding();
   if(run && $("exam").style.display==="block"){
     // ξαναζωγράφισε την τρέχουσα ερώτηση χωρίς να χαθεί η πρόοδος
-    if(!run.answered){ const s=new Set(run.sel); renderQ(); s.forEach(i=>choose(i)); }
+    if(run.party && !$("handoff").hidden){ renderHandoff(); $("counter").textContent=`${T.round[lang]} ${Math.floor(run.i/run.party.players.length)+1}/${run.party.rounds}`; }
+    else if(!run.answered){ const s=new Set(run.sel); renderQ(true); s.forEach(i=>choose(i)); }
     else { $("qtype").textContent = run.qs[run.i].t==="m" ? "☑ "+T.multi[lang] : "◉ "+T.single[lang]; $("counter").textContent=`${T.q[lang]} ${run.i+1}/${run.qs.length}`; }
   }
   if(run && $("results").style.display==="block") renderResults();
