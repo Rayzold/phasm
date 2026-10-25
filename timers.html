@@ -60,10 +60,14 @@
   body.min:not(.reveal) .sec{padding:4px 8px 5px;margin-bottom:4px}
   body.min:not(.reveal) .phase{margin-bottom:0}
   body.min:not(.reveal) .phase.idle{display:none}
+  /* ήχος κλειδωμένος (π.χ. μετά από reload) — μένει ορατό και στο minimal */
+  .snd{font-size:11.5px;color:var(--warn);border:1px dashed #6b5a2a;border-radius:6px;padding:3px 8px;margin-bottom:6px;cursor:pointer}
+  .snd.hide{display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="snd hide" id="snd">🔇 <span class="l-el">Κλικ ή πλήκτρο για ήχο — τα beeps είναι κλειδωμένα</span><span class="l-en">Click or press a key to enable sound — beeps are locked</span></div>
   <div class="top">
     <h1>⏱️ TIMERS</h1>
     <div class="ctl">
@@ -72,6 +76,7 @@
         <option value="intermediate">Intermediate</option>
         <option value="professional">Professional</option>
         <option value="nightmare">Nightmare</option>
+        <option value="custom" title="Οι Custom ρυθμίσεις του Journal σε αυτόν τον browser · the Journal's Custom settings in this browser">Custom</option>
       </select>
       <button id="lang" title="Ελληνικά / English">ΕΛ</button>
       <a href="index.html" title="Phasmo Journal">↩</a>
@@ -124,195 +129,115 @@
     <div id="tells"></div>
   </div>
 
-  <div class="hint"><span class="l-el">Steam: Shift+Tab → Web Browser → άνοιξε αυτή τη σελίδα → 📌 pin. Για κλικ/πλήκτρα ξανανοίγεις το overlay (Shift+Tab). Πλήκτρα: 1/2/3 smudge · Q/W/E hunt · C cooldown · D πόρτα · O Obambo on/off · G ghost tells · M minimal · R reset όλα. Τα κουμπάκια πάνω κρύβουν/δείχνουν timers.</span><span class="l-en">Steam: Shift+Tab → Web Browser → open this page → 📌 pin. To click/press keys, reopen the overlay (Shift+Tab). Keys: 1/2/3 smudge · Q/W/E hunt · C cooldown · D door · O Obambo on/off · G ghost tells · M minimal · R reset all. The chips at the top show/hide timers.</span></div>
+  <div class="hint"><span class="l-el">Steam: Shift+Tab → Web Browser → άνοιξε αυτή τη σελίδα → 📌 pin. Για κλικ/πλήκτρα ξανανοίγεις το overlay (Shift+Tab). Πλήκτρα: 1/2/3 smudge · Q/W/E hunt · C cooldown · D πόρτα · O Obambo on/off · G ghost tells · F πλήρη/σύντομα tells · M minimal · R reset όλα. Τα κουμπάκια πάνω κρύβουν/δείχνουν timers.</span><span class="l-en">Steam: Shift+Tab → Web Browser → open this page → 📌 pin. To click/press keys, reopen the overlay (Shift+Tab). Keys: 1/2/3 smudge · Q/W/E hunt · C cooldown · D door · O Obambo on/off · G ghost tells · F full/short tells · M minimal · R reset all. The chips at the top show/hide timers.</span></div>
 </div>
 <script src="ghosts-data.js"></script>
+<script src="timers-core.js"></script>
 <script src="tells.js"></script>
 <script>
-// Ίδιες διάρκειες hunt με το DIFF του index.html — κράτα τα συγχρονισμένα αν αλλάξουν.
-const HUNTS = {
-  amateur:      {small:15, medium:30, large:40},
-  intermediate: {small:20, medium:40, large:50},
-  professional: {small:30, medium:50, large:60},
-  nightmare:    {small:30, medium:50, large:60}
+// Η λογική των timers (countdowns, contract/Obambo, ήχος, show/hide, minimal) ζει στο timers-core.js
+// και είναι κοινή με το pop-out του index.html· τα tells στο tells.js. Εδώ μόνο το UI αυτής της σελίδας.
+const PT=PhasmoTimers, $=id=>document.getElementById(id);
+
+// ---- state της σελίδας (difficulty, γλώσσα, deadlines) ----
+const LS_TM="phasmo-timers-v1";
+function readTM(){ try{ const d=JSON.parse(localStorage.getItem(LS_TM)||"null"); return d && typeof d==="object" ? d : {}; }catch(e){ return {}; } }
+function writeTM(patch){ try{ localStorage.setItem(LS_TM, JSON.stringify(Object.assign(readTM(), patch))); }catch(e){/* ignore */} }
+const saved=readTM();
+// Default: Nightmare (το μέγιστο). Μια αποθηκευμένη επιλογή κρατιέται μόνο αν την άλλαξες εσύ από
+// το select (diffSet) — παλιότερες εκδόσεις έγραφαν το default τους χωρίς να το έχεις διαλέξει.
+const st={
+  diff: saved.diffSet && DIFFICULTIES[saved.diff] ? saved.diff : "nightmare",
+  lang: saved.lang==="el" ? "el" : "en"
 };
-// Obambo: ξεκινά Calm, 1η αλλαγή +1:00 από το πρώτο άνοιγμα της εξώπορτας, μετά εναλλαγή κάθε 2:00.
-const OBAMBO_FIRST=60, OBAMBO_EVERY=120, OBAMBO_WARN=5;
-// Το contract μοιράζεται key με το pop-out του index.html (ίδιο origin) — στον ίδιο browser βλέπουν το ίδιο start.
-const CT_KEY="phasmo-journal-contract", LS_TM="phasmo-timers-v1";
-// Ποια κουτιά φαίνονται — κοινό key με το pop-out του index.html. Το Obambo (γραμμή + beeps)
-// είναι το contract.beepOn μέσα στο CT_KEY, ώστε να το κλείνεις μία φορά για όλες τις σελίδες.
-const SHOW_KEY="phasmo-timers-show";
-let show={sm:true, hu:true, ct:true, tl:true, min:false};
-function loadShow(){ try{ const d=JSON.parse(localStorage.getItem(SHOW_KEY)||"null"); if(d) show=Object.assign({sm:true,hu:true,ct:true,tl:true,min:false},d); }catch(e){} }
-loadShow();
+const store=key=>({get:()=>readTM()[key], set:v=>writeTM({[key]:v})});
 
-let st={diff:"intermediate", lang:"en", sm:{dl:0,tot:90}, hu:{dl:0,tot:20}};
-try{ const d=JSON.parse(localStorage.getItem(LS_TM)||"null"); if(d) st=Object.assign(st,d); }catch(e){}
-if(!HUNTS[st.diff]) st.diff="intermediate";
-const save=()=>{ try{ localStorage.setItem(LS_TM,JSON.stringify(st)); }catch(e){} };
+// ---- timers ----
+const smudge=PT.countdown({idle:90, onDone:()=>PT.beep(660,1), store:store("sm")});
+const hunt=PT.countdown({idle:20, onDone:()=>PT.beep(880,2), store:store("hu")});
+smudge.addView($("smD"),$("smB"));
+hunt.addView($("huD"),$("huB"));
+PT.bindSoundBadge($("snd"));
 
-// ---- audio ----
-let audioCtx=null;
-function ensureAudio(){
-  try{
-    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    if(audioCtx.state==="suspended") audioCtx.resume();
-  }catch(e){}
-}
-function beep(freq,times){
-  if(!audioCtx) return;
-  try{
-    for(let i=0;i<times;i++){
-      const t=audioCtx.currentTime+i*0.5, o=audioCtx.createOscillator(), g=audioCtx.createGain();
-      o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
-      g.gain.setValueAtTime(0.15,t); o.start(t); o.stop(t+0.35);
-    }
-  }catch(e){}
-}
-const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
-const $=id=>document.getElementById(id);
-
-// ---- countdowns (deadline-based, επιβιώνουν σε reload) ----
-function countdown(key,dispId,barId,idleSecs,onDone){
-  const disp=$(dispId), bar=$(barId);
-  let fired=!st[key].dl || st[key].dl<=Date.now();
-  return {
-    start(secs){ ensureAudio(); st[key]={dl:Date.now()+secs*1000, tot:secs}; fired=false; save(); this.tick(); },
-    reset(){ st[key]={dl:0, tot:idleSecs}; fired=true; save(); this.tick(); },
-    tick(){
-      const s=st[key];
-      if(!s.dl){ disp.textContent=fmt(idleSecs); disp.classList.remove("done"); bar.style.width="100%"; return; }
-      const rem=Math.max(0,Math.ceil((s.dl-Date.now())/1000));
-      disp.textContent=fmt(rem);
-      disp.classList.toggle("done",rem<=0);
-      bar.style.width=Math.max(0,rem/s.tot*100)+"%";
-      if(rem<=0 && !fired){ fired=true; onDone(); }
-    }
-  };
-}
-const smudge=countdown("sm","smD","smB",90,()=>beep(660,1));
-const hunt=countdown("hu","huD","huB",20,()=>beep(880,2));
-
-// ---- contract + Obambo ----
-function obamboAt(t){
-  if(t<OBAMBO_FIRST) return {aggr:false, next:OBAMBO_FIRST-t, idx:0};
-  const k=Math.floor((t-OBAMBO_FIRST)/OBAMBO_EVERY);
-  return {aggr:k%2===0, next:OBAMBO_FIRST+OBAMBO_EVERY*(k+1)-t, idx:k+1};
-}
-const contract={
-  t0:0, beepOn:true, lastWarn:-1,
-  load(){
-    try{
-      const d=JSON.parse(localStorage.getItem(CT_KEY)||"null");
-      this.t0=(d && typeof d.t0==="number" && d.t0>0 && Date.now()-d.t0<6*3600e3) ? d.t0 : 0;
-      this.beepOn=!(d && d.beep===0);
-    }catch(e){}
-  },
-  save(){ try{ localStorage.setItem(CT_KEY,JSON.stringify({t0:this.t0, beep:this.beepOn?1:0})); }catch(e){} },
-  elapsed(){ return this.t0 ? Math.floor((Date.now()-this.t0)/1000) : 0; },
-  start(){ ensureAudio(); this.t0=Date.now(); this.lastWarn=-1; this.save(); this.tick(); },
-  reset(){ this.t0=0; this.save(); this.tick(); },
-  tick(){
-    const el=$("ob"), sec=$("ctSec");
-    if(!this.t0){
-      $("ctD").textContent="--:--"; el.classList.remove("soon","hide"); el.classList.add("idle"); sec.classList.remove("aggr");
-      el.innerHTML=st.lang==="el" ? "Πάτα 🚪 μόλις ανοίξει η εξώπορτα" : "Hit 🚪 as soon as the front door opens";
-      return;
-    }
-    const t=this.elapsed(), ob=obamboAt(t);
-    if(this.beepOn && ob.next<=OBAMBO_WARN && this.lastWarn!==ob.idx){ this.lastWarn=ob.idx; beep(520,3); }
-    $("ctD").textContent=fmt(t);
-    el.classList.remove("idle");
-    el.classList.toggle("hide",!this.beepOn);
-    if(!this.beepOn){ el.classList.remove("soon"); sec.classList.remove("aggr"); return; }
-    el.innerHTML="Obambo: "+(ob.aggr?'<span class="aggr">AGGRESSIVE</span>':'<span class="calm">CALM</span>')
-      +" · flip "+(st.lang==="el"?"σε ":"in ")+fmt(ob.next);
-    el.classList.toggle("soon",ob.next<=OBAMBO_WARN);
-    sec.classList.toggle("aggr",ob.aggr);
+PT.contract.addView((t,ob)=>{
+  const el=$("ob"), sec=$("ctSec"), on=PT.contract.beepOn;
+  if(!PT.contract.t0){
+    $("ctD").textContent="--:--"; el.classList.remove("soon","hide"); el.classList.add("idle"); sec.classList.remove("aggr");
+    el.textContent=st.lang==="el" ? "Πάτα 🚪 μόλις ανοίξει η εξώπορτα" : "Hit 🚪 as soon as the front door opens";
+    return;
   }
-};
-contract.load();
-// μετά από reload: μην «φας» την προειδοποίηση του επόμενου flip, ούτε ξαναχτυπήσεις μια που ήδη ακούστηκε
-// ---- ghost tells (tells.js) ----
-const tells=mountTells($("tells"), ()=>st.lang, n=>$("tlSec").classList.toggle("tl-none",n===0));
-if(contract.t0){ const ob=obamboAt(contract.elapsed()); contract.lastWarn= ob.next<=OBAMBO_WARN ? ob.idx : -1; }
-// αλλαγές από άλλο tab ίδιου origin (π.χ. pop-out του index.html στον ίδιο browser)
-window.addEventListener("storage",e=>{
-  if(e.key===CT_KEY){ contract.load(); applyVis(); contract.tick(); }
-  if(e.key===SHOW_KEY){ loadShow(); applyVis(); }
-  if(e.key===TELLS_KEY) tells.render();
+  $("ctD").textContent=PT.fmt(t);
+  el.classList.remove("idle");
+  el.classList.toggle("hide",!on);
+  el.classList.toggle("soon",on && ob.next<=PT.OBAMBO.warn);
+  sec.classList.toggle("aggr",on && ob.aggr);
+  if(on) el.innerHTML="Obambo: "+(ob.aggr?'<span class="aggr">AGGRESSIVE</span>':'<span class="calm">CALM</span>')
+    +" · flip "+(st.lang==="el"?"σε ":"in ")+PT.fmt(ob.next);
 });
 
-// ---- show / hide ----
-function applyVis(){
-  $("smSec").classList.toggle("hide",!show.sm);
-  $("huSec").classList.toggle("hide",!show.hu);
-  $("ctSec").classList.toggle("hide",!show.ct);
-  $("tlSec").classList.toggle("hide",!show.tl);
-  document.body.classList.toggle("min",!!show.min);
-  if(!show.min) hideControls();
-  document.querySelectorAll("#vis [data-v]").forEach(b=>{
-    const v=b.dataset.v, on= v==="ob" ? contract.beepOn : show[v];
-    b.classList.toggle("off",!on);
-  });
-}
-function toggleVis(v){
-  if(v==="ob"){ contract.beepOn=!contract.beepOn; contract.save(); contract.tick(); }
-  else { show[v]=!show[v]; try{ localStorage.setItem(SHOW_KEY,JSON.stringify(show)); }catch(e){} }
-  applyVis();
-  if(v==="min" && show.min) hideControls();
-}
-// ---- minimal: reveal με κλικ, αυτόματο κρύψιμο ----
-let revealT=null;
-function hideControls(){ document.body.classList.remove("reveal"); clearTimeout(revealT); revealT=null; }
-function revealControls(){ document.body.classList.add("reveal"); clearTimeout(revealT); revealT=setTimeout(hideControls,5000); }
-document.addEventListener("click",e=>{
-  if(!show.min) return;
-  if(!document.body.classList.contains("reveal")){ e.preventDefault(); e.stopPropagation(); revealControls(); return; }
-  // κλικ σε timer κουμπί → κάνε τη δουλειά και κρύψου αμέσως· οτιδήποτε άλλο → μέτρα ξανά 5s
-  if(e.target.closest(".btn")) hideControls(); else revealControls();
-},true);
-document.addEventListener("change",()=>{ if(show.min && document.body.classList.contains("reveal")) revealControls(); });
-document.querySelectorAll("#vis [data-v]").forEach(b=>b.onclick=()=>toggleVis(b.dataset.v));
+// ---- ghost tells ----
+const tells=PhasmoTells.mount($("tells"), ()=>st.lang, n=>$("tlSec").classList.toggle("tl-none",n===0));
 
-// ---- UI ----
-function huntSecs(m){ return HUNTS[st.diff][m]; }
-function paintStatic(){
+// ---- show / hide + minimal ----
+const paintChips=PT.bindVisChips($("vis"));
+const reveal=PT.minimalReveal(document, window);
+function applyVis(){
+  [["smSec","sm"],["huSec","hu"],["ctSec","ct"],["tlSec","tl"]].forEach(([id,k])=>$(id).classList.toggle("hide",!PT.prefs.isOn(k)));
+  reveal.apply();
+  paintChips();
+}
+PT.prefs.onChange(applyVis);
+const ensureTells=()=>{ if(!PT.prefs.isOn("tl")) PT.prefs.toggle("tl"); };
+
+// ---- difficulty + γλώσσα ----
+function paintHuntLabels(){
+  const h=PT.huntsFor(st.diff), keys={small:"Q",medium:"W",large:"E"};
+  document.querySelectorAll("[data-map]").forEach(b=>{ const m=b.dataset.map; b.innerHTML=m[0].toUpperCase()+" "+h[m]+"<kbd>"+keys[m]+"</kbd>"; });
+}
+function paintLang(){
   document.documentElement.setAttribute("lang",st.lang);
   $("lang").textContent=st.lang==="el"?"EN":"ΕΛ";
-  $("diff").value=st.diff;
-  const keys={small:"Q",medium:"W",large:"E"};
-  document.querySelectorAll("[data-map]").forEach(b=>{ const m=b.dataset.map; b.innerHTML=m[0].toUpperCase()+" "+huntSecs(m)+"<kbd>"+keys[m]+"</kbd>"; });
-  applyVis();
 }
+// blur: αλλιώς το select κρατάει το focus και «τρώει» τα hotkeys μέχρι να κάνεις κλικ αλλού
+$("diff").onchange=e=>{ st.diff=e.target.value; writeTM({diff:st.diff, diffSet:true}); paintHuntLabels(); e.target.blur(); };
+$("lang").onclick=()=>{ st.lang=st.lang==="el"?"en":"el"; writeTM({lang:st.lang}); paintLang(); PT.contract.repaint(); tells.render(); };
+// Custom: αν αλλάξουν οι ρυθμίσεις στο Journal (άλλο tab), ενημέρωσε τις διάρκειες
+window.addEventListener("storage",e=>{ if(e.key===PT.KEYS.journal && st.diff==="custom") paintHuntLabels(); });
+
+// ---- κουμπιά ----
 document.querySelectorAll("[data-sm]").forEach(b=>b.onclick=()=>smudge.start(+b.dataset.sm));
-document.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>hunt.start(huntSecs(b.dataset.map)));
+document.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>hunt.start(PT.huntsFor(st.diff)[b.dataset.map]));
 document.querySelectorAll("[data-hu]").forEach(b=>b.onclick=()=>hunt.start(+b.dataset.hu));
 $("smR").onclick=()=>smudge.reset();
 $("huR").onclick=()=>hunt.reset();
-$("ctS").onclick=()=>contract.start();
-$("ctR").onclick=()=>contract.reset();
-$("diff").onchange=e=>{ st.diff=e.target.value; save(); paintStatic(); };
-$("lang").onclick=()=>{ st.lang=st.lang==="el"?"en":"el"; save(); paintStatic(); contract.tick(); tells.render(); };
+$("ctS").onclick=()=>PT.contract.start();
+$("ctR").onclick=()=>PT.contract.reset();
 
+// ---- hotkeys (στο Steam overlay δουλεύουν όσο είναι ανοιχτό το overlay) ----
+const HOTKEYS={
+  "1":()=>smudge.start(90), "2":()=>smudge.start(180), "3":()=>smudge.start(60),
+  "q":()=>hunt.start(PT.huntsFor(st.diff).small), "w":()=>hunt.start(PT.huntsFor(st.diff).medium), "e":()=>hunt.start(PT.huntsFor(st.diff).large),
+  "c":()=>hunt.start(25), "d":()=>PT.contract.start(),
+  "o":()=>PT.prefs.toggle("ob"), "m":()=>PT.prefs.toggle("min"),
+  "g":()=>{ ensureTells(); tells.togglePick(); if(PT.prefs.show.min) reveal.show(); },
+  "f":()=>{ ensureTells(); tells.toggleDetail(); },
+  "r":()=>{ smudge.reset(); hunt.reset(); PT.contract.reset(); }
+};
 document.addEventListener("keydown",e=>{
-  if(e.ctrlKey||e.altKey||e.metaKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
-  const k=e.key.toLowerCase();
-  const act={
-    "1":()=>smudge.start(90), "2":()=>smudge.start(180), "3":()=>smudge.start(60),
-    "q":()=>hunt.start(huntSecs("small")), "w":()=>hunt.start(huntSecs("medium")), "e":()=>hunt.start(huntSecs("large")),
-    "c":()=>hunt.start(25), "d":()=>contract.start(), "o":()=>toggleVis("ob"), "m":()=>toggleVis("min"),
-    "g":()=>{ if(!show.tl) toggleVis("tl"); tells.togglePick(); if(show.min) revealControls(); },
-    "r":()=>{ smudge.reset(); hunt.reset(); contract.reset(); }
-  }[k];
-  if(act){ e.preventDefault(); act(); if(show.min && k!=="m" && k!=="g") hideControls(); }
+  if(e.ctrlKey||e.altKey||e.metaKey||/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+  const k=e.key.toLowerCase(), act=HOTKEYS[k];
+  if(!act) return;
+  e.preventDefault();
+  if(e.target.tagName==="SELECT") e.target.blur();   // ούτε ένα focused select δεν μπλοκάρει τα hotkeys
+  act();
+  if(PT.prefs.show.min && k!=="m" && k!=="g") reveal.hide();
 });
 
-paintStatic();
-const tickAll=()=>{ smudge.tick(); hunt.tick(); contract.tick(); };
-tickAll();
-setInterval(tickAll,250);
+$("diff").value=st.diff;
+paintLang();
+paintHuntLabels();
+applyVis();
+PT.tickAll();
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 </script>
 </body>

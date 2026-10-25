@@ -15,6 +15,15 @@ const ITEM_OF = {
  el:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Θερμόμετρο",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
  en:{EMF:"EMF Reader",DOTS:"D.O.T.S. Projector",UV:"UV Light",FRZ:"Thermometer",ORB:"Video Camera",WRT:"Ghost Writing Book",SB:"Spirit Box"},
 };
+// Difficulty: drain multiplier, διάρκειες hunt ανά μέγεθος χάρτη, grace period, πόσα evidence δίνονται.
+// Κοινό για index.html (DIFF) και timers.html — το custom ξαναχτίζεται από τις ρυθμίσεις του χρήστη.
+const DIFFICULTIES = {
+ amateur:      {label:"Amateur",      mult:1.0, hunts:{small:15,medium:30,large:40}, grace:5, evid:3},
+ intermediate: {label:"Intermediate", mult:1.5, hunts:{small:20,medium:40,large:50}, grace:4, evid:3},
+ professional: {label:"Professional", mult:2.0, hunts:{small:30,medium:50,large:60}, grace:3, evid:3},
+ nightmare:    {label:"Nightmare",    mult:2.0, hunts:{small:30,medium:50,large:60}, grace:2, evid:2},
+ custom:       {label:"Custom",       mult:1.5, hunts:{small:20,medium:40,large:50}, grace:4, evid:3},
+};
 // thMax = ανώτατο sanity % στο οποίο το ghost μπορεί ακόμα να κάνει hunt (για ταξινόμηση/quick lookup).
 // isAny = μπορεί να κάνει hunt σε ΟΠΟΙΟΔΗΠΟΤΕ sanity μέσω ability.
 // variableTh = threshold που αλλάζει ανάλογα με behavior (π.χ. Mimic μιμείται άλλο ghost).
