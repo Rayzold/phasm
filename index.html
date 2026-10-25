@@ -645,7 +645,7 @@
 
   <div class="panel anchor-target" id="rule-outs">
     <div class="panel-label"><span class="l-el">Rule-Outs — πώς αποκλείεις κάθε ghost</span><span class="l-en">Rule-Outs — how to eliminate every ghost</span></div>
-    <div class="sanity-note" style="margin-bottom:10px"><span class="l-el">Από το guide του <a href="https://www.youtube.com/watch?v=PNPgkRpEkxw" target="_blank" rel="noopener" style="color:var(--nv)">Lisas Chillin (Οκτ. 2026)</a>. Το timestamp ανοίγει το video σε εκείνο το σημείο. Το «Φίλτρο» ενεργοποιεί το αντίστοιχο behavior chip στο Evidence Board.</span><span class="l-en">From <a href="https://www.youtube.com/watch?v=PNPgkRpEkxw" target="_blank" rel="noopener" style="color:var(--nv)">Lisas Chillin's guide (Oct 2026)</a>. The timestamp opens the video at that point. "Filter" toggles the matching behavior chip on the Evidence Board.</span></div>
+    <div class="sanity-note" style="margin-bottom:10px"><span class="l-el">Από το guide του <a href="https://www.youtube.com/watch?v=PNPgkRpEkxw" target="_blank" rel="noopener" style="color:var(--nv)">Lisas Chillin (Οκτ. 2026)</a>. Το timestamp ανοίγει το video σε εκείνο το σημείο. Το «Φίλτρο» ενεργοποιεί το αντίστοιχο behavior chip στο Evidence Board. Οι γραμμές με 📝 είναι από no-evidence / hunt identification guide (ταχύτητες, Demon smudge, Twins, Onryo, Yurei).</span><span class="l-en">From <a href="https://www.youtube.com/watch?v=PNPgkRpEkxw" target="_blank" rel="noopener" style="color:var(--nv)">Lisas Chillin's guide (Oct 2026)</a>. The timestamp opens the video at that point. "Filter" toggles the matching behavior chip on the Evidence Board. Rows marked 📝 come from a no-evidence / hunt identification guide (speeds, Demon smudge, Twins, Onryo, Yurei).</span></div>
     <div class="ro-head">
       <button type="button" class="sel ro-tab on" data-ro="ghost"><span class="l-el">Ανά Ghost</span><span class="l-en">By Ghost</span></button>
       <button type="button" class="sel ro-tab" data-ro="elem"><span class="l-el">Ανά Στοιχείο</span><span class="l-en">By Clue</span></button>
@@ -1270,7 +1270,12 @@ let roView="ghost";
 const roTable=document.getElementById("roTable"), roSearch=document.getElementById("roSearch"), roCount=document.getElementById("roCount");
 const RO_KIND={el:{x:"Rule-out",pos:"Ένδειξη",info:"Info"},en:{x:"Rule-out",pos:"Points to",info:"Info"}};
 function roSec(ts){ const [m,s]=ts.split(":").map(Number); return m*60+s; }
-function roTs(r){ return `<a class="ro-ts" href="${RULEOUT_VIDEO}&t=${roSec(r.ts)}s" target="_blank" rel="noopener">${r.ts}</a>`; }
+function roTs(r){
+  const url = r.v==="ne" ? RULEOUT_VIDEO_NE : RULEOUT_VIDEO;
+  const src = r.v==="ne" ? (lang==="en"?"No-evidence guide":"No-evidence guide") : "";
+  if(!url) return `<span class="ro-ts" title="${src}">📝 ${r.ts}</span>`;
+  return `<a class="ro-ts" href="${url}&t=${roSec(r.ts)}s" target="_blank" rel="noopener"${src?` title="${src}"`:""}>${r.v==="ne"?"📝 ":""}${r.ts}</a>`;
+}
 function roApply(r){
   if(!r.bh) return "";
   return `<button type="button" class="ro-apply${bhState[r.bh]?" on":""}" data-bh-apply="${r.bh}">${bhState[r.bh]?"✓ ":""}${lang==="en"?"Filter":"Φίλτρο"}</button>`;
@@ -1781,9 +1786,14 @@ const SPEED_REF=[
  {min:0.40,max:3.00,label:"Deildegast",note:"3.0 αρχικά → 0.4 μετά από ~26 αντικείμενα (όχι ο εξοπλισμός σου)",noteEn:"3.0 at first → 0.4 after ~26 items (not your own equipment)"},
  {min:1.00,max:1.00,label:"Revenant (δεν σε βλέπει) / Thaye (γερασμένο)",labelEn:"Revenant (doesn't see you) / Thaye (aged)",note:"σταθερό",noteEn:"constant"},
  {min:1.40,max:2.70,label:"Hantu",note:"πιο γρήγορο στο κρύο, χωρίς LoS accel",noteEn:"faster in the cold, no LoS accel"},
- {min:1.50,max:2.25,label:"Moroi",note:"πιο γρήγορο όσο πέφτει το sanity σου",noteEn:"faster as your sanity drops"},
+ {min:1.20,max:2.25,label:"Dayan",note:"1.2 ακίνητος → 2.25 σε κίνηση (<10 m), χωρίς LoS",noteEn:"1.2 still → 2.25 moving (<10 m), no LoS"},
+ {min:1.36,max:1.96,label:"Gallu",note:"Weak 1.36 · Normal 1.7 · Angry 1.96",noteEn:"Weak 1.36 · Normal 1.7 · Angry 1.96"},
+ {min:1.45,max:1.96,label:"Obambo",note:"calm 1.45 · aggressive 1.96, αλλάζει και μέσα στο hunt",noteEn:"calm 1.45 · aggressive 1.96, can switch mid-hunt"},
+ {min:1.50,max:2.25,label:"Moroi",note:"πιο γρήγορο όσο πέφτει το sanity σου · με LoS ως 3.71 (το πιο γρήγορο)",noteEn:"faster as your sanity drops · with LoS up to 3.71 (the fastest)"},
+ {min:1.53,max:1.53,label:"Aswang",note:"αργό ξεκίνημα, max LoS σε ~8.7s",noteEn:"slow start, max LoS in ~8.7s"},
  {min:1.53,max:1.87,label:"The Twins",note:"δύο σταθερές ταχύτητες",noteEn:"two fixed speeds"},
  {min:1.70,max:1.70,label:"Βασική ταχύτητα (τα περισσότερα ghosts)",labelEn:"Base speed (most ghosts)",note:"με line-of-sight ως ×1.65 → ~2.8",noteEn:"with line-of-sight up to ×1.65 → ~2.8"},
+ {min:2.21,max:2.21,label:"Kormos (σε ακούει να κινείσαι, >5 m)",labelEn:"Kormos (hears you moving, >5 m)",note:"χωρίς LoS",noteEn:"no LoS"},
  {min:2.50,max:2.50,label:"Raiju (ενεργά ηλεκτρονικά) / Jinn (ρεύμα ON, από μακριά)",labelEn:"Raiju (active electronics) / Jinn (power ON, from afar)",note:""},
  {min:2.75,max:2.75,label:"Thaye (φρέσκο)",labelEn:"Thaye (fresh)",note:""},
  {min:3.00,max:3.00,label:"Revenant (σε βλέπει)",labelEn:"Revenant (sees you)",note:""},
@@ -1810,7 +1820,11 @@ const SPEED_OF={ // εύρη m/s ανά ghost όπου διαφέρουν (με 
  "Moroi":[[1.5,3.71]],
  "The Twins":[[1.53,3.09]],
  "Thaye":[[1.0,2.75]],
- "Dayan":[[1.0,2.8]],
+ "Dayan":[[1.2,2.25]],
+ "Aswang":[[1.53,2.53]],
+ "Gallu":[[1.36,3.23]],
+ "Obambo":[[1.45,3.23]],
+ "Kormos":[[1.7,2.21]],
  "Deildegast":[[0.4,3.0]],
 };
 function passesSpeed(g){

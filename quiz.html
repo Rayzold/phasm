@@ -392,7 +392,7 @@ Q(1,"s",e("Τι βλέπεις στο salt με το UV;","What does UV show on 
   e("Πράσινα footprints. Αν μένει ανέγγιχτο, σκέψου Wraith.","Green footprints. If it stays untouched, think Wraith."));
 Q(1,"s",e("Τι «σβήνει» την κατάρα του Moroi;","What clears the Moroi's curse?"),
   ["Sanity Pills","Crucifix","Salt",["Φώτα αναμμένα","Lights on"]],[0],
-  e("Sanity pills. Το smudge το τυφλώνει και για 7″ αντί 5″.","Sanity pills. Smudge also blinds it for 7s instead of 5s."));
+  e("Sanity pills. Το smudge το τυφλώνει και για 7.5″ αντί 5″.","Sanity pills. Smudge also blinds it for 7.5s instead of 5s."));
 Q(1,"s",e("Το D.O.T.S. του Goryo φαίνεται μόνο…","The Goryo's D.O.T.S. only shows…"),
   [["μέσα από video camera, με άδειο δωμάτιο","through a video camera, with the room empty"],["με γυμνό μάτι","with the naked eye"],["με σβηστό breaker","with the breaker off"],["όταν μιλάς","when you talk"]],[0],
   e("Και δεν αλλάζει ποτέ ghost room.","And it never changes ghost room."));
@@ -459,11 +459,11 @@ Q(2,"s",e("Threshold του Mare με ΑΝΑΜΜΕΝΑ φώτα στο room το
   ["30%","40%","50%","60%"],[1],
   e("40% στο φως, 60% στο σκοτάδι.","40% in light, 60% in the dark."));
 Q(2,"s",e("Smudge σε hunt: πόσο «τυφλώνεται» το Moroi;","Mid-hunt smudge: how long is a Moroi blinded?"),
-  ["4″","5″","6″","7″"],[3],
-  e("7″. Κανονικά 5″, Gallu 4″ (angry) ή 6″ (weak).","7s. Normally 5s; Gallu 4s (angry) or 6s (weak)."));
+  ["5″","6″","7.5″","10″"],[2],
+  e("7.5″. Κανονικά 5″, Gallu 4″ (angry) ή 6″ (weak).","7.5s. Normally 5s; Gallu 4s (angry) or 6s (weak)."));
 Q(2,"m",e("Ποια ghosts ΔΕΝ επιταχύνουν με line-of-sight;","Which ghosts do NOT speed up with line-of-sight?"),
-  ["Hantu","Kormos","Deildegast","Thaye","Deogen","Banshee","Wraith","Oni"],[0,1,2,3,4],
-  e("Hantu (θερμοκρασία), Kormos (τυφλό), Deildegast (σταθερή ταχύτητα), Thaye (ηλικία), Deogen (απόσταση). Το Revenant είναι οριακό: πηδά απευθείας στο max.","Hantu (temperature), Kormos (blind), Deildegast (fixed speed), Thaye (age), Deogen (distance). The Revenant is borderline: it jumps straight to max."));
+  ["Hantu","Kormos","Deildegast","Thaye","Deogen","Dayan","Banshee","Wraith","Oni"],[0,1,2,3,4,5],
+  e("Hantu (θερμοκρασία), Kormos (τυφλό), Deildegast (σταθερή ταχύτητα), Thaye (ηλικία), Deogen (απόσταση), Dayan (η δική σου κίνηση). Το Revenant είναι οριακό: πηδά απευθείας στο max.","Hantu (temperature), Kormos (blind), Deildegast (fixed speed), Thaye (age), Deogen (distance), Dayan (your own movement). The Revenant is borderline: it jumps straight to max."));
 Q(2,"s",e("Το Aswang σε βρίσκει μέσα σε locker. Τι γίνεται;","An Aswang reaches you inside a locker. What happens?"),
   [["Το hunt τελειώνει αμέσως","The hunt ends instantly"],["Πεθαίνεις","You die"],["Χάνεις 50% sanity","You lose 50% sanity"],["Τίποτα","Nothing"]],[0],
   e("Στο επόμενο hunt όμως πάει κατευθείαν εκεί. Άλλαξε κρυψώνα.","But next hunt it goes straight there. Change spots."));
@@ -646,6 +646,56 @@ Q(2,"s",e("Tarot: κόκκινη «Wheel of Fortune»;","Tarot: a red 'Wheel of 
   ["−25% sanity","+25% sanity",["Cursed hunt","Cursed hunt"],["Τίποτα","Nothing"]],[0],
   e("Κόκκινη −25%, πράσινη +25%.","Red −25%, green +25%."));
 
+// ---- Οκτ. 2026: no-evidence / hunt identification guide (ταχύτητες, smudge timers, Twins, Onryo, Yurei) ----
+Q(1,"s",e("Ποια είναι η κανονική ταχύτητα ενός ghost σε hunt;","What's a normal ghost's hunt speed?"),
+  ["1.0 m/s","1.7 m/s","2.5 m/s","3.0 m/s"],[1],
+  e("1.7 m/s. Με line-of-sight ανεβαίνει σταδιακά ως ~2.8.","1.7 m/s. With line-of-sight it gradually climbs to ~2.8."));
+Q(1,"s",e("Ποιο ghost είναι το ΜΟΝΟ που κουνά τη front door εκτός event ή hunt;","Which is the ONLY ghost that moves the front door outside an event or hunt?"),
+  ["Yurei","Poltergeist","Demon","Phantom"],[0],
+  e("Το Yurei. Και κανονικές πόρτες τις κουνά μόνο τέρμα, ποτέ μισές.","The Yurei. It also only moves normal doors fully, never halfway."));
+Q(1,"s",e("Το ghost άναψε το campfire στο Maple Lodge. Ποιο αποκλείεις;","The ghost lit the campfire on Maple Lodge. Which one do you rule out?"),
+  ["Onryo","Mare","Hantu","Shade"],[0],
+  e("Το Onryo δεν ανάβει ποτέ κεριά ή campfires — μόνο τα σβήνει.","The Onryo never lights candles or campfires — it only blows them out."));
+Q(2,"s",e("Smudge το ghost και ξεκινάς χρονόμετρο. Κάνει hunt στο 1:10. Τι υποψιάζεσαι;","You smudge the ghost and start a timer. It hunts at 1:10. What do you suspect?"),
+  ["Demon","Spirit","Yurei","Moroi"],[0],
+  e("Demon: ξαναμπορεί από το 1:00, τα άλλα από το 1:30, το Spirit από το 3:00. Χρονόμετρο από την επαφή με το incense.","Demon: can hunt again from 1:00, others from 1:30, the Spirit from 3:00. Time it from incense contact."));
+Q(2,"s",e("Σε ένα hunt το ghost πήγε από αργό σε γρήγορο στη μέση του hunt (όχι από LOS). Ποιο αποκλείεις;","Mid-hunt, the ghost switched from slow to fast (not from LOS). Which one do you rule out?"),
+  ["The Twins","Obambo","Revenant","Dayan"],[0],
+  e("Οι Twins κρατούν μία ταχύτητα (~1.5 ή ~1.9) για όλο το hunt. Το Obambo μπορεί να αλλάξει φάση μέσα στο hunt.","The Twins keep one speed (~1.5 or ~1.9) for the whole hunt. An Obambo can switch phase mid-hunt."));
+Q(2,"s",e("Obambo: σε τι φάση είναι το ΠΡΩΤΟ λεπτό μετά το ξεκλείδωμα της πόρτας;","Obambo: what phase is it in for the FIRST minute after unlocking the door?"),
+  [["Calm","Calm"],["Aggressive","Aggressive"],["Τυχαία","Random"],["Εξαρτάται από το sanity","Depends on sanity"]],[0],
+  e("Calm (1.45 m/s). Μετά εναλλάσσεται κάθε 2 λεπτά με aggressive (1.96 m/s).","Calm (1.45 m/s). Then it swaps every 2 minutes with aggressive (1.96 m/s)."));
+Q(2,"s",e("Lighter test: ανάβεις αναπτήρα και το ghost τον σβήνει σε 12 sec. Ποιο υποψιάζεσαι;","Lighter test: you light a lighter and the ghost blows it out in 12 seconds. What do you suspect?"),
+  ["Onryo","Mare","Hantu","Jinn"],[0],
+  e("Onryo: αν σβήσει τον αναπτήρα μέσα σε 20 sec, ισχυρή ένδειξη.","Onryo: blowing out the lighter within 20 seconds is a strong hint."));
+Q(2,"s",e("Ποιο ghost μπορεί να περπατά ανάποδα ή να «πηδά» βήματα στο hunt;","Which ghost may walk backwards or skip steps during a hunt?"),
+  ["Obake","Phantom","Oni","Revenant"],[0],
+  e("Το Obake — μαζί με το shapeshift σε συγκεκριμένα blinks.","The Obake — along with shapeshifting on certain blinks."));
+Q(2,"s",e("Hantu σε hunt με breaker off και κρύο σπίτι. Ταχύτητα;","A Hantu hunts with the breaker off and a cold house. Speed?"),
+  ["1.4 m/s","1.7 m/s","2.7 m/s","3.0 m/s"],[2],
+  e("2.7 m/s και παγωμένη ανάσα. Στη ζέστη 1.4 m/s. Χωρίς LOS speed-up.","2.7 m/s with freezing breath. In the warmth 1.4 m/s. No LOS speed-up."));
+Q(2,"s",e("Deogen σε hunt: πόσο αργό γίνεται όταν είναι κοντά σου;","A hunting Deogen: how slow does it get once it's close to you?"),
+  ["0.4 m/s","1.0 m/s","1.4 m/s","1.7 m/s"],[0],
+  e("0.4 m/s από κοντά, 3.0 m/s από μακριά. Κάνε loop — η κρυψώνα δεν πιάνει.","0.4 m/s up close, 3.0 m/s from afar. Loop it — hiding doesn't work."));
+Q(2,"s",e("Dayan σε απόσταση <10 m: πόσο γρήγορη είναι όταν ΣΤΕΚΕΣΑΙ ακίνητος;","A Dayan within 10 m: how fast is it while you stand STILL?"),
+  ["1.2 m/s","1.7 m/s","2.25 m/s","0.4 m/s"],[0],
+  e("1.2 m/s ακίνητος, 2.25 m/s σε κίνηση. Σταθερή ταχύτητα, χωρίς LOS speed-up.","1.2 m/s still, 2.25 m/s moving. Fixed speed, no LOS speed-up."));
+Q(3,"s",e("Ποιο είναι το πιο γρήγορο ghost του παιχνιδιού σε πλήρες line-of-sight;","Which is the fastest ghost in the game at full line-of-sight?"),
+  ["Moroi","Revenant","Deogen","Thaye"],[0],
+  e("Moroi: 2.25 m/s στο 0% sanity και με LOS ως 3.71 m/s.","Moroi: 2.25 m/s at 0% sanity and up to 3.71 m/s with LOS."));
+Q(3,"s",e("Gallu: ταχύτητα σε κάθε stage (Weak / Normal / Angry);","Gallu: speed in each stage (Weak / Normal / Angry)?"),
+  ["1.36 / 1.7 / 1.96","1.0 / 1.7 / 2.5","1.45 / 1.7 / 1.96","1.2 / 1.7 / 2.25"],[0],
+  e("Weak 1.36, Normal 1.7, Angry 1.96 m/s. Τα 1.45 / 1.96 είναι του Obambo, τα 1.2 / 2.25 του Dayan.","Weak 1.36, Normal 1.7, Angry 1.96 m/s. 1.45 / 1.96 is the Obambo, 1.2 / 2.25 the Dayan."));
+Q(3,"s",e("Αργό ghost που επιταχύνει με LOS και φτάνει στο max σε ~8.7 sec. Ποιο;","A slow ghost that speeds up with LOS and maxes out in ~8.7 seconds. Which?"),
+  ["Aswang","Thaye","Hantu","Moroi"],[0],
+  e("Aswang: βάση 1.53 m/s, το πιο γρήγορο LOS ramp. Το Thaye και το Hantu δεν επιταχύνουν με LOS.","Aswang: 1.53 m/s base, the fastest LOS ramp. Thaye and Hantu don't speed up with LOS."));
+Q(3,"m",e("Thaye ή Moroi; Τι δείχνει Moroi;","Thaye or Moroi? What points to a Moroi?"),
+  [["Επιταχύνει με line-of-sight","Speeds up with line-of-sight"],["Smudge blind 7.5″","Smudge blind 7.5s"],["Smudge blind 5″","Smudge blind 5s"],["Η ηλικία στο Ouija μεγαλώνει","Its Ouija age goes up"]],[0,1],
+  e("Moroi: LOS speed-up και 7.5″ blind. Thaye: χωρίς LOS, 5″ blind, γερνάει στο Ouija.","Moroi: LOS speed-up and a 7.5s blind. Thaye: no LOS, 5s blind, ages on the Ouija."));
+Q(3,"s",e("Custom με 0 evidence: βλέπεις Orbs στη video camera. Τι είναι;","Custom with 0 evidence: you see Orbs on the video camera. What is it?"),
+  ["The Mimic","Goryo","Yurei","Hantu"],[0],
+  e("Τα Orbs του Mimic είναι ability, όχι evidence — φαίνονται και με όλα τα evidence κλειστά.","The Mimic's Orbs are an ability, not evidence — they show even with all evidence off."));
+
 // ======================================================================================
 // GENERATED QUESTIONS (από ghosts-data.js — συμφωνούν πάντα με το site)
 // ======================================================================================
@@ -663,7 +713,7 @@ const BASE_EX = {
   male:e("Ανδρικό μοντέλο σε event","Male model in an event"),
   airball:e("Airball event","Airball event"),
 };
-const RO_IDS = ["eventToward","photoVisible","salt2","dirtyWater","windowKnock","singEvent","throwAtYou","roomChange","partialDoor","thirdFlameNoHunt","drain10","singNo15","mareLitHunt","spiritSmudge3","sameRoom","normalBlink","noShapeshift","heardFar","dayanFlat","losSpeedup","stillApproach","hantuNoBreath","smudgeNot7"];
+const RO_IDS = ["litFlame","speedSwapMidHunt","eventToward","photoVisible","salt2","dirtyWater","windowKnock","singEvent","throwAtYou","roomChange","partialDoor","thirdFlameNoHunt","drain10","singNo15","mareLitHunt","spiritSmudge3","sameRoom","normalBlink","noShapeshift","heardFar","dayanFlat","losSpeedup","stillApproach","hantuNoBreath","smudgeNot7"];
 const EXCL = [];
 BEHAVIOR_RULES.forEach(r=>{
   if(!r.exclude) return;
