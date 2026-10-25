@@ -317,6 +317,22 @@
   .btn:hover{border-color:#3a465a}
   .btn:disabled{opacity:.4;cursor:default}
   .smudge-note{font-size:12px;color:var(--muted);line-height:1.5}
+  /* ---------- pop-out timers (Document Picture-in-Picture) ---------- */
+  body.pip{padding:8px 10px;overflow:auto}
+  .pip-sec{border:1px solid var(--line);border-radius:8px;padding:6px 8px 7px;margin-bottom:6px;background:#0c1119}
+  .pip-head{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+  .pip-head .tool-title{margin-bottom:0;font-size:11px}
+  .pip-sec .smudge-display{font-size:28px;margin:0;text-align:right}
+  .pip-sec .smudge-bar{margin:4px 0 6px;height:4px}
+  .pip-sec .smudge-btns{gap:4px;margin-bottom:0}
+  .pip-sec .btn{padding:4px 7px;font-size:12px;border-radius:6px}
+  .pip-phase{font-family:"Special Elite",monospace;font-size:13px;letter-spacing:1px;margin:2px 0 6px;color:var(--muted)}
+  .pip-phase .calm{color:var(--nv)}
+  .pip-phase .aggr{color:var(--danger)}
+  .pip-phase.soon{animation:pipBlink .5s step-end infinite}
+  @keyframes pipBlink{50%{opacity:.35}}
+  .btn.pipOpen.on{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.1)}
+  .pip-chk{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-left:auto}
   /* ---------- footstep tapper ---------- */
   .tap-btn{
     width:100%;padding:16px 10px;border-radius:10px;border:1px solid var(--nv-dim);
@@ -557,9 +573,11 @@
         <div class="smudge-btns">
           <button class="btn primary" id="smStart90">Start (90s)</button>
           <button class="btn ghostvar" id="smStart180">Spirit (180s)</button>
+          <button class="btn ghostvar" id="smStart60">Demon (60s)</button>
           <button class="btn" id="smReset">Reset</button>
+          <button class="btn pipOpen" title="Pop-out: smudge, hunt &amp; contract timers σε μικρό παράθυρο πάνω από το παιχνίδι">⏱️ Pop-out</button>
         </div>
-        <div class="smudge-note"><span class="l-el">Standard προστασία: 90s χωρίς hunt. <strong>Spirit</strong> extend: 180s. <strong>Yurei</strong>: αν κάνεις smudge μέσα στο δωμάτιό του, καθηλώνεται εκεί για 90s αντί να roamάρει.</span><span class="l-en">Standard protection: 90s without a hunt. <strong>Spirit</strong> extend: 180s. <strong>Yurei</strong>: smudge inside its room and it's pinned there for 90s instead of roaming.</span></div>
+        <div class="smudge-note"><span class="l-el">Standard προστασία: 90s χωρίς hunt. <strong>Spirit</strong> extend: 180s. <strong>Demon</strong>: μόνο 60s. <strong>Yurei</strong>: αν κάνεις smudge μέσα στο δωμάτιό του, καθηλώνεται εκεί για 90s αντί να roamάρει.</span><span class="l-en">Standard protection: 90s without a hunt. <strong>Spirit</strong> extend: 180s. <strong>Demon</strong>: only 60s. <strong>Yurei</strong>: smudge inside its room and it's pinned there for 90s instead of roaming.</span></div>
       </div>
     </div>
   </div>
@@ -606,6 +624,7 @@
           <button class="btn primary" data-hunt="50" data-map="large">Large (50s)</button>
           <button class="btn ghostvar" data-hunt="25">Cooldown (25s)</button>
           <button class="btn" id="huntReset">Reset</button>
+          <button class="btn pipOpen" title="Pop-out: smudge, hunt &amp; contract timers σε μικρό παράθυρο πάνω από το παιχνίδι">⏱️ Pop-out</button>
         </div>
         <div class="smudge-note"><span class="l-el">Διάρκειες hunt για <strong class="diffNameTxt">Intermediate</strong>. Grace period <span class="graceTxt">4s</span> στην αρχή (το ghost δεν σκοτώνει ακόμα). Cursed hunts: +20s. Cooldown μεταξύ hunts: 25s (<strong>Demon</strong>: 20s).</span><span class="l-en">Hunt durations for <strong class="diffNameTxt">Intermediate</strong>. Grace period <span class="graceTxt">4s</span> at the start (the ghost can't kill yet). Cursed hunts: +20s. Cooldown between hunts: 25s (<strong>Demon</strong>: 20s).</span></div>
       </div>
@@ -899,7 +918,7 @@
 </div>
 <script src="ghosts-data.js"></script>
 <script>
-const APP_VERSION = "1.35.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.36.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -1571,37 +1590,189 @@ document.addEventListener("visibilitychange",()=>{ if(!document.hidden && wake.c
 // υπολογίζεται πάντα από το ρολόι.
 function fmt(s){ const m=Math.floor(s/60), r=s%60; return m+":"+String(r).padStart(2,"0"); }
 function makeTimer(displayId,barId,defaultSecs,onDone){
-  const display=document.getElementById(displayId), bar=document.getElementById(barId);
-  let deadline=0, total=defaultSecs, interval=null, running=false;
-  function paint(rem,idle){
-    display.textContent = fmt(Math.max(rem,0));
-    display.classList.toggle("done", !idle && rem<=0);
-    bar.style.width = (idle ? 100 : Math.max(0,(rem/total)*100))+"%";
+  // views: η σελίδα + (προαιρετικά) το pop-out window — όλα ζωγραφίζονται από το ίδιο deadline
+  const views=[{display:document.getElementById(displayId), bar:document.getElementById(barId)}];
+  let deadline=0, total=defaultSecs, interval=null, running=false, fired=true;
+  function paintView(v,rem,idle){
+    v.display.textContent = fmt(Math.max(rem,0));
+    v.display.classList.toggle("done", !idle && rem<=0);
+    v.bar.style.width = (idle ? 100 : Math.max(0,(rem/total)*100))+"%";
   }
+  function paint(rem,idle){ views.forEach(v=>paintView(v,rem,idle)); }
+  function remaining(){ return Math.ceil((deadline-Date.now())/1000); }
+  // idempotent: το καλούν και το interval της σελίδας ΚΑΙ του pop-out (που δεν στραγγαλίζεται
+  // όσο είναι ορατό), οπότε το beep βγαίνει στην ώρα του ακόμα κι αν το tab είναι background
   function tick(){
-    const rem = Math.ceil((deadline-Date.now())/1000);
+    if(!deadline) return;
+    const rem = remaining();
     paint(rem,false);
-    if(rem<=0){ clearInterval(interval); interval=null; if(running){running=false; wake.release();} onDone(); }
+    if(rem<=0 && !fired){ fired=true; clearInterval(interval); interval=null; if(running){running=false; wake.release();} onDone(); }
   }
   return {
     start(seconds){
       ensureAudio();
       if(!running){ running=true; wake.acquire(); }
-      total=seconds; deadline=Date.now()+seconds*1000;
+      total=seconds; deadline=Date.now()+seconds*1000; fired=false;
       clearInterval(interval);
       paint(seconds,false);
       interval=setInterval(tick,250);
     },
-    reset(){ clearInterval(interval); interval=null; deadline=0; if(running){running=false; wake.release();} paint(defaultSecs,true); }
+    reset(){ clearInterval(interval); interval=null; deadline=0; fired=true; if(running){running=false; wake.release();} paint(defaultSecs,true); },
+    tick,
+    addView(display,bar){
+      const v={display,bar}; views.push(v);
+      if(deadline) paintView(v,remaining(),false); else paintView(v,defaultSecs,true);
+      return ()=>{ const k=views.indexOf(v); if(k>=0) views.splice(k,1); };
+    }
   };
 }
 const smudgeTimer = makeTimer("smDisplay","smBar",90,()=>beep(660,1));
 const huntTimer   = makeTimer("huntDisplay","huntBar",20,()=>beep(880,2));
 document.getElementById("smStart90").onclick=()=>smudgeTimer.start(90);
 document.getElementById("smStart180").onclick=()=>smudgeTimer.start(180);
+document.getElementById("smStart60").onclick=()=>smudgeTimer.start(60);
 document.getElementById("smReset").onclick=()=>smudgeTimer.reset();
 document.querySelectorAll("[data-hunt]").forEach(b=>b.onclick=()=>huntTimer.start(Number(b.dataset.hunt)));
 document.getElementById("huntReset").onclick=()=>huntTimer.reset();
+
+// ---- contract timer + Obambo phase ----
+// Obambo: ξεκινά Calm, 1η αλλαγή +1:00 από το πρώτο άνοιγμα της εξώπορτας, μετά εναλλαγή κάθε 2:00.
+// Είναι πρόβλεψη από το ρολόι — αν το παιχνίδι αλλάξει τους χρόνους, άλλαξε αυτές τις σταθερές.
+const OBAMBO_FIRST=60, OBAMBO_EVERY=120, OBAMBO_WARN=5;
+function obamboAt(t){
+  if(t<OBAMBO_FIRST) return {aggr:false, next:OBAMBO_FIRST-t, idx:0};
+  const k=Math.floor((t-OBAMBO_FIRST)/OBAMBO_EVERY);
+  return {aggr:k%2===0, next:OBAMBO_FIRST+OBAMBO_EVERY*(k+1)-t, idx:k+1};
+}
+const CT_KEY="phasmo-journal-contract";
+const contract={
+  t0:0, beepOn:true, lastWarn:-1, interval:null, views:[],
+  load(){
+    try{
+      const d=JSON.parse(localStorage.getItem(CT_KEY)||"null");
+      if(d && typeof d.t0==="number" && d.t0>0 && Date.now()-d.t0<6*3600e3) this.t0=d.t0;
+      if(d && d.beep===0) this.beepOn=false;
+    }catch(e){/* ignore */}
+    if(this.t0){ const ob=obamboAt(this.elapsed()); this.lastWarn= ob.next<=OBAMBO_WARN ? ob.idx : -1; this.interval=setInterval(()=>this.tick(),250); }
+  },
+  save(){ try{ localStorage.setItem(CT_KEY, JSON.stringify({t0:this.t0, beep:this.beepOn?1:0})); }catch(e){/* ignore */} },
+  elapsed(){ return this.t0 ? Math.floor((Date.now()-this.t0)/1000) : 0; },
+  start(){
+    ensureAudio();
+    this.t0=Date.now(); this.lastWarn=-1; this.save();
+    clearInterval(this.interval); this.interval=setInterval(()=>this.tick(),250);
+    this.tick();
+  },
+  reset(){ this.t0=0; clearInterval(this.interval); this.interval=null; this.save(); this.tick(); },
+  setBeep(on){ this.beepOn=on; this.save(); },
+  tick(){
+    const t=this.elapsed(), ob=obamboAt(t);
+    if(this.t0 && this.beepOn && ob.next<=OBAMBO_WARN && this.lastWarn!==ob.idx){ this.lastWarn=ob.idx; beep(520,3); }
+    this.views.forEach(v=>v(t,ob));
+  }
+};
+contract.load();
+
+// ---- pop-out timers: Document Picture-in-Picture (Chrome/Edge 116+) ----
+// Μένει πάνω από όλα τα παράθυρα — με το Phasmophobia σε Borderless Windowed λειτουργεί σαν overlay.
+const pipBtns=document.querySelectorAll(".pipOpen");
+const pipOn=on=>pipBtns.forEach(b=>b.classList.toggle("on",on));
+let pipWin=null;
+function pipMarkup(){
+  return `
+  <div class="pip-sec">
+    <div class="pip-head"><div class="tool-title">Smudge</div><div class="smudge-display" id="pSm">1:30</div></div>
+    <div class="smudge-bar"><div id="pSmBar"></div></div>
+    <div class="smudge-btns">
+      <button class="btn primary" data-sm="90">90s</button>
+      <button class="btn ghostvar" data-sm="180">Spirit</button>
+      <button class="btn ghostvar" data-sm="60">Demon</button>
+      <button class="btn" id="pSmReset">↺</button>
+    </div>
+  </div>
+  <div class="pip-sec">
+    <div class="pip-head"><div class="tool-title">Hunt / Cooldown</div><div class="smudge-display" id="pHu">0:20</div></div>
+    <div class="smudge-bar"><div id="pHuBar"></div></div>
+    <div class="smudge-btns">
+      <button class="btn primary" data-pmap="small">S</button>
+      <button class="btn primary" data-pmap="medium">M</button>
+      <button class="btn primary" data-pmap="large">L</button>
+      <button class="btn ghostvar" data-phunt="25">CD 25</button>
+      <button class="btn ghostvar" data-phunt="20">Demon CD 20</button>
+      <button class="btn" id="pHuReset">↺</button>
+    </div>
+  </div>
+  <div class="pip-sec">
+    <div class="pip-head"><div class="tool-title">Contract</div><div class="smudge-display" id="pCt">--:--</div></div>
+    <div class="pip-phase" id="pOb"></div>
+    <div class="smudge-btns">
+      <button class="btn primary" id="pCtStart">🚪 <span class="l-el">Πόρτα άνοιξε</span><span class="l-en">Door opened</span></button>
+      <button class="btn" id="pCtReset">↺</button>
+      <label class="pip-chk"><input type="checkbox" id="pCtBeep"> 🔔 Obambo</label>
+    </div>
+  </div>`;
+}
+async function openPip(){
+  if(pipWin){ pipWin.close(); return; }
+  ensureAudio(); // user gesture εδώ — αλλιώς τα beeps μένουν βουβά
+  let w;
+  try{ w=await documentPictureInPicture.requestWindow({width:330, height:400}); }
+  catch(e){ alert(lang==="el" ? "Δεν άνοιξε το pop-out: "+e.message : "Couldn't open the pop-out: "+e.message); return; }
+  pipWin=w; pipOn(true);
+  const d=w.document;
+  // ίδια styles με τη σελίδα (inline <style> + Google font)
+  [...document.styleSheets].forEach(ss=>{
+    try{ const st=d.createElement("style"); st.textContent=[...ss.cssRules].map(r=>r.cssText).join("\n"); d.head.appendChild(st); }
+    catch(e){ if(ss.href){ const l=d.createElement("link"); l.rel="stylesheet"; l.href=ss.href; d.head.appendChild(l); } }
+  });
+  d.title="Phasmo Timers";
+  d.documentElement.setAttribute("lang",lang);
+  d.body.className="pip";
+  d.body.innerHTML=pipMarkup();
+  const $=id=>d.getElementById(id);
+
+  const unSm=smudgeTimer.addView($("pSm"),$("pSmBar"));
+  const unHu=huntTimer.addView($("pHu"),$("pHuBar"));
+  d.querySelectorAll("[data-sm]").forEach(b=>b.onclick=()=>smudgeTimer.start(Number(b.dataset.sm)));
+  $("pSmReset").onclick=()=>smudgeTimer.reset();
+  // S/M/L: διάρκειες από το τρέχον difficulty (τα κουμπιά της σελίδας τις κρατάνε στο data-hunt)
+  const mapSecs=m=>Number(document.querySelector('[data-map="'+m+'"]').dataset.hunt);
+  d.querySelectorAll("[data-pmap]").forEach(b=>b.onclick=()=>huntTimer.start(mapSecs(b.dataset.pmap)));
+  d.querySelectorAll("[data-phunt]").forEach(b=>b.onclick=()=>huntTimer.start(Number(b.dataset.phunt)));
+  $("pHuReset").onclick=()=>huntTimer.reset();
+
+  const ctEl=$("pCt"), obEl=$("pOb"), beepChk=$("pCtBeep");
+  beepChk.checked=contract.beepOn;
+  beepChk.onchange=()=>contract.setBeep(beepChk.checked);
+  $("pCtStart").onclick=()=>contract.start();
+  $("pCtReset").onclick=()=>contract.reset();
+  const ctView=(t,ob)=>{
+    if(!contract.t0){
+      ctEl.textContent="--:--"; obEl.classList.remove("soon");
+      obEl.innerHTML= lang==="el" ? "Πάτα 🚪 μόλις ανοίξει η εξώπορτα" : "Hit 🚪 as soon as the front door opens";
+      return;
+    }
+    ctEl.textContent=fmt(t);
+    const st= ob.aggr ? '<span class="aggr">AGGRESSIVE</span>' : '<span class="calm">CALM</span>';
+    obEl.innerHTML="Obambo: "+st+" · flip "+(lang==="el"?"σε ":"in ")+fmt(ob.next);
+    obEl.classList.toggle("soon", ob.next<=OBAMBO_WARN);
+  };
+  contract.views.push(ctView);
+
+  // το pop-out είναι ορατό → το interval του δεν στραγγαλίζεται, οπότε οδηγεί όλα τα ticks
+  const lblSync=()=>d.querySelectorAll("[data-pmap]").forEach(b=>{ b.textContent=b.dataset.pmap.charAt(0).toUpperCase()+" "+mapSecs(b.dataset.pmap); });
+  lblSync();
+  const iv=w.setInterval(()=>{ smudgeTimer.tick(); huntTimer.tick(); contract.tick(); lblSync(); d.documentElement.setAttribute("lang",lang); },250);
+  contract.tick();
+
+  w.addEventListener("pagehide",()=>{
+    w.clearInterval(iv); unSm(); unHu();
+    const k=contract.views.indexOf(ctView); if(k>=0) contract.views.splice(k,1);
+    pipWin=null; pipOn(false);
+  });
+}
+if("documentPictureInPicture" in window){ pipBtns.forEach(b=>b.onclick=openPip); }
+else pipBtns.forEach(b=>{ b.disabled=true; b.title="Pop-out timers: χρειάζεται Chrome ή Edge (116+) σε desktop / needs desktop Chrome or Edge 116+"; });
 
 // ---- footstep speed tapper ----
 // Σχέση της κοινότητας (tybayn cheat sheet): βήμα κάθε (1/v − 0.075)s ⇒ v = bpm / (60 + 0.075·bpm)
