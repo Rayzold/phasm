@@ -575,6 +575,7 @@
           <button class="btn ghostvar" id="smStart180">Spirit (180s)</button>
           <button class="btn ghostvar" id="smStart60">Demon (60s)</button>
           <button class="btn" id="smReset">Reset</button>
+          <a class="btn" href="timers.html" style="text-decoration:none" title="Τα ίδια timers για pin στο Steam overlay — δουλεύει και σε exclusive fullscreen">🎮 Steam overlay</a>
           <button class="btn pipOpen" title="Pop-out: smudge, hunt &amp; contract timers σε μικρό παράθυρο πάνω από το παιχνίδι">⏱️ Pop-out</button>
         </div>
         <div class="smudge-note"><span class="l-el">Standard προστασία: 90s χωρίς hunt. <strong>Spirit</strong> extend: 180s. <strong>Demon</strong>: μόνο 60s. <strong>Yurei</strong>: αν κάνεις smudge μέσα στο δωμάτιό του, καθηλώνεται εκεί για 90s αντί να roamάρει.</span><span class="l-en">Standard protection: 90s without a hunt. <strong>Spirit</strong> extend: 180s. <strong>Demon</strong>: only 60s. <strong>Yurei</strong>: smudge inside its room and it's pinned there for 90s instead of roaming.</span></div>
@@ -918,7 +919,7 @@
 </div>
 <script src="ghosts-data.js"></script>
 <script>
-const APP_VERSION = "1.36.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.37.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off

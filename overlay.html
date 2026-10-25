@@ -144,7 +144,7 @@ function render(){
     app.innerHTML=`<h1>OVERLAY</h1>
       <p class="sub">${t("Διάλεξε παίκτη. Μετά στο Steam overlay (Shift+Tab → Web Browser) άνοιξε το link και πάτα το pin.","Pick a player. Then in the Steam overlay (Shift+Tab → Web Browser) open the link and press pin.")}</p>
       <div class="pick">`+ORDER.map(k=>{const q=PLAYERS[k];return `<a href="?player=${k}" style="--c:var(${q.c})"><span>${q.ic}</span>${esc(q.name)}<small>${esc(q.role)}</small></a>`;}).join("")
-      +`<a href="?player=all" style="--c:var(--nv)"><span>👥</span>${t("Όλοι","Everyone")}<small>Squad</small></a></div>
+      +`<a href="?player=all" style="--c:var(--nv)"><span>👥</span>${t("Όλοι","Everyone")}<small>Squad</small></a><a href="timers.html" style="--c:var(--warn)"><span>⏱️</span>Timers<small>Smudge · Hunt · Obambo</small></a></div>
       <p class="sub" style="margin-top:12px"><a href="team.html" style="color:var(--nv)">${t("← Squad Plan","← Squad Plan")}</a> · <button id="lang" style="font:inherit;font-size:12px;background:none;border:1px solid var(--line);border-radius:12px;color:var(--muted);padding:1px 8px;cursor:pointer">${lang==="el"?"EN":"ΕΛ"}</button></p>`;
   }
   app.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{st.stage=+b.dataset.s;save();render();});

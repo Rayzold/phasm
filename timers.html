@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phasmo Timers</title>
+<meta name="theme-color" content="#0A0D12">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  /* Compact timers για pin στο Steam overlay (Shift+Tab → Web Browser → pin).
+     Δουλεύει και σε exclusive fullscreen, σε αντίθεση με το pop-out του index.html.
+     Σχεδιασμένο για μικρό παράθυρο ~280–360px πλάτος. */
+  :root{
+    --bg:#0A0D12; --line:#232b38; --muted:#8A93A3; --nv:#8FE388; --nv-dim:#57996b;
+    --warn:#F0C674; --danger:#E15B5B;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:#D7DCE4}
+  html[lang=en] .l-el{display:none!important}
+  html:not([lang=en]) .l-en{display:none!important}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:14px;line-height:1.35;padding:8px 10px;min-height:100vh}
+  .wrap{max-width:400px}
+  .top{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+  h1{font-family:"Special Elite",monospace;color:var(--nv);font-size:16px;letter-spacing:2px;margin:0}
+  .ctl{margin-left:auto;display:flex;gap:4px;align-items:center}
+  .ctl button,.ctl a,.ctl select{font:inherit;font-size:11px;background:#0c1119;border:1px solid var(--line);border-radius:12px;color:var(--muted);padding:2px 7px;cursor:pointer;text-decoration:none}
+  .ctl button:hover,.ctl a:hover,.ctl select:hover{border-color:var(--nv);color:var(--nv)}
+  .sec{border:1px solid var(--line);border-left:3px solid var(--c,var(--nv));border-radius:8px;padding:6px 8px 7px;margin-bottom:6px;background:#0c1119;transition:border-color .2s}
+  .head{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+  .lbl{font-family:"Special Elite",monospace;font-size:11px;letter-spacing:2px;color:var(--nv-dim);text-transform:uppercase}
+  .disp{font-family:"Special Elite","Courier New",monospace;font-size:30px;color:var(--nv);letter-spacing:2px;line-height:1.1}
+  .disp.done{color:var(--danger)}
+  .bar{height:4px;border-radius:3px;background:#1a212c;overflow:hidden;margin:4px 0 6px}
+  .bar > div{height:100%;background:var(--nv);width:100%;transition:width 1s linear}
+  .btns{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .btn{font:inherit;font-size:12px;border:1px solid var(--line);background:#0c1118;color:#B9C2CE;border-radius:6px;padding:4px 7px;cursor:pointer}
+  .btn:hover{border-color:#3a465a}
+  .btn.p{border-color:var(--nv);color:var(--nv)}
+  .btn.w{border-color:var(--warn);color:var(--warn)}
+  .btn kbd{font:inherit;font-size:9.5px;opacity:.55;margin-left:3px}
+  .phase{font-family:"Special Elite",monospace;font-size:13px;letter-spacing:1px;margin:2px 0 6px;color:var(--muted)}
+  .phase .calm{color:var(--nv)}
+  .phase .aggr{color:var(--danger)}
+  .phase.soon{animation:blink .5s step-end infinite}
+  @keyframes blink{50%{opacity:.35}}
+  .sec.aggr{--c:var(--danger)}
+  .chk{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-left:auto}
+  .hint{font-size:10.5px;color:#5b6473;margin-top:4px}
+  body.compact .hint, body.compact kbd, body.compact .bar{display:none}
+  body.compact .sec{padding:4px 7px 5px;margin-bottom:4px}
+  body.compact .disp{font-size:24px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>⏱️ TIMERS</h1>
+    <div class="ctl">
+      <select id="diff" title="Difficulty → hunt durations">
+        <option value="amateur">Amateur</option>
+        <option value="intermediate">Intermediate</option>
+        <option value="professional">Professional</option>
+        <option value="nightmare">Nightmare</option>
+      </select>
+      <button id="lang" title="Ελληνικά / English">ΕΛ</button>
+      <button id="cmp" title="Compact">⊖</button>
+      <a href="index.html" title="Phasmo Journal">↩</a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="head"><span class="lbl">Smudge</span><span class="disp" id="smD">1:30</span></div>
+    <div class="bar"><div id="smB"></div></div>
+    <div class="btns">
+      <button class="btn p" data-sm="90">90s<kbd>1</kbd></button>
+      <button class="btn w" data-sm="180">Spirit<kbd>2</kbd></button>
+      <button class="btn w" data-sm="60">Demon<kbd>3</kbd></button>
+      <button class="btn" id="smR">↺</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="head"><span class="lbl">Hunt / Cooldown</span><span class="disp" id="huD">0:20</span></div>
+    <div class="bar"><div id="huB"></div></div>
+    <div class="btns">
+      <button class="btn p" data-map="small">S<kbd>Q</kbd></button>
+      <button class="btn p" data-map="medium">M<kbd>W</kbd></button>
+      <button class="btn p" data-map="large">L<kbd>E</kbd></button>
+      <button class="btn w" data-hu="25">CD 25<kbd>C</kbd></button>
+      <button class="btn w" data-hu="20">Demon CD 20</button>
+      <button class="btn" id="huR">↺</button>
+    </div>
+  </div>
+
+  <div class="sec" id="ctSec">
+    <div class="head"><span class="lbl">Contract</span><span class="disp" id="ctD">--:--</span></div>
+    <div class="phase" id="ob"></div>
+    <div class="btns">
+      <button class="btn p" id="ctS">🚪 <span class="l-el">Πόρτα άνοιξε</span><span class="l-en">Door opened</span><kbd>D</kbd></button>
+      <button class="btn" id="ctR">↺</button>
+      <label class="chk"><input type="checkbox" id="ctBeep"> 🔔 Obambo</label>
+    </div>
+  </div>
+
+  <div class="hint"><span class="l-el">Steam: Shift+Tab → Web Browser → άνοιξε αυτή τη σελίδα → 📌 pin. Για κλικ/πλήκτρα ξανανοίγεις το overlay (Shift+Tab). Πλήκτρα: 1/2/3 smudge · Q/W/E hunt · C cooldown · D πόρτα · R reset όλα.</span><span class="l-en">Steam: Shift+Tab → Web Browser → open this page → 📌 pin. To click/press keys, reopen the overlay (Shift+Tab). Keys: 1/2/3 smudge · Q/W/E hunt · C cooldown · D door · R reset all.</span></div>
+</div>
+<script>
+// Ίδιες διάρκειες hunt με το DIFF του index.html — κράτα τα συγχρονισμένα αν αλλάξουν.
+const HUNTS = {
+  amateur:      {small:15, medium:30, large:40},
+  intermediate: {small:20, medium:40, large:50},
+  professional: {small:30, medium:50, large:60},
+  nightmare:    {small:30, medium:50, large:60}
+};
+// Obambo: ξεκινά Calm, 1η αλλαγή +1:00 από το πρώτο άνοιγμα της εξώπορτας, μετά εναλλαγή κάθε 2:00.
+const OBAMBO_FIRST=60, OBAMBO_EVERY=120, OBAMBO_WARN=5;
+// Το contract μοιράζεται key με το pop-out του index.html (ίδιο origin) — στον ίδιο browser βλέπουν το ίδιο start.
+const CT_KEY="phasmo-journal-contract", LS_TM="phasmo-timers-v1";
+
+let st={diff:"intermediate", lang:"en", compact:false, sm:{dl:0,tot:90}, hu:{dl:0,tot:20}};
+try{ const d=JSON.parse(localStorage.getItem(LS_TM)||"null"); if(d) st=Object.assign(st,d); }catch(e){}
+if(!HUNTS[st.diff]) st.diff="intermediate";
+const save=()=>{ try{ localStorage.setItem(LS_TM,JSON.stringify(st)); }catch(e){} };
+
+// ---- audio ----
+let audioCtx=null;
+function ensureAudio(){
+  try{
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+  }catch(e){}
+}
+function beep(freq,times){
+  if(!audioCtx) return;
+  try{
+    for(let i=0;i<times;i++){
+      const t=audioCtx.currentTime+i*0.5, o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0.15,t); o.start(t); o.stop(t+0.35);
+    }
+  }catch(e){}
+}
+const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+const $=id=>document.getElementById(id);
+
+// ---- countdowns (deadline-based, επιβιώνουν σε reload) ----
+function countdown(key,dispId,barId,idleSecs,onDone){
+  const disp=$(dispId), bar=$(barId);
+  let fired=!st[key].dl || st[key].dl<=Date.now();
+  return {
+    start(secs){ ensureAudio(); st[key]={dl:Date.now()+secs*1000, tot:secs}; fired=false; save(); this.tick(); },
+    reset(){ st[key]={dl:0, tot:idleSecs}; fired=true; save(); this.tick(); },
+    tick(){
+      const s=st[key];
+      if(!s.dl){ disp.textContent=fmt(idleSecs); disp.classList.remove("done"); bar.style.width="100%"; return; }
+      const rem=Math.max(0,Math.ceil((s.dl-Date.now())/1000));
+      disp.textContent=fmt(rem);
+      disp.classList.toggle("done",rem<=0);
+      bar.style.width=Math.max(0,rem/s.tot*100)+"%";
+      if(rem<=0 && !fired){ fired=true; onDone(); }
+    }
+  };
+}
+const smudge=countdown("sm","smD","smB",90,()=>beep(660,1));
+const hunt=countdown("hu","huD","huB",20,()=>beep(880,2));
+
+// ---- contract + Obambo ----
+function obamboAt(t){
+  if(t<OBAMBO_FIRST) return {aggr:false, next:OBAMBO_FIRST-t, idx:0};
+  const k=Math.floor((t-OBAMBO_FIRST)/OBAMBO_EVERY);
+  return {aggr:k%2===0, next:OBAMBO_FIRST+OBAMBO_EVERY*(k+1)-t, idx:k+1};
+}
+const contract={
+  t0:0, beepOn:true, lastWarn:-1,
+  load(){
+    try{
+      const d=JSON.parse(localStorage.getItem(CT_KEY)||"null");
+      this.t0=(d && typeof d.t0==="number" && d.t0>0 && Date.now()-d.t0<6*3600e3) ? d.t0 : 0;
+      this.beepOn=!(d && d.beep===0);
+    }catch(e){}
+  },
+  save(){ try{ localStorage.setItem(CT_KEY,JSON.stringify({t0:this.t0, beep:this.beepOn?1:0})); }catch(e){} },
+  elapsed(){ return this.t0 ? Math.floor((Date.now()-this.t0)/1000) : 0; },
+  start(){ ensureAudio(); this.t0=Date.now(); this.lastWarn=-1; this.save(); this.tick(); },
+  reset(){ this.t0=0; this.save(); this.tick(); },
+  tick(){
+    const el=$("ob"), sec=$("ctSec");
+    if(!this.t0){
+      $("ctD").textContent="--:--"; el.classList.remove("soon"); sec.classList.remove("aggr");
+      el.innerHTML=st.lang==="el" ? "Πάτα 🚪 μόλις ανοίξει η εξώπορτα" : "Hit 🚪 as soon as the front door opens";
+      return;
+    }
+    const t=this.elapsed(), ob=obamboAt(t);
+    if(this.beepOn && ob.next<=OBAMBO_WARN && this.lastWarn!==ob.idx){ this.lastWarn=ob.idx; beep(520,3); }
+    $("ctD").textContent=fmt(t);
+    el.innerHTML="Obambo: "+(ob.aggr?'<span class="aggr">AGGRESSIVE</span>':'<span class="calm">CALM</span>')
+      +" · flip "+(st.lang==="el"?"σε ":"in ")+fmt(ob.next);
+    el.classList.toggle("soon",ob.next<=OBAMBO_WARN);
+    sec.classList.toggle("aggr",ob.aggr);
+  }
+};
+contract.load();
+// μετά από reload: μην «φας» την προειδοποίηση του επόμενου flip, ούτε ξαναχτυπήσεις μια που ήδη ακούστηκε
+if(contract.t0){ const ob=obamboAt(contract.elapsed()); contract.lastWarn= ob.next<=OBAMBO_WARN ? ob.idx : -1; }
+// αλλαγές από άλλο tab ίδιου origin (π.χ. pop-out του index.html στον ίδιο browser)
+window.addEventListener("storage",e=>{ if(e.key===CT_KEY){ contract.load(); $("ctBeep").checked=contract.beepOn; contract.tick(); } });
+
+// ---- UI ----
+function huntSecs(m){ return HUNTS[st.diff][m]; }
+function paintStatic(){
+  document.documentElement.setAttribute("lang",st.lang);
+  document.body.classList.toggle("compact",!!st.compact);
+  $("lang").textContent=st.lang==="el"?"EN":"ΕΛ";
+  $("cmp").textContent=st.compact?"⊕":"⊖";
+  $("diff").value=st.diff;
+  const keys={small:"Q",medium:"W",large:"E"};
+  document.querySelectorAll("[data-map]").forEach(b=>{ const m=b.dataset.map; b.innerHTML=m[0].toUpperCase()+" "+huntSecs(m)+"<kbd>"+keys[m]+"</kbd>"; });
+  $("ctBeep").checked=contract.beepOn;
+}
+document.querySelectorAll("[data-sm]").forEach(b=>b.onclick=()=>smudge.start(+b.dataset.sm));
+document.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>hunt.start(huntSecs(b.dataset.map)));
+document.querySelectorAll("[data-hu]").forEach(b=>b.onclick=()=>hunt.start(+b.dataset.hu));
+$("smR").onclick=()=>smudge.reset();
+$("huR").onclick=()=>hunt.reset();
+$("ctS").onclick=()=>contract.start();
+$("ctR").onclick=()=>contract.reset();
+$("ctBeep").onchange=e=>{ contract.beepOn=e.target.checked; contract.save(); };
+$("diff").onchange=e=>{ st.diff=e.target.value; save(); paintStatic(); };
+$("lang").onclick=()=>{ st.lang=st.lang==="el"?"en":"el"; save(); paintStatic(); contract.tick(); };
+$("cmp").onclick=()=>{ st.compact=!st.compact; save(); paintStatic(); };
+
+document.addEventListener("keydown",e=>{
+  if(e.ctrlKey||e.altKey||e.metaKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+  const k=e.key.toLowerCase();
+  const act={
+    "1":()=>smudge.start(90), "2":()=>smudge.start(180), "3":()=>smudge.start(60),
+    "q":()=>hunt.start(huntSecs("small")), "w":()=>hunt.start(huntSecs("medium")), "e":()=>hunt.start(huntSecs("large")),
+    "c":()=>hunt.start(25), "d":()=>contract.start(),
+    "r":()=>{ smudge.reset(); hunt.reset(); contract.reset(); }
+  }[k];
+  if(act){ e.preventDefault(); act(); }
+});
+
+paintStatic();
+const tickAll=()=>{ smudge.tick(); hunt.tick(); contract.tick(); };
+tickAll();
+setInterval(tickAll,250);
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
