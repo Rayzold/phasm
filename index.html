@@ -928,8 +928,9 @@
   <button class="toTop" id="toTop" title="Πάνω" aria-label="Επιστροφή στην κορυφή">↑</button>
 </div>
 <script src="ghosts-data.js"></script>
+<script src="tells.js"></script>
 <script>
-const APP_VERSION = "1.37.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.38.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -1696,13 +1697,14 @@ const contract={
 contract.load();
 // ποια timers φαίνονται στο pop-out — κοινό key με το timers.html
 const SHOW_KEY="phasmo-timers-show";
-let timerShow={sm:true, hu:true, ct:true, min:false};
-function loadShow(){ try{ const d=JSON.parse(localStorage.getItem(SHOW_KEY)||"null"); if(d) timerShow=Object.assign({sm:true,hu:true,ct:true,min:false},d); }catch(e){/* ignore */} }
+let timerShow={sm:true, hu:true, ct:true, tl:true, min:false};
+function loadShow(){ try{ const d=JSON.parse(localStorage.getItem(SHOW_KEY)||"null"); if(d) timerShow=Object.assign({sm:true,hu:true,ct:true,tl:true,min:false},d); }catch(e){/* ignore */} }
 function saveShow(){ try{ localStorage.setItem(SHOW_KEY, JSON.stringify(timerShow)); }catch(e){/* ignore */} }
 loadShow();
 // αλλαγές από το timers.html σε άλλο tab του ίδιου browser
 window.addEventListener("storage",e=>{
   if(e.key===SHOW_KEY) loadShow();
+  if(e.key===TELLS_KEY && pipTells) pipTells.render();
   if(e.key===CT_KEY){ contract.load(); contract.tick(); }
 });
 
@@ -1710,11 +1712,11 @@ window.addEventListener("storage",e=>{
 // Μένει πάνω από όλα τα παράθυρα — με το Phasmophobia σε Borderless Windowed λειτουργεί σαν overlay.
 const pipBtns=document.querySelectorAll(".pipOpen");
 const pipOn=on=>pipBtns.forEach(b=>b.classList.toggle("on",on));
-let pipWin=null;
+let pipWin=null, pipTells=null;
 function pipMarkup(){
   return `
   <div class="pip-vis" id="pVis" title="Εμφάνιση / απόκρυψη · Show / hide">
-    <button data-v="sm">Smudge</button><button data-v="hu">Hunt</button><button data-v="ct">Contract</button><button data-v="ob">Obambo</button><button data-v="min" title="Minimal: μόνο τα timers — κλικ οπουδήποτε για τα κουμπιά · only the timers — click anywhere for the buttons">◱ Minimal</button>
+    <button data-v="sm">Smudge</button><button data-v="hu">Hunt</button><button data-v="ct">Contract</button><button data-v="ob">Obambo</button><button data-v="tl">Tells</button><button data-v="min" title="Minimal: μόνο τα timers — κλικ οπουδήποτε για τα κουμπιά · only the timers — click anywhere for the buttons">◱ Minimal</button>
   </div>
   <div class="pip-sec" id="pSmSec">
     <div class="pip-head"><div class="tool-title">Smudge</div><div class="smudge-display" id="pSm">1:30</div></div>
@@ -1745,13 +1747,17 @@ function pipMarkup(){
       <button class="btn primary" id="pCtStart">🚪 <span class="l-el">Πόρτα άνοιξε</span><span class="l-en">Door opened</span></button>
       <button class="btn" id="pCtReset">↺</button>
     </div>
+  </div>
+  <div class="pip-sec" id="pTlSec">
+    <div class="tool-title" style="margin-bottom:0">Ghost Tells</div>
+    <div id="pTells"></div>
   </div>`;
 }
 async function openPip(){
   if(pipWin){ pipWin.close(); return; }
   ensureAudio(); // user gesture εδώ — αλλιώς τα beeps μένουν βουβά
   let w;
-  try{ w=await documentPictureInPicture.requestWindow({width:330, height:400}); }
+  try{ w=await documentPictureInPicture.requestWindow({width:340, height:560}); }
   catch(e){ alert(lang==="el" ? "Δεν άνοιξε το pop-out: "+e.message : "Couldn't open the pop-out: "+e.message); return; }
   pipWin=w; pipOn(true);
   const d=w.document;
@@ -1791,6 +1797,7 @@ async function openPip(){
     $("pSmSec").classList.toggle("hide",!timerShow.sm);
     $("pHuSec").classList.toggle("hide",!timerShow.hu);
     $("pCtSec").classList.toggle("hide",!timerShow.ct);
+    $("pTlSec").classList.toggle("hide",!timerShow.tl);
     d.body.classList.toggle("min",!!timerShow.min);
     if(!timerShow.min) hideCtl();
     d.querySelectorAll("#pVis [data-v]").forEach(b=>b.classList.toggle("off",!(b.dataset.v==="ob" ? contract.beepOn : timerShow[b.dataset.v])));
@@ -1821,16 +1828,20 @@ async function openPip(){
   };
   contract.views.push(ctView);
 
+  // ghost tells (tells.js) — ίδια επιλογή suspects με το timers.html στον ίδιο browser
+  pipTells=mountTells($("pTells"), ()=>lang, n=>$("pTlSec").classList.toggle("tl-none",n===0));
+  let tellsLang=lang;
+
   // το pop-out είναι ορατό → το interval του δεν στραγγαλίζεται, οπότε οδηγεί όλα τα ticks
   const lblSync=()=>d.querySelectorAll("[data-pmap]").forEach(b=>{ b.textContent=b.dataset.pmap.charAt(0).toUpperCase()+" "+mapSecs(b.dataset.pmap); });
   lblSync();
-  const iv=w.setInterval(()=>{ smudgeTimer.tick(); huntTimer.tick(); contract.tick(); lblSync(); applyVis(); d.documentElement.setAttribute("lang",lang); },250);
+  const iv=w.setInterval(()=>{ smudgeTimer.tick(); huntTimer.tick(); contract.tick(); lblSync(); applyVis(); d.documentElement.setAttribute("lang",lang); if(tellsLang!==lang){ tellsLang=lang; pipTells.render(); } },250);
   contract.tick();
 
   w.addEventListener("pagehide",()=>{
     w.clearInterval(iv); unSm(); unHu();
     const k=contract.views.indexOf(ctView); if(k>=0) contract.views.splice(k,1);
-    pipWin=null; pipOn(false);
+    pipWin=null; pipTells=null; pipOn(false);
   });
 }
 if("documentPictureInPicture" in window){ pipBtns.forEach(b=>b.onclick=openPip); }
