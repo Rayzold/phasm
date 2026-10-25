@@ -336,6 +336,13 @@
   .pip-vis button{font:inherit;font-size:11px;background:rgba(143,227,136,.08);border:1px solid var(--nv-dim);border-radius:12px;color:var(--nv);padding:1px 8px;cursor:pointer}
   .pip-vis button.off{background:none;border-color:var(--line);color:#5b6473;text-decoration:line-through}
   .pip-sec.hide,.pip-phase.hide{display:none}
+  /* minimal pop-out: μόνο τα timers — κλικ οπουδήποτε για τα κουμπιά, ξανακρύβονται σε ~5s */
+  body.pip.min{cursor:pointer;user-select:none}
+  body.pip.min .pip-vis, body.pip.min .pip-sec .smudge-btns{display:none}
+  body.pip.min.reveal .pip-vis, body.pip.min.reveal .pip-sec .smudge-btns{display:flex}
+  body.pip.min:not(.reveal) .pip-sec{padding:4px 8px 5px;margin-bottom:4px}
+  body.pip.min:not(.reveal) .pip-phase{margin-bottom:0}
+  body.pip.min:not(.reveal) .pip-phase.idle{display:none}
   /* ---------- footstep tapper ---------- */
   .tap-btn{
     width:100%;padding:16px 10px;border-radius:10px;border:1px solid var(--nv-dim);
@@ -1689,8 +1696,8 @@ const contract={
 contract.load();
 // ποια timers φαίνονται στο pop-out — κοινό key με το timers.html
 const SHOW_KEY="phasmo-timers-show";
-let timerShow={sm:true, hu:true, ct:true};
-function loadShow(){ try{ const d=JSON.parse(localStorage.getItem(SHOW_KEY)||"null"); if(d) timerShow=Object.assign({sm:true,hu:true,ct:true},d); }catch(e){/* ignore */} }
+let timerShow={sm:true, hu:true, ct:true, min:false};
+function loadShow(){ try{ const d=JSON.parse(localStorage.getItem(SHOW_KEY)||"null"); if(d) timerShow=Object.assign({sm:true,hu:true,ct:true,min:false},d); }catch(e){/* ignore */} }
 function saveShow(){ try{ localStorage.setItem(SHOW_KEY, JSON.stringify(timerShow)); }catch(e){/* ignore */} }
 loadShow();
 // αλλαγές από το timers.html σε άλλο tab του ίδιου browser
@@ -1707,7 +1714,7 @@ let pipWin=null;
 function pipMarkup(){
   return `
   <div class="pip-vis" id="pVis" title="Εμφάνιση / απόκρυψη · Show / hide">
-    <button data-v="sm">Smudge</button><button data-v="hu">Hunt</button><button data-v="ct">Contract</button><button data-v="ob">Obambo</button>
+    <button data-v="sm">Smudge</button><button data-v="hu">Hunt</button><button data-v="ct">Contract</button><button data-v="ob">Obambo</button><button data-v="min" title="Minimal: μόνο τα timers — κλικ οπουδήποτε για τα κουμπιά · only the timers — click anywhere for the buttons">◱ Minimal</button>
   </div>
   <div class="pip-sec" id="pSmSec">
     <div class="pip-head"><div class="tool-title">Smudge</div><div class="smudge-display" id="pSm">1:30</div></div>
@@ -1770,11 +1777,22 @@ async function openPip(){
   $("pHuReset").onclick=()=>huntTimer.reset();
 
   const ctEl=$("pCt"), obEl=$("pOb");
+  // minimal: πρώτο κλικ εμφανίζει τα κουμπιά, κλικ σε timer κουμπί τα ξανακρύβει, αλλιώς κρύβονται σε 5s
+  let revealT=null;
+  const hideCtl=()=>{ d.body.classList.remove("reveal"); w.clearTimeout(revealT); revealT=null; };
+  const revealCtl=()=>{ d.body.classList.add("reveal"); w.clearTimeout(revealT); revealT=w.setTimeout(hideCtl,5000); };
+  d.addEventListener("click",e=>{
+    if(!timerShow.min) return;
+    if(!d.body.classList.contains("reveal")){ e.preventDefault(); e.stopPropagation(); revealCtl(); return; }
+    if(e.target.closest(".btn")) hideCtl(); else revealCtl();
+  },true);
   // εμφάνιση/απόκρυψη: ίδιες ρυθμίσεις με το timers.html (κοινό localStorage), Obambo = contract.beepOn
   const applyVis=()=>{
     $("pSmSec").classList.toggle("hide",!timerShow.sm);
     $("pHuSec").classList.toggle("hide",!timerShow.hu);
     $("pCtSec").classList.toggle("hide",!timerShow.ct);
+    d.body.classList.toggle("min",!!timerShow.min);
+    if(!timerShow.min) hideCtl();
     d.querySelectorAll("#pVis [data-v]").forEach(b=>b.classList.toggle("off",!(b.dataset.v==="ob" ? contract.beepOn : timerShow[b.dataset.v])));
   };
   d.querySelectorAll("#pVis [data-v]").forEach(b=>b.onclick=()=>{
@@ -1782,17 +1800,19 @@ async function openPip(){
     if(v==="ob") contract.setBeep(!contract.beepOn);
     else { timerShow[v]=!timerShow[v]; saveShow(); }
     applyVis(); contract.tick();
+    if(v==="min" && timerShow.min) hideCtl();
   });
   applyVis();
   $("pCtStart").onclick=()=>contract.start();
   $("pCtReset").onclick=()=>contract.reset();
   const ctView=(t,ob)=>{
     if(!contract.t0){
-      ctEl.textContent="--:--"; obEl.classList.remove("soon","hide");
+      ctEl.textContent="--:--"; obEl.classList.remove("soon","hide"); obEl.classList.add("idle");
       obEl.innerHTML= lang==="el" ? "Πάτα 🚪 μόλις ανοίξει η εξώπορτα" : "Hit 🚪 as soon as the front door opens";
       return;
     }
     ctEl.textContent=fmt(t);
+    obEl.classList.remove("idle");
     obEl.classList.toggle("hide",!contract.beepOn);
     if(!contract.beepOn){ obEl.classList.remove("soon"); return; }
     const st= ob.aggr ? '<span class="aggr">AGGRESSIVE</span>' : '<span class="calm">CALM</span>';

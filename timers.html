@@ -52,9 +52,14 @@
   .vis button.off{background:none;border-color:var(--line);color:#5b6473;text-decoration:line-through}
   .sec.hide,.phase.hide{display:none}
   .hint{font-size:10.5px;color:#5b6473;margin-top:4px}
-  body.compact .hint, body.compact kbd, body.compact .bar{display:none}
-  body.compact .sec{padding:4px 7px 5px;margin-bottom:4px}
-  body.compact .disp{font-size:24px}
+  /* minimal: μόνο τα timers — τα κουμπιά εμφανίζονται με κλικ οπουδήποτε και κρύβονται ξανά σε ~5s */
+  body.min{cursor:pointer;user-select:none}
+  body.min .top, body.min .vis, body.min .btns, body.min .hint{display:none}
+  body.min.reveal .top, body.min.reveal .vis, body.min.reveal .btns{display:flex}
+  body.min.reveal .hint{display:block}
+  body.min:not(.reveal) .sec{padding:4px 8px 5px;margin-bottom:4px}
+  body.min:not(.reveal) .phase{margin-bottom:0}
+  body.min:not(.reveal) .phase.idle{display:none}
 </style>
 </head>
 <body>
@@ -69,7 +74,6 @@
         <option value="nightmare">Nightmare</option>
       </select>
       <button id="lang" title="Ελληνικά / English">ΕΛ</button>
-      <button id="cmp" title="Compact">⊖</button>
       <a href="index.html" title="Phasmo Journal">↩</a>
     </div>
   </div>
@@ -78,6 +82,7 @@
     <button data-v="hu">Hunt</button>
     <button data-v="ct">Contract</button>
     <button data-v="ob">Obambo</button>
+    <button data-v="min" title="Minimal: μόνο τα timers — κλικ οπουδήποτε για τα κουμπιά · only the timers — click anywhere for the buttons (M)">◱ Minimal</button>
   </div>
 
   <div class="sec" id="smSec">
@@ -113,7 +118,7 @@
     </div>
   </div>
 
-  <div class="hint"><span class="l-el">Steam: Shift+Tab → Web Browser → άνοιξε αυτή τη σελίδα → 📌 pin. Για κλικ/πλήκτρα ξανανοίγεις το overlay (Shift+Tab). Πλήκτρα: 1/2/3 smudge · Q/W/E hunt · C cooldown · D πόρτα · O Obambo on/off · R reset όλα. Τα κουμπάκια πάνω κρύβουν/δείχνουν timers.</span><span class="l-en">Steam: Shift+Tab → Web Browser → open this page → 📌 pin. To click/press keys, reopen the overlay (Shift+Tab). Keys: 1/2/3 smudge · Q/W/E hunt · C cooldown · D door · O Obambo on/off · R reset all. The chips at the top show/hide timers.</span></div>
+  <div class="hint"><span class="l-el">Steam: Shift+Tab → Web Browser → άνοιξε αυτή τη σελίδα → 📌 pin. Για κλικ/πλήκτρα ξανανοίγεις το overlay (Shift+Tab). Πλήκτρα: 1/2/3 smudge · Q/W/E hunt · C cooldown · D πόρτα · O Obambo on/off · M minimal · R reset όλα. Τα κουμπάκια πάνω κρύβουν/δείχνουν timers.</span><span class="l-en">Steam: Shift+Tab → Web Browser → open this page → 📌 pin. To click/press keys, reopen the overlay (Shift+Tab). Keys: 1/2/3 smudge · Q/W/E hunt · C cooldown · D door · O Obambo on/off · M minimal · R reset all. The chips at the top show/hide timers.</span></div>
 </div>
 <script>
 // Ίδιες διάρκειες hunt με το DIFF του index.html — κράτα τα συγχρονισμένα αν αλλάξουν.
@@ -130,11 +135,11 @@ const CT_KEY="phasmo-journal-contract", LS_TM="phasmo-timers-v1";
 // Ποια κουτιά φαίνονται — κοινό key με το pop-out του index.html. Το Obambo (γραμμή + beeps)
 // είναι το contract.beepOn μέσα στο CT_KEY, ώστε να το κλείνεις μία φορά για όλες τις σελίδες.
 const SHOW_KEY="phasmo-timers-show";
-let show={sm:true, hu:true, ct:true};
-function loadShow(){ try{ const d=JSON.parse(localStorage.getItem(SHOW_KEY)||"null"); if(d) show=Object.assign({sm:true,hu:true,ct:true},d); }catch(e){} }
+let show={sm:true, hu:true, ct:true, min:false};
+function loadShow(){ try{ const d=JSON.parse(localStorage.getItem(SHOW_KEY)||"null"); if(d) show=Object.assign({sm:true,hu:true,ct:true,min:false},d); }catch(e){} }
 loadShow();
 
-let st={diff:"intermediate", lang:"en", compact:false, sm:{dl:0,tot:90}, hu:{dl:0,tot:20}};
+let st={diff:"intermediate", lang:"en", sm:{dl:0,tot:90}, hu:{dl:0,tot:20}};
 try{ const d=JSON.parse(localStorage.getItem(LS_TM)||"null"); if(d) st=Object.assign(st,d); }catch(e){}
 if(!HUNTS[st.diff]) st.diff="intermediate";
 const save=()=>{ try{ localStorage.setItem(LS_TM,JSON.stringify(st)); }catch(e){} };
@@ -203,13 +208,14 @@ const contract={
   tick(){
     const el=$("ob"), sec=$("ctSec");
     if(!this.t0){
-      $("ctD").textContent="--:--"; el.classList.remove("soon","hide"); sec.classList.remove("aggr");
+      $("ctD").textContent="--:--"; el.classList.remove("soon","hide"); el.classList.add("idle"); sec.classList.remove("aggr");
       el.innerHTML=st.lang==="el" ? "Πάτα 🚪 μόλις ανοίξει η εξώπορτα" : "Hit 🚪 as soon as the front door opens";
       return;
     }
     const t=this.elapsed(), ob=obamboAt(t);
     if(this.beepOn && ob.next<=OBAMBO_WARN && this.lastWarn!==ob.idx){ this.lastWarn=ob.idx; beep(520,3); }
     $("ctD").textContent=fmt(t);
+    el.classList.remove("idle");
     el.classList.toggle("hide",!this.beepOn);
     if(!this.beepOn){ el.classList.remove("soon"); sec.classList.remove("aggr"); return; }
     el.innerHTML="Obambo: "+(ob.aggr?'<span class="aggr">AGGRESSIVE</span>':'<span class="calm">CALM</span>')
@@ -232,6 +238,8 @@ function applyVis(){
   $("smSec").classList.toggle("hide",!show.sm);
   $("huSec").classList.toggle("hide",!show.hu);
   $("ctSec").classList.toggle("hide",!show.ct);
+  document.body.classList.toggle("min",!!show.min);
+  if(!show.min) hideControls();
   document.querySelectorAll("#vis [data-v]").forEach(b=>{
     const v=b.dataset.v, on= v==="ob" ? contract.beepOn : show[v];
     b.classList.toggle("off",!on);
@@ -241,16 +249,26 @@ function toggleVis(v){
   if(v==="ob"){ contract.beepOn=!contract.beepOn; contract.save(); contract.tick(); }
   else { show[v]=!show[v]; try{ localStorage.setItem(SHOW_KEY,JSON.stringify(show)); }catch(e){} }
   applyVis();
+  if(v==="min" && show.min) hideControls();
 }
+// ---- minimal: reveal με κλικ, αυτόματο κρύψιμο ----
+let revealT=null;
+function hideControls(){ document.body.classList.remove("reveal"); clearTimeout(revealT); revealT=null; }
+function revealControls(){ document.body.classList.add("reveal"); clearTimeout(revealT); revealT=setTimeout(hideControls,5000); }
+document.addEventListener("click",e=>{
+  if(!show.min) return;
+  if(!document.body.classList.contains("reveal")){ e.preventDefault(); e.stopPropagation(); revealControls(); return; }
+  // κλικ σε timer κουμπί → κάνε τη δουλειά και κρύψου αμέσως· οτιδήποτε άλλο → μέτρα ξανά 5s
+  if(e.target.closest(".btn")) hideControls(); else revealControls();
+},true);
+document.addEventListener("change",()=>{ if(show.min && document.body.classList.contains("reveal")) revealControls(); });
 document.querySelectorAll("#vis [data-v]").forEach(b=>b.onclick=()=>toggleVis(b.dataset.v));
 
 // ---- UI ----
 function huntSecs(m){ return HUNTS[st.diff][m]; }
 function paintStatic(){
   document.documentElement.setAttribute("lang",st.lang);
-  document.body.classList.toggle("compact",!!st.compact);
   $("lang").textContent=st.lang==="el"?"EN":"ΕΛ";
-  $("cmp").textContent=st.compact?"⊕":"⊖";
   $("diff").value=st.diff;
   const keys={small:"Q",medium:"W",large:"E"};
   document.querySelectorAll("[data-map]").forEach(b=>{ const m=b.dataset.map; b.innerHTML=m[0].toUpperCase()+" "+huntSecs(m)+"<kbd>"+keys[m]+"</kbd>"; });
@@ -265,7 +283,6 @@ $("ctS").onclick=()=>contract.start();
 $("ctR").onclick=()=>contract.reset();
 $("diff").onchange=e=>{ st.diff=e.target.value; save(); paintStatic(); };
 $("lang").onclick=()=>{ st.lang=st.lang==="el"?"en":"el"; save(); paintStatic(); contract.tick(); };
-$("cmp").onclick=()=>{ st.compact=!st.compact; save(); paintStatic(); };
 
 document.addEventListener("keydown",e=>{
   if(e.ctrlKey||e.altKey||e.metaKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
@@ -273,10 +290,10 @@ document.addEventListener("keydown",e=>{
   const act={
     "1":()=>smudge.start(90), "2":()=>smudge.start(180), "3":()=>smudge.start(60),
     "q":()=>hunt.start(huntSecs("small")), "w":()=>hunt.start(huntSecs("medium")), "e":()=>hunt.start(huntSecs("large")),
-    "c":()=>hunt.start(25), "d":()=>contract.start(), "o":()=>toggleVis("ob"),
+    "c":()=>hunt.start(25), "d":()=>contract.start(), "o":()=>toggleVis("ob"), "m":()=>toggleVis("min"),
     "r":()=>{ smudge.reset(); hunt.reset(); contract.reset(); }
   }[k];
-  if(act){ e.preventDefault(); act(); }
+  if(act){ e.preventDefault(); act(); if(show.min && k!=="m") hideControls(); }
 });
 
 paintStatic();
