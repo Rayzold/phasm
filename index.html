@@ -332,7 +332,10 @@
   .pip-phase.soon{animation:pipBlink .5s step-end infinite}
   @keyframes pipBlink{50%{opacity:.35}}
   .btn.pipOpen.on{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.1)}
-  .pip-chk{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-left:auto}
+  .pip-vis{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 6px}
+  .pip-vis button{font:inherit;font-size:11px;background:rgba(143,227,136,.08);border:1px solid var(--nv-dim);border-radius:12px;color:var(--nv);padding:1px 8px;cursor:pointer}
+  .pip-vis button.off{background:none;border-color:var(--line);color:#5b6473;text-decoration:line-through}
+  .pip-sec.hide,.pip-phase.hide{display:none}
   /* ---------- footstep tapper ---------- */
   .tap-btn{
     width:100%;padding:16px 10px;border-radius:10px;border:1px solid var(--nv-dim);
@@ -1653,13 +1656,19 @@ function obamboAt(t){
 const CT_KEY="phasmo-journal-contract";
 const contract={
   t0:0, beepOn:true, lastWarn:-1, interval:null, views:[],
+  // idempotent: καλείται και στο φόρτωμα και όταν αλλάξει το CT_KEY από άλλο tab (π.χ. timers.html)
   load(){
+    const prev=this.t0;
     try{
       const d=JSON.parse(localStorage.getItem(CT_KEY)||"null");
-      if(d && typeof d.t0==="number" && d.t0>0 && Date.now()-d.t0<6*3600e3) this.t0=d.t0;
-      if(d && d.beep===0) this.beepOn=false;
+      this.t0=(d && typeof d.t0==="number" && d.t0>0 && Date.now()-d.t0<6*3600e3) ? d.t0 : 0;
+      this.beepOn=!(d && d.beep===0);
     }catch(e){/* ignore */}
-    if(this.t0){ const ob=obamboAt(this.elapsed()); this.lastWarn= ob.next<=OBAMBO_WARN ? ob.idx : -1; this.interval=setInterval(()=>this.tick(),250); }
+    clearInterval(this.interval); this.interval=null;
+    if(this.t0){
+      if(this.t0!==prev){ const ob=obamboAt(this.elapsed()); this.lastWarn= ob.next<=OBAMBO_WARN ? ob.idx : -1; }
+      this.interval=setInterval(()=>this.tick(),250);
+    }
   },
   save(){ try{ localStorage.setItem(CT_KEY, JSON.stringify({t0:this.t0, beep:this.beepOn?1:0})); }catch(e){/* ignore */} },
   elapsed(){ return this.t0 ? Math.floor((Date.now()-this.t0)/1000) : 0; },
@@ -1678,6 +1687,17 @@ const contract={
   }
 };
 contract.load();
+// ποια timers φαίνονται στο pop-out — κοινό key με το timers.html
+const SHOW_KEY="phasmo-timers-show";
+let timerShow={sm:true, hu:true, ct:true};
+function loadShow(){ try{ const d=JSON.parse(localStorage.getItem(SHOW_KEY)||"null"); if(d) timerShow=Object.assign({sm:true,hu:true,ct:true},d); }catch(e){/* ignore */} }
+function saveShow(){ try{ localStorage.setItem(SHOW_KEY, JSON.stringify(timerShow)); }catch(e){/* ignore */} }
+loadShow();
+// αλλαγές από το timers.html σε άλλο tab του ίδιου browser
+window.addEventListener("storage",e=>{
+  if(e.key===SHOW_KEY) loadShow();
+  if(e.key===CT_KEY){ contract.load(); contract.tick(); }
+});
 
 // ---- pop-out timers: Document Picture-in-Picture (Chrome/Edge 116+) ----
 // Μένει πάνω από όλα τα παράθυρα — με το Phasmophobia σε Borderless Windowed λειτουργεί σαν overlay.
@@ -1686,7 +1706,10 @@ const pipOn=on=>pipBtns.forEach(b=>b.classList.toggle("on",on));
 let pipWin=null;
 function pipMarkup(){
   return `
-  <div class="pip-sec">
+  <div class="pip-vis" id="pVis" title="Εμφάνιση / απόκρυψη · Show / hide">
+    <button data-v="sm">Smudge</button><button data-v="hu">Hunt</button><button data-v="ct">Contract</button><button data-v="ob">Obambo</button>
+  </div>
+  <div class="pip-sec" id="pSmSec">
     <div class="pip-head"><div class="tool-title">Smudge</div><div class="smudge-display" id="pSm">1:30</div></div>
     <div class="smudge-bar"><div id="pSmBar"></div></div>
     <div class="smudge-btns">
@@ -1696,7 +1719,7 @@ function pipMarkup(){
       <button class="btn" id="pSmReset">↺</button>
     </div>
   </div>
-  <div class="pip-sec">
+  <div class="pip-sec" id="pHuSec">
     <div class="pip-head"><div class="tool-title">Hunt / Cooldown</div><div class="smudge-display" id="pHu">0:20</div></div>
     <div class="smudge-bar"><div id="pHuBar"></div></div>
     <div class="smudge-btns">
@@ -1708,13 +1731,12 @@ function pipMarkup(){
       <button class="btn" id="pHuReset">↺</button>
     </div>
   </div>
-  <div class="pip-sec">
+  <div class="pip-sec" id="pCtSec">
     <div class="pip-head"><div class="tool-title">Contract</div><div class="smudge-display" id="pCt">--:--</div></div>
     <div class="pip-phase" id="pOb"></div>
     <div class="smudge-btns">
       <button class="btn primary" id="pCtStart">🚪 <span class="l-el">Πόρτα άνοιξε</span><span class="l-en">Door opened</span></button>
       <button class="btn" id="pCtReset">↺</button>
-      <label class="pip-chk"><input type="checkbox" id="pCtBeep"> 🔔 Obambo</label>
     </div>
   </div>`;
 }
@@ -1747,18 +1769,32 @@ async function openPip(){
   d.querySelectorAll("[data-phunt]").forEach(b=>b.onclick=()=>huntTimer.start(Number(b.dataset.phunt)));
   $("pHuReset").onclick=()=>huntTimer.reset();
 
-  const ctEl=$("pCt"), obEl=$("pOb"), beepChk=$("pCtBeep");
-  beepChk.checked=contract.beepOn;
-  beepChk.onchange=()=>contract.setBeep(beepChk.checked);
+  const ctEl=$("pCt"), obEl=$("pOb");
+  // εμφάνιση/απόκρυψη: ίδιες ρυθμίσεις με το timers.html (κοινό localStorage), Obambo = contract.beepOn
+  const applyVis=()=>{
+    $("pSmSec").classList.toggle("hide",!timerShow.sm);
+    $("pHuSec").classList.toggle("hide",!timerShow.hu);
+    $("pCtSec").classList.toggle("hide",!timerShow.ct);
+    d.querySelectorAll("#pVis [data-v]").forEach(b=>b.classList.toggle("off",!(b.dataset.v==="ob" ? contract.beepOn : timerShow[b.dataset.v])));
+  };
+  d.querySelectorAll("#pVis [data-v]").forEach(b=>b.onclick=()=>{
+    const v=b.dataset.v;
+    if(v==="ob") contract.setBeep(!contract.beepOn);
+    else { timerShow[v]=!timerShow[v]; saveShow(); }
+    applyVis(); contract.tick();
+  });
+  applyVis();
   $("pCtStart").onclick=()=>contract.start();
   $("pCtReset").onclick=()=>contract.reset();
   const ctView=(t,ob)=>{
     if(!contract.t0){
-      ctEl.textContent="--:--"; obEl.classList.remove("soon");
+      ctEl.textContent="--:--"; obEl.classList.remove("soon","hide");
       obEl.innerHTML= lang==="el" ? "Πάτα 🚪 μόλις ανοίξει η εξώπορτα" : "Hit 🚪 as soon as the front door opens";
       return;
     }
     ctEl.textContent=fmt(t);
+    obEl.classList.toggle("hide",!contract.beepOn);
+    if(!contract.beepOn){ obEl.classList.remove("soon"); return; }
     const st= ob.aggr ? '<span class="aggr">AGGRESSIVE</span>' : '<span class="calm">CALM</span>';
     obEl.innerHTML="Obambo: "+st+" · flip "+(lang==="el"?"σε ":"in ")+fmt(ob.next);
     obEl.classList.toggle("soon", ob.next<=OBAMBO_WARN);
@@ -1768,7 +1804,7 @@ async function openPip(){
   // το pop-out είναι ορατό → το interval του δεν στραγγαλίζεται, οπότε οδηγεί όλα τα ticks
   const lblSync=()=>d.querySelectorAll("[data-pmap]").forEach(b=>{ b.textContent=b.dataset.pmap.charAt(0).toUpperCase()+" "+mapSecs(b.dataset.pmap); });
   lblSync();
-  const iv=w.setInterval(()=>{ smudgeTimer.tick(); huntTimer.tick(); contract.tick(); lblSync(); d.documentElement.setAttribute("lang",lang); },250);
+  const iv=w.setInterval(()=>{ smudgeTimer.tick(); huntTimer.tick(); contract.tick(); lblSync(); applyVis(); d.documentElement.setAttribute("lang",lang); },250);
   contract.tick();
 
   w.addEventListener("pagehide",()=>{

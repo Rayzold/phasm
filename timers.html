@@ -46,7 +46,11 @@
   .phase.soon{animation:blink .5s step-end infinite}
   @keyframes blink{50%{opacity:.35}}
   .sec.aggr{--c:var(--danger)}
-  .chk{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-left:auto}
+  /* εμφάνιση/απόκρυψη timers */
+  .vis{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 6px}
+  .vis button{font:inherit;font-size:11px;background:rgba(143,227,136,.08);border:1px solid var(--nv-dim);border-radius:12px;color:var(--nv);padding:1px 8px;cursor:pointer}
+  .vis button.off{background:none;border-color:var(--line);color:#5b6473;text-decoration:line-through}
+  .sec.hide,.phase.hide{display:none}
   .hint{font-size:10.5px;color:#5b6473;margin-top:4px}
   body.compact .hint, body.compact kbd, body.compact .bar{display:none}
   body.compact .sec{padding:4px 7px 5px;margin-bottom:4px}
@@ -69,8 +73,14 @@
       <a href="index.html" title="Phasmo Journal">↩</a>
     </div>
   </div>
+  <div class="vis" id="vis" title="Εμφάνιση / απόκρυψη · Show / hide">
+    <button data-v="sm">Smudge</button>
+    <button data-v="hu">Hunt</button>
+    <button data-v="ct">Contract</button>
+    <button data-v="ob">Obambo</button>
+  </div>
 
-  <div class="sec">
+  <div class="sec" id="smSec">
     <div class="head"><span class="lbl">Smudge</span><span class="disp" id="smD">1:30</span></div>
     <div class="bar"><div id="smB"></div></div>
     <div class="btns">
@@ -81,7 +91,7 @@
     </div>
   </div>
 
-  <div class="sec">
+  <div class="sec" id="huSec">
     <div class="head"><span class="lbl">Hunt / Cooldown</span><span class="disp" id="huD">0:20</span></div>
     <div class="bar"><div id="huB"></div></div>
     <div class="btns">
@@ -100,11 +110,10 @@
     <div class="btns">
       <button class="btn p" id="ctS">🚪 <span class="l-el">Πόρτα άνοιξε</span><span class="l-en">Door opened</span><kbd>D</kbd></button>
       <button class="btn" id="ctR">↺</button>
-      <label class="chk"><input type="checkbox" id="ctBeep"> 🔔 Obambo</label>
     </div>
   </div>
 
-  <div class="hint"><span class="l-el">Steam: Shift+Tab → Web Browser → άνοιξε αυτή τη σελίδα → 📌 pin. Για κλικ/πλήκτρα ξανανοίγεις το overlay (Shift+Tab). Πλήκτρα: 1/2/3 smudge · Q/W/E hunt · C cooldown · D πόρτα · R reset όλα.</span><span class="l-en">Steam: Shift+Tab → Web Browser → open this page → 📌 pin. To click/press keys, reopen the overlay (Shift+Tab). Keys: 1/2/3 smudge · Q/W/E hunt · C cooldown · D door · R reset all.</span></div>
+  <div class="hint"><span class="l-el">Steam: Shift+Tab → Web Browser → άνοιξε αυτή τη σελίδα → 📌 pin. Για κλικ/πλήκτρα ξανανοίγεις το overlay (Shift+Tab). Πλήκτρα: 1/2/3 smudge · Q/W/E hunt · C cooldown · D πόρτα · O Obambo on/off · R reset όλα. Τα κουμπάκια πάνω κρύβουν/δείχνουν timers.</span><span class="l-en">Steam: Shift+Tab → Web Browser → open this page → 📌 pin. To click/press keys, reopen the overlay (Shift+Tab). Keys: 1/2/3 smudge · Q/W/E hunt · C cooldown · D door · O Obambo on/off · R reset all. The chips at the top show/hide timers.</span></div>
 </div>
 <script>
 // Ίδιες διάρκειες hunt με το DIFF του index.html — κράτα τα συγχρονισμένα αν αλλάξουν.
@@ -118,6 +127,12 @@ const HUNTS = {
 const OBAMBO_FIRST=60, OBAMBO_EVERY=120, OBAMBO_WARN=5;
 // Το contract μοιράζεται key με το pop-out του index.html (ίδιο origin) — στον ίδιο browser βλέπουν το ίδιο start.
 const CT_KEY="phasmo-journal-contract", LS_TM="phasmo-timers-v1";
+// Ποια κουτιά φαίνονται — κοινό key με το pop-out του index.html. Το Obambo (γραμμή + beeps)
+// είναι το contract.beepOn μέσα στο CT_KEY, ώστε να το κλείνεις μία φορά για όλες τις σελίδες.
+const SHOW_KEY="phasmo-timers-show";
+let show={sm:true, hu:true, ct:true};
+function loadShow(){ try{ const d=JSON.parse(localStorage.getItem(SHOW_KEY)||"null"); if(d) show=Object.assign({sm:true,hu:true,ct:true},d); }catch(e){} }
+loadShow();
 
 let st={diff:"intermediate", lang:"en", compact:false, sm:{dl:0,tot:90}, hu:{dl:0,tot:20}};
 try{ const d=JSON.parse(localStorage.getItem(LS_TM)||"null"); if(d) st=Object.assign(st,d); }catch(e){}
@@ -188,13 +203,15 @@ const contract={
   tick(){
     const el=$("ob"), sec=$("ctSec");
     if(!this.t0){
-      $("ctD").textContent="--:--"; el.classList.remove("soon"); sec.classList.remove("aggr");
+      $("ctD").textContent="--:--"; el.classList.remove("soon","hide"); sec.classList.remove("aggr");
       el.innerHTML=st.lang==="el" ? "Πάτα 🚪 μόλις ανοίξει η εξώπορτα" : "Hit 🚪 as soon as the front door opens";
       return;
     }
     const t=this.elapsed(), ob=obamboAt(t);
     if(this.beepOn && ob.next<=OBAMBO_WARN && this.lastWarn!==ob.idx){ this.lastWarn=ob.idx; beep(520,3); }
     $("ctD").textContent=fmt(t);
+    el.classList.toggle("hide",!this.beepOn);
+    if(!this.beepOn){ el.classList.remove("soon"); sec.classList.remove("aggr"); return; }
     el.innerHTML="Obambo: "+(ob.aggr?'<span class="aggr">AGGRESSIVE</span>':'<span class="calm">CALM</span>')
       +" · flip "+(st.lang==="el"?"σε ":"in ")+fmt(ob.next);
     el.classList.toggle("soon",ob.next<=OBAMBO_WARN);
@@ -205,7 +222,27 @@ contract.load();
 // μετά από reload: μην «φας» την προειδοποίηση του επόμενου flip, ούτε ξαναχτυπήσεις μια που ήδη ακούστηκε
 if(contract.t0){ const ob=obamboAt(contract.elapsed()); contract.lastWarn= ob.next<=OBAMBO_WARN ? ob.idx : -1; }
 // αλλαγές από άλλο tab ίδιου origin (π.χ. pop-out του index.html στον ίδιο browser)
-window.addEventListener("storage",e=>{ if(e.key===CT_KEY){ contract.load(); $("ctBeep").checked=contract.beepOn; contract.tick(); } });
+window.addEventListener("storage",e=>{
+  if(e.key===CT_KEY){ contract.load(); applyVis(); contract.tick(); }
+  if(e.key===SHOW_KEY){ loadShow(); applyVis(); }
+});
+
+// ---- show / hide ----
+function applyVis(){
+  $("smSec").classList.toggle("hide",!show.sm);
+  $("huSec").classList.toggle("hide",!show.hu);
+  $("ctSec").classList.toggle("hide",!show.ct);
+  document.querySelectorAll("#vis [data-v]").forEach(b=>{
+    const v=b.dataset.v, on= v==="ob" ? contract.beepOn : show[v];
+    b.classList.toggle("off",!on);
+  });
+}
+function toggleVis(v){
+  if(v==="ob"){ contract.beepOn=!contract.beepOn; contract.save(); contract.tick(); }
+  else { show[v]=!show[v]; try{ localStorage.setItem(SHOW_KEY,JSON.stringify(show)); }catch(e){} }
+  applyVis();
+}
+document.querySelectorAll("#vis [data-v]").forEach(b=>b.onclick=()=>toggleVis(b.dataset.v));
 
 // ---- UI ----
 function huntSecs(m){ return HUNTS[st.diff][m]; }
@@ -217,7 +254,7 @@ function paintStatic(){
   $("diff").value=st.diff;
   const keys={small:"Q",medium:"W",large:"E"};
   document.querySelectorAll("[data-map]").forEach(b=>{ const m=b.dataset.map; b.innerHTML=m[0].toUpperCase()+" "+huntSecs(m)+"<kbd>"+keys[m]+"</kbd>"; });
-  $("ctBeep").checked=contract.beepOn;
+  applyVis();
 }
 document.querySelectorAll("[data-sm]").forEach(b=>b.onclick=()=>smudge.start(+b.dataset.sm));
 document.querySelectorAll("[data-map]").forEach(b=>b.onclick=()=>hunt.start(huntSecs(b.dataset.map)));
@@ -226,7 +263,6 @@ $("smR").onclick=()=>smudge.reset();
 $("huR").onclick=()=>hunt.reset();
 $("ctS").onclick=()=>contract.start();
 $("ctR").onclick=()=>contract.reset();
-$("ctBeep").onchange=e=>{ contract.beepOn=e.target.checked; contract.save(); };
 $("diff").onchange=e=>{ st.diff=e.target.value; save(); paintStatic(); };
 $("lang").onclick=()=>{ st.lang=st.lang==="el"?"en":"el"; save(); paintStatic(); contract.tick(); };
 $("cmp").onclick=()=>{ st.compact=!st.compact; save(); paintStatic(); };
@@ -237,7 +273,7 @@ document.addEventListener("keydown",e=>{
   const act={
     "1":()=>smudge.start(90), "2":()=>smudge.start(180), "3":()=>smudge.start(60),
     "q":()=>hunt.start(huntSecs("small")), "w":()=>hunt.start(huntSecs("medium")), "e":()=>hunt.start(huntSecs("large")),
-    "c":()=>hunt.start(25), "d":()=>contract.start(),
+    "c":()=>hunt.start(25), "d":()=>contract.start(), "o":()=>toggleVis("ob"),
     "r":()=>{ smudge.reset(); hunt.reset(); contract.reset(); }
   }[k];
   if(act){ e.preventDefault(); act(); }
