@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phasmo Timers — Guide</title>
+<meta name="description" content="Overlay για Phasmophobia: smudge, hunt/cooldown, contract + Obambo, ghost tells — στήσιμο σε Steam overlay ή Chrome pop-out.">
+<meta name="theme-color" content="#0A0D12">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  /* Οδηγίες για φίλους — πώς στήνουν το timers.html. Ίδιο look με το overlay. */
+  :root{
+    --bg:#0A0D12; --line:#232b38; --muted:#8A93A3; --nv:#8FE388; --nv-dim:#57996b;
+    --warn:#F0C674; --danger:#E15B5B; --card:#0c1119;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:#D7DCE4}
+  html[lang=en] .l-el{display:none!important}
+  html:not([lang=en]) .l-en{display:none!important}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.55;padding:20px 16px 48px}
+  .wrap{max-width:720px;margin:0 auto}
+  header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  h1{font-family:"Special Elite",monospace;color:var(--nv);font-size:26px;letter-spacing:3px;margin:0}
+  .ctl{margin-left:auto;display:flex;gap:6px}
+  .ctl button,.ctl a{font:inherit;font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;color:var(--muted);padding:3px 10px;cursor:pointer;text-decoration:none}
+  .ctl button:hover,.ctl a:hover{border-color:var(--nv);color:var(--nv)}
+  .lead{color:var(--muted);margin:4px 0 18px}
+  h2{font-family:"Special Elite",monospace;font-size:15px;letter-spacing:2px;text-transform:uppercase;color:var(--nv-dim);margin:28px 0 10px}
+  .card{border:1px solid var(--line);border-left:3px solid var(--c,var(--nv));border-radius:10px;background:var(--card);padding:14px 16px;margin-bottom:12px}
+  .card.alt{--c:var(--warn)}
+  .card h3{margin:0 0 6px;font-size:16px;color:#EAEDF2}
+  .card h3 small{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:6px}
+  ol{margin:6px 0 0;padding-left:22px}
+  ol li{margin-bottom:7px}
+  ol li::marker{color:var(--nv);font-family:"Special Elite",monospace}
+  code,kbd{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+  code{color:var(--nv);background:#111823;border:1px solid var(--line);border-radius:5px;padding:1px 5px;word-break:break-all}
+  kbd{display:inline-block;min-width:22px;text-align:center;color:#EAEDF2;background:#151c27;border:1px solid #2f3a4b;border-bottom-width:2px;border-radius:5px;padding:0 5px}
+  b{color:#EAEDF2}
+  .note{font-size:13px;color:var(--warn);border-left:2px solid #6b5a2a;padding:2px 0 2px 10px;margin:10px 0 0}
+  .muted{color:var(--muted);font-size:13.5px}
+  .share{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .btn{font:inherit;font-size:13.5px;border:1px solid var(--nv);background:rgba(143,227,136,.08);color:var(--nv);border-radius:8px;padding:7px 12px;cursor:pointer;text-decoration:none}
+  .btn:hover{box-shadow:0 0 12px rgba(143,227,136,.15)}
+  .btn.sec{border-color:var(--line);background:none;color:#B9C2CE}
+  .msg{white-space:pre-wrap;font-size:13px;color:#B9C2CE;background:#0b0f15;border:1px dashed var(--line);border-radius:8px;padding:10px 12px;margin-top:10px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  td{padding:6px 8px;border-top:1px solid var(--line);vertical-align:top}
+  td:first-child{white-space:nowrap;width:1%}
+  ul.feat{margin:0;padding-left:18px}
+  ul.feat li{margin-bottom:6px}
+  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#132016;border:1px solid var(--nv);color:var(--nv);border-radius:8px;padding:7px 14px;font-size:13.5px;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>⏱️ PHASMO TIMERS</h1>
+    <div class="ctl">
+      <button id="lang" title="Ελληνικά / English">ΕΛ</button>
+      <a href="timers.html">⏱️ <span class="l-el">Άνοιγμα</span><span class="l-en">Open</span></a>
+    </div>
+  </header>
+  <p class="lead">
+    <span class="l-el">Overlay για Phasmophobia: <b>smudge</b>, <b>hunt / cooldown</b>, χρόνος <b>contract</b> με πρόβλεψη για τον <b>Obambo</b>, και τα <b>tells</b> των ghosts που υποψιάζεσαι — πάνω από το παιχνίδι. Δωρεάν, χωρίς εγκατάσταση.</span>
+    <span class="l-en">A Phasmophobia overlay: <b>smudge</b>, <b>hunt / cooldown</b>, <b>contract</b> time with an <b>Obambo</b> phase prediction, and the <b>tells</b> of the ghosts you suspect — on top of the game. Free, nothing to install.</span>
+  </p>
+
+  <div class="card">
+    <h3>📤 <span class="l-el">Μοιράσου το</span><span class="l-en">Share it</span></h3>
+    <div class="muted"><span class="l-el">Στείλε στους φίλους σου το link αυτής της σελίδας ή το έτοιμο μήνυμα.</span><span class="l-en">Send your friends this page's link or the ready-made message.</span></div>
+    <div class="share">
+      <button class="btn" id="cpGuide">🔗 <span class="l-el">Αντιγραφή link οδηγιών</span><span class="l-en">Copy guide link</span></button>
+      <button class="btn" id="cpMsg">💬 <span class="l-el">Αντιγραφή μηνύματος</span><span class="l-en">Copy message</span></button>
+      <button class="btn sec" id="cpOverlay">⏱️ <span class="l-el">Link του overlay</span><span class="l-en">Overlay link</span></button>
+    </div>
+    <div class="msg" id="msg"></div>
+    <p class="note"><span class="l-el">Κάθε παίκτης έχει τα δικά του timers — δεν συγχρονίζονται ανάμεσα σε φίλους. Ο καθένας πατάει τα δικά του.</span><span class="l-en">Every player has their own timers — they don't sync between friends. Everyone runs their own.</span></p>
+  </div>
+
+  <h2><span class="l-el">Στήσιμο</span><span class="l-en">Setup</span></h2>
+
+  <div class="card">
+    <h3>🎮 Steam overlay <small><span class="l-el">προτείνεται — δουλεύει και σε fullscreen</span><span class="l-en">recommended — works in fullscreen too</span></small></h3>
+    <ol>
+      <li><span class="l-el">Στο Steam: <b>Steam → Settings → In Game</b> → άναψε το <b>Enable the Steam Overlay while in-game</b>.</span><span class="l-en">In Steam: <b>Steam → Settings → In Game</b> → turn on <b>Enable the Steam Overlay while in-game</b>.</span></li>
+      <li><span class="l-el">Προαιρετικά, στην ίδια σελίδα βάλε στο <b>Web browser home page</b> το</span><span class="l-en">Optional: on the same page, set <b>Web browser home page</b> to</span> <code class="ovUrl"></code> <span class="l-el">— θα ανοίγει κατευθείαν.</span><span class="l-en">— it'll open straight away.</span></li>
+      <li><span class="l-el">Δεξί κλικ στο <b>Phasmophobia</b> στη Library → <b>Properties → General</b> → να είναι ενεργό και εκεί το overlay.</span><span class="l-en">Right-click <b>Phasmophobia</b> in your Library → <b>Properties → General</b> → make sure the overlay is enabled there too.</span></li>
+      <li><span class="l-el">Μέσα στο game (lobby ή βαν) πάτα</span><span class="l-en">In game (lobby or van) press</span> <kbd>Shift</kbd>+<kbd>Tab</kbd> → <b>Web Browser</b> <span class="l-el">και άνοιξε το</span><span class="l-en">and open</span> <code class="ovUrl"></code>.</li>
+      <li><span class="l-el">Μίκρυνε το παράθυρο (~340px πλάτος), βάλ' το σε μια γωνία, και διάλεξε πάνω δεξιά <b>difficulty</b> και γλώσσα.</span><span class="l-en">Shrink the window (~340px wide), put it in a corner, and pick the <b>difficulty</b> and language at the top right.</span></li>
+      <li><span class="l-el">Πάτα το <b>📌 pin</b> του παραθύρου (από εκεί ρυθμίζεις και τη διαφάνεια) και μετά</span><span class="l-en">Press the window's <b>📌 pin</b> (you can set its opacity there too), then</span> <kbd>Shift</kbd>+<kbd>Tab</kbd> <span class="l-el">για επιστροφή — τα timers μένουν στην οθόνη.</span><span class="l-en">to go back — the timers stay on screen.</span></li>
+    </ol>
+    <p class="note"><span class="l-el">Τα pinned παράθυρα δέχονται κλικ/πλήκτρα μόνο με ανοιχτό το overlay: <b>Shift+Tab → πλήκτρο → Shift+Tab</b>. Με τα hotkeys παρακάτω παίρνει ένα δευτερόλεπτο.</span><span class="l-en">Pinned windows only take clicks/keys while the overlay is open: <b>Shift+Tab → key → Shift+Tab</b>. With the hotkeys below it takes a second.</span></p>
+  </div>
+
+  <div class="card alt">
+    <h3>🌐 Chrome / Edge pop-out <small><span class="l-el">μόνο σε Borderless Windowed</span><span class="l-en">Borderless Windowed only</span></small></h3>
+    <ol>
+      <li><span class="l-el">Άνοιξε το</span><span class="l-en">Open</span> <code class="ixUrl"></code> <span class="l-el">σε Chrome ή Edge (desktop).</span><span class="l-en">in Chrome or Edge (desktop).</span></li>
+      <li><span class="l-el">Στο <b>Smudge Timer</b> πάτα <b>⏱️ Pop-out</b> — ανοίγει μικρό παράθυρο που μένει πάνω από όλα.</span><span class="l-en">In the <b>Smudge Timer</b> press <b>⏱️ Pop-out</b> — a small always-on-top window opens.</span></li>
+      <li><span class="l-el">Στο Phasmophobia: <b>Settings → Display → Borderless Windowed</b> (σε exclusive fullscreen δεν φαίνεται).</span><span class="l-en">In Phasmophobia: <b>Settings → Display → Borderless Windowed</b> (it won't show in exclusive fullscreen).</span></li>
+    </ol>
+  </div>
+
+  <h2><span class="l-el">Κατά τη διάρκεια του contract</span><span class="l-en">During the contract</span></h2>
+  <div class="card">
+    <table>
+      <tr><td><kbd>D</kbd></td><td><span class="l-el">Άνοιξε η εξώπορτα — ξεκινά ο χρόνος contract και η πρόβλεψη Obambo (Calm ως το 1:00, μετά εναλλαγή κάθε 2:00, 3 beeps 5s πριν από κάθε αλλαγή)</span><span class="l-en">Front door opened — starts the contract clock and the Obambo prediction (Calm until 1:00, then flips every 2:00, 3 beeps 5s before each flip)</span></td></tr>
+      <tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></td><td><span class="l-el">Smudge: 90s · Spirit 180s · Demon 60s</span><span class="l-en">Smudge: 90s · Spirit 180s · Demon 60s</span></td></tr>
+      <tr><td><kbd>Q</kbd> <kbd>W</kbd> <kbd>E</kbd></td><td><span class="l-el">Ξεκίνησε hunt — small / medium / large map (διάρκειες ανά difficulty)</span><span class="l-en">Hunt started — small / medium / large map (durations per difficulty)</span></td></tr>
+      <tr><td><kbd>C</kbd></td><td><span class="l-el">Τέλος hunt → cooldown 25s (Demon 20s με κλικ)</span><span class="l-en">Hunt over → 25s cooldown (Demon 20s by click)</span></td></tr>
+      <tr><td><kbd>G</kbd> <kbd>F</kbd></td><td><span class="l-el">Διάλεξε έως 3 ghosts που υποψιάζεσαι · σύντομα / πλήρη tells</span><span class="l-en">Pick up to 3 suspected ghosts · short / full tells</span></td></tr>
+      <tr><td><kbd>O</kbd> <kbd>M</kbd></td><td><span class="l-el">Obambo on/off · Minimal (μόνο τα timers)</span><span class="l-en">Obambo on/off · Minimal (timers only)</span></td></tr>
+      <tr><td><kbd>R</kbd></td><td><span class="l-el">Reset όλα — για το επόμενο contract</span><span class="l-en">Reset everything — for the next contract</span></td></tr>
+    </table>
+  </div>
+
+  <h2><span class="l-el">Χρήσιμα</span><span class="l-en">Good to know</span></h2>
+  <div class="card">
+    <ul class="feat">
+      <li><span class="l-el">Τα κουμπάκια <b>Smudge · Hunt · Contract · Obambo · Tells</b> κρύβουν ό,τι δεν χρειάζεσαι.</span><span class="l-en">The <b>Smudge · Hunt · Contract · Obambo · Tells</b> chips hide whatever you don't need.</span></li>
+      <li><span class="l-el"><b>◱ Minimal</b>: μένουν μόνο οι χρόνοι — κλικ οπουδήποτε για τα κουμπιά, κρύβονται ξανά σε 5s.</span><span class="l-en"><b>◱ Minimal</b>: only the clocks stay — click anywhere for the buttons, they hide again after 5s.</span></li>
+      <li><span class="l-el"><b>Ghost Tells → ≡ Full</b>: hunt συμπεριφορά, τι το επιβεβαιώνει και τι το αποκλείει. Ανοιχτό ένα ghost τη φορά — κλικ στο όνομα για εναλλαγή.</span><span class="l-en"><b>Ghost Tells → ≡ Full</b>: hunt behaviour, what confirms it and what rules it out. One ghost open at a time — click a name to switch.</span></li>
+      <li><span class="l-el"><b>🔇 «Κλικ για ήχο»</b>: οι browsers κλειδώνουν τον ήχο μέχρι το πρώτο κλικ ή πλήκτρο — ένα κλικ και τα beeps δουλεύουν.</span><span class="l-en"><b>🔇 "Click to enable sound"</b>: browsers lock audio until your first click or key — one click and the beeps work.</span></li>
+      <li><span class="l-el">Όλα θυμούνται τις ρυθμίσεις τους, ακόμα και μετά από restart του game. Για νέα έκδοση: refresh στο Steam browser.</span><span class="l-en">Everything remembers its settings, even after restarting the game. For a new version: refresh in the Steam browser.</span></li>
+    </ul>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+// Τα links χτίζονται από τη θέση αυτής της σελίδας, ώστε να δουλεύουν και σε fork/άλλο domain.
+const $=id=>document.getElementById(id);
+const OVERLAY=new URL("timers.html", location.href).href;
+const GUIDE=new URL("timers-guide.html", location.href).href;
+const JOURNAL=new URL("./", location.href).href;
+const MSG={
+  el:`👻 Phasmo Timers — overlay για Phasmophobia: smudge, hunt/cooldown, χρόνος contract + Obambo, ghost tells.
+
+Οδηγίες (2 λεπτά): ${GUIDE}
+Overlay: ${OVERLAY}
+
+Στο game: Shift+Tab → Web Browser → άνοιξε το overlay → 📌 pin.`,
+  en:`👻 Phasmo Timers — a Phasmophobia overlay: smudge, hunt/cooldown, contract time + Obambo, ghost tells.
+
+Setup guide (2 min): ${GUIDE}
+Overlay: ${OVERLAY}
+
+In game: Shift+Tab → Web Browser → open the overlay → 📌 pin.`
+};
+// γλώσσα: ό,τι διάλεξες στο overlay (ίδιο browser), αλλιώς η γλώσσα του browser
+let lang="en";
+try{ const d=JSON.parse(localStorage.getItem("phasmo-timers-v1")||"null"); if(d && (d.lang==="el"||d.lang==="en")) lang=d.lang; else if((navigator.language||"").toLowerCase().startsWith("el")) lang="el"; }catch(e){}
+
+function paint(){
+  document.documentElement.setAttribute("lang",lang);
+  $("lang").textContent=lang==="el"?"EN":"ΕΛ";
+  $("msg").textContent=MSG[lang];
+  document.querySelectorAll(".ovUrl").forEach(e=>e.textContent=OVERLAY);
+  document.querySelectorAll(".ixUrl").forEach(e=>e.textContent=JOURNAL);
+}
+$("lang").onclick=()=>{
+  lang=lang==="el"?"en":"el";
+  try{ const d=JSON.parse(localStorage.getItem("phasmo-timers-v1")||"null")||{}; d.lang=lang; localStorage.setItem("phasmo-timers-v1",JSON.stringify(d)); }catch(e){}
+  paint();
+};
+let toastT=null;
+function toast(t){ const el=$("toast"); el.textContent=t; el.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("on"),1600); }
+function copy(text){
+  const ok=()=>toast(lang==="el"?"✓ Αντιγράφηκε":"✓ Copied");
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok).catch(()=>prompt("",text));
+  else prompt("",text);
+}
+$("cpGuide").onclick=()=>copy(GUIDE);
+$("cpMsg").onclick=()=>copy(MSG[lang]);
+$("cpOverlay").onclick=()=>copy(OVERLAY);
+paint();
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>

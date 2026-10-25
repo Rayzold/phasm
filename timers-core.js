@@ -204,7 +204,7 @@ window.PhasmoTimers = (() => {
     const hide = () => { body.classList.remove("reveal"); win.clearTimeout(t); t = null; };
     const show = () => { body.classList.add("reveal"); win.clearTimeout(t); t = win.setTimeout(hide, 5000); };
     doc.addEventListener("click", e => {
-      if(!isMin()) return;
+      if(!isMin() || e.target.closest("[data-passthru]")) return;   // π.χ. headers των tells
       if(!body.classList.contains("reveal")){ e.preventDefault(); e.stopPropagation(); show(); return; }
       if(e.target.closest(".btn")) hide(); else show();
     }, true);

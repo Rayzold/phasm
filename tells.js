@@ -40,6 +40,12 @@ window.PhasmoTells = (() => {
   .tl-l{list-style:none;margin:0;padding:0;display:grid;gap:3px}
   .tl-l li{font-size:11.5px;line-height:1.35;color:#9aa4b3}
   .tl-l li b{color:#D7DCE4;font-weight:600}
+  /* Full: accordion — ανοιχτό ένα ghost τη φορά, τα άλλα μόνο με το header */
+  .tl-card.acc .tl-h{cursor:pointer;user-select:none}
+  .tl-card.acc .tl-h b::before{content:"▸ ";color:var(--nv-dim);font-size:12px}
+  .tl-card.acc.open .tl-h b::before{content:"▾ "}
+  .tl-card.acc:not(.open) .tl-h{margin-bottom:0}
+  .tl-card.acc .tl-h:hover b{color:var(--nv)}
   body.min:not(.reveal) .tl-ctl, body.min:not(.reveal) .tl-pick, body.min:not(.reveal) .tl-empty,
   body.min:not(.reveal) .tl-none{display:none}
   `;
@@ -51,14 +57,20 @@ window.PhasmoTells = (() => {
   // Short: evidence + hunt threshold + tell.
   // Full (χωρίς τα 3 evidence, που τα ξέρεις ήδη από το board): hunt threshold, tell, τι κάνει στο
   // hunt, και όλα τα σχετικά entries του RULEOUTS — τι το επιβεβαιώνει, τι το αποκλείει, σημειώσεις.
-  function card(n, lang, full){
+  // open: στο Full, αν η κάρτα είναι ανοιχτή (accordion) — κλειστή δείχνει μόνο όνομα + hunt threshold.
+  function card(n, lang, full, open){
     const g = GHOSTS.find(x => x.name === n);
     const L = (el, en) => lang === "en" ? en : el;
     const tell = lang === "en" ? (TELL_EN[n] || g.tell) : g.tell;
     const hunt = lang === "en" ? (HUNT_EN[n] || g.hunt) : g.hunt;
-    let h = `<div class="tl-card"><div class="tl-h"><b>${esc(n)}</b>`;
+    // data-passthru: το header αλλάζει ghost και στο minimal χωρίς να εμφανίζει τα κουμπιά
+    let h = full
+      ? `<div class="tl-card acc${open ? " open" : ""}"><div class="tl-h" data-open="${esc(n)}" data-passthru="1" title="${L("Άνοιγμα / κλείσιμο", "Expand / collapse")}"><b>${esc(n)}</b>`
+      : `<div class="tl-card"><div class="tl-h"><b>${esc(n)}</b>`;
     if(!full) h += `<span class="tl-ev" title="${esc(g.ev.map(evName).join(" · "))}">${g.ev.map(evIc).join(" ")}</span>`;
-    h += `<span class="tl-hunt">hunt ${esc(hunt)}</span></div><div class="tl-t">${esc(tell)}</div>`;
+    h += `<span class="tl-hunt">hunt ${esc(hunt)}</span></div>`;
+    if(full && !open) return h + `</div>`;
+    h += `<div class="tl-t">${esc(tell)}</div>`;
     if(!full) return h + `</div>`;
 
     const beh = lang === "en" ? (HUNT_BEHAVIOR_EN[n] || HUNT_BEHAVIOR[n]) : HUNT_BEHAVIOR[n];
@@ -87,7 +99,8 @@ window.PhasmoTells = (() => {
     if(!doc.getElementById("tells-css")){
       const st = doc.createElement("style"); st.id = "tells-css"; st.textContent = CSS; doc.head.appendChild(st);
     }
-    let picking = false;
+    // Full: ποιο ghost είναι ανοιχτό (ανά σελίδα). undefined = αυτόματα το πρώτο, null = όλα κλειστά.
+    let picking = false, openName;
 
     function render(){
       const lang = getLang(), sel = loadSuspects(), full = isFull(), atMax = sel.length >= MAX;
@@ -103,18 +116,21 @@ window.PhasmoTells = (() => {
       } else if(!sel.length){
         h += `<div class="tl-empty">${lang === "el" ? "Διάλεξε έως 3 ghosts που υποψιάζεσαι για να δεις τα tells τους." : "Pick up to 3 suspected ghosts to see their tells."}</div>`;
       }
-      h += sel.map(n => card(n, lang, full)).join("");
+      if(openName !== null && !sel.includes(openName)) openName = sel[0];
+      h += sel.map(n => card(n, lang, full, n === openName)).join("");
       root.innerHTML = h;
       if(onCount) onCount(sel.length);
     }
 
     const onClick = e => {
+      const hd = e.target.closest("[data-open]");
+      if(hd && root.contains(hd)){ openName = openName === hd.dataset.open ? null : hd.dataset.open; render(); return; }
       const b = e.target.closest("button");
       if(!b || !root.contains(b)) return;
       const sel = loadSuspects();
       if(b.dataset.pick) picking = !picking;
       else if(b.dataset.det) setFull(!isFull());
-      else if(b.dataset.add){ if(!sel.includes(b.dataset.add) && sel.length < MAX){ sel.push(b.dataset.add); saveSuspects(sel); } }
+      else if(b.dataset.add){ if(!sel.includes(b.dataset.add) && sel.length < MAX){ sel.push(b.dataset.add); saveSuspects(sel); openName = b.dataset.add; } }
       else if(b.dataset.rm) saveSuspects(sel.filter(n => n !== b.dataset.rm));
       else return;
       render();
