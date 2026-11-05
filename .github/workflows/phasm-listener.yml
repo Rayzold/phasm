@@ -4,9 +4,12 @@ name: PhasmListener
 # - κάθε push που αγγίζει footstep-helper/ ή footsteps.js → artifact στο run
 # - push tag listener-v* (π.χ. listener-v1.0.0) → GitHub Release με το .exe
 on:
+  # Χωρίς branches: δίπλα στο tags:, το GitHub αγνοεί τα push σε branches.
+  # Το paths: ισχύει μόνο για branch pushes· τα tag pushes τρέχουν πάντα.
   push:
-    paths: ["footstep-helper/**", "footsteps.js", "tests/**", ".github/workflows/phasm-listener.yml"]
+    branches: ["**"]
     tags: ["listener-v*"]
+    paths: ["footstep-helper/**", "footsteps.js", "tests/**", ".github/workflows/phasm-listener.yml"]
   workflow_dispatch:
 
 permissions:
