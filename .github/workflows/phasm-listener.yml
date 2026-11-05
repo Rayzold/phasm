@@ -1,0 +1,39 @@
+name: PhasmListener
+
+# Βγάζει το PhasmListener.exe (self-contained, single file) για το auto-listen του Journal.
+# - κάθε push που αγγίζει footstep-helper/ ή footsteps.js → artifact στο run
+# - push tag listener-v* (π.χ. listener-v1.0.0) → GitHub Release με το .exe
+on:
+  push:
+    paths: ["footstep-helper/**", "footsteps.js", "tests/**", ".github/workflows/phasm-listener.yml"]
+    tags: ["listener-v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Detector tests
+        run: node tests/footsteps.test.js
+      - name: Publish win-x64
+        run: dotnet publish footstep-helper -c Release -r win-x64 -o out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PhasmListener-win-x64
+          path: out/PhasmListener.exe
+      - name: Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/listener-v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" out/PhasmListener.exe --title "PhasmListener ${GITHUB_REF_NAME#listener-v}" --notes "Auto-listen helper για το Phasmo Journal. Δες footstep-helper/README.md."

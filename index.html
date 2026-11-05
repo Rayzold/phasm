@@ -356,6 +356,25 @@
   .tap-btn small{display:block;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:11px;color:var(--muted);letter-spacing:normal;margin-top:4px}
   .tap-readout{font-family:"Special Elite",monospace;font-size:24px;color:var(--nv);text-align:center;margin-bottom:10px}
   .tap-readout .dim{color:var(--muted);font-size:13px}
+  .tap-readout.unsure #tapBpm,.tap-readout.unsure #tapMs{color:var(--warn)}
+  .tap-src{display:block;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:11px;color:var(--muted);letter-spacing:normal;margin-top:2px;min-height:14px}
+  /* ---------- auto-listen (footsteps.js + PhasmListener) ---------- */
+  .ear{border:1px dashed var(--line);border-radius:8px;padding:9px 10px 8px;margin:0 0 10px;background:rgba(143,227,136,.025)}
+  .ear.on{border-style:solid;border-color:var(--nv-dim)}
+  .ear-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-size:12.5px;color:#B9C2CE}
+  .ear-state{font-size:11.5px;padding:2px 9px;border-radius:12px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .ear-state.live{color:var(--nv);border-color:var(--nv-dim);background:rgba(143,227,136,.08)}
+  .ear-state.wait{color:var(--warn);border-color:#6b5a2a}
+  .ear-state.err{color:var(--danger);border-color:var(--danger)}
+  .ear .smudge-btns{margin-bottom:6px}
+  .ear .btn{padding:6px 10px;font-size:12.5px}
+  .ear .btn.on{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.1)}
+  .ear-meter{position:relative;height:6px;border-radius:4px;background:#1a212c;overflow:hidden;margin:4px 0 6px}
+  .ear-meter>div{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--nv-dim);transition:width .1s linear}
+  .ear-meter>i{position:absolute;top:0;bottom:0;width:2px;background:var(--warn);opacity:.7;left:0}
+  .ear .drain-row{margin:2px 0 4px}
+  .ear .smudge-note{font-size:11.5px}
+  .ear .smudge-note a{color:var(--nv)}
   .speed-rows{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
   .speed-row{display:flex;gap:8px;align-items:baseline;font-size:12.5px;color:var(--muted);border:1px solid transparent;border-radius:6px;padding:3px 8px}
   .speed-row .sp{font-family:"Special Elite",monospace;color:#B9C2CE;white-space:nowrap;min-width:86px;font-variant-numeric:tabular-nums}
@@ -601,7 +620,23 @@
       <div class="tool-col">
         <div class="tool-title">Footstep Speed Tapper</div>
         <button class="tap-btn" id="tapBtn">TAP<small><span class="l-el">ή πάτα Space</span><span class="l-en">or press Space</span></small></button>
-        <div class="tap-readout"><span id="tapBpm">–</span><span class="dim"> bpm · </span><span id="tapMs">–</span><span class="dim"> m/s</span></div>
+        <div class="tap-readout" id="tapReadout"><span id="tapBpm">–</span><span class="dim"> bpm · </span><span id="tapMs">–</span><span class="dim"> m/s</span><span class="tap-src" id="tapSrc"></span></div>
+        <div class="ear" id="ear">
+          <div class="ear-head"><span>🎧 <span class="l-el">Αυτόματο άκουσμα βημάτων</span><span class="l-en">Auto-listen for footsteps</span></span><span class="ear-state" id="earState">off</span></div>
+          <div class="smudge-btns">
+            <button class="btn" id="earHelper" title="PhasmListener: ακούει ΜΟΝΟ το Phasmophobia (όχι Discord) / hears ONLY Phasmophobia (not Discord)">🖥️ <span class="l-el">PhasmListener</span><span class="l-en">PhasmListener</span></button>
+            <button class="btn" id="earScreen" title="Share screen + «Share system audio» (Chrome/Edge)">🔊 <span class="l-el">Ήχος συστήματος</span><span class="l-en">System audio</span></button>
+            <button class="btn" id="earStop" style="display:none">■ Stop</button>
+          </div>
+          <div class="ear-meter" title="Ένταση / level · κίτρινο = θόρυβος βάθους / yellow = noise floor"><div id="earLevel"></div><i id="earFloor"></i></div>
+          <div class="drain-row">
+            <label class="chk" style="flex:1;min-width:220px"><span style="white-space:nowrap">🎚️ <span class="l-el">Ευαισθησία</span><span class="l-en">Sensitivity</span></span>
+              <input type="range" id="earSens" min="0" max="1" step="0.05" value="0.5" style="flex:1;margin:0 8px">
+              <span id="earSensVal" style="min-width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)">50%</span>
+            </label>
+          </div>
+          <div class="smudge-note" id="earNote"><span class="l-el"><strong>PhasmListener</strong> = μικρό Windows app που ακούει ΜΟΝΟ τον ήχο του Phasmophobia (όχι Discord/μουσική) — <a href="https://github.com/Rayzold/phasm/tree/main/footstep-helper" target="_blank" rel="noopener">οδηγίες</a>. <strong>Ήχος συστήματος</strong> = χωρίς εγκατάσταση, αλλά ακούει ό,τι παίζει ο υπολογιστής. Μείνε ακίνητος στο hunt: τα δικά σου βήματα μπερδεύουν τη μέτρηση.</span><span class="l-en"><strong>PhasmListener</strong> = a small Windows app that hears ONLY Phasmophobia's audio (not Discord/music) — <a href="https://github.com/Rayzold/phasm/tree/main/footstep-helper" target="_blank" rel="noopener">setup</a>. <strong>System audio</strong> = nothing to install, but it hears everything your PC plays. Stand still during the hunt: your own footsteps confuse the reading.</span></div>
+        </div>
         <div class="drain-row" style="margin:2px 0 10px">
           <label class="chk" style="flex:1;min-width:220px" title="Calibration"><span style="white-space:nowrap">🎚️ <span class="l-el">Βαθμονόμηση</span><span class="l-en">Calibration</span></span>
             <input type="range" id="tapCalib" min="-1" max="1" step="0.05" value="0" style="flex:1;margin:0 8px">
@@ -932,8 +967,9 @@
 <script src="ghosts-data.js"></script>
 <script src="timers-core.js"></script>
 <script src="tells.js"></script>
+<script src="footsteps.js"></script>
 <script>
-const APP_VERSION = "1.40.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.41.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -1848,35 +1884,45 @@ function paintCalib(){ tapCalibVal.textContent=(calibOffset>=0?"+":"")+calibOffs
 tapCalib.addEventListener("input",()=>{
   calibOffset=Number(tapCalib.value);
   paintCalib();
-  paintTaps(); // ξαναϋπολόγισε την ήδη μετρημένη ταχύτητα με το νέο offset
+  if(speedSrc==="tap") paintTaps(); // ξαναϋπολόγισε την ήδη μετρημένη ταχύτητα με το νέο offset (μόνο taps — το auto δεν έχει ανθρώπινη καθυστέρηση)
   saveState();
 });
 
 let tapTimes=[];
+let speedSrc=null; // "tap" | "auto": ποιος έγραψε τελευταίος στο readout
 const tapBpmEl=document.getElementById("tapBpm"), tapMsEl=document.getElementById("tapMs");
-function bpmToSpeed(bpm){ return bpm/(60+0.075*bpm); }
+const tapReadout=document.getElementById("tapReadout"), tapSrcEl=document.getElementById("tapSrc");
+const bpmToSpeed=PhasmFootsteps.bpmToSpeed; // ίδια σχέση: v = bpm / (60 + 0.075·bpm)
+function clearSpeed(){
+  tapBpmEl.textContent="–"; tapMsEl.textContent="–"; tapSrcEl.textContent="";
+  tapReadout.classList.remove("unsure");
+  lastSpeed=null; speedApply.disabled=true;
+  speedRows.querySelectorAll(".speed-row").forEach(r=>r.classList.remove("hit"));
+}
+// Κοινό readout για taps και auto-listen. sure=false → κίτρινο, χωρίς φίλτρο.
+function showSpeed(bpm, v, srcLabel, sure){
+  tapBpmEl.textContent=Math.round(bpm);
+  tapMsEl.textContent=v.toFixed(2);
+  tapSrcEl.textContent=srcLabel||"";
+  tapReadout.classList.toggle("unsure", !sure);
+  lastSpeed=sure ? v : null; speedApply.disabled=!sure;
+  speedRows.querySelectorAll(".speed-row").forEach(r=>{
+    const s=SPEED_REF[r.dataset.i];
+    r.classList.toggle("hit", sure && v>=s.min-0.08 && v<=s.max+0.08);
+  });
+}
 function paintTaps(){
-  if(tapTimes.length<2){
-    tapBpmEl.textContent="–"; tapMsEl.textContent="–";
-    lastSpeed=null; speedApply.disabled=true;
-    speedRows.querySelectorAll(".speed-row").forEach(r=>r.classList.remove("hit"));
-    return;
-  }
+  if(tapTimes.length<2){ clearSpeed(); return; }
   const ints=[];
   for(let i=1;i<tapTimes.length;i++) ints.push(tapTimes[i]-tapTimes[i-1]);
   const use=ints.slice(-5);
   const avg=use.reduce((a,b)=>a+b,0)/use.length;
   const bpm=60000/avg, v=Math.max(0, bpmToSpeed(bpm)+calibOffset); // +calibOffset: προσωπική διόρθωση καθυστέρησης
-  tapBpmEl.textContent=Math.round(bpm);
-  tapMsEl.textContent=v.toFixed(2);
-  lastSpeed=v; speedApply.disabled=false;
-  speedRows.querySelectorAll(".speed-row").forEach(r=>{
-    const s=SPEED_REF[r.dataset.i];
-    r.classList.toggle("hit", v>=s.min-0.08 && v<=s.max+0.08);
-  });
+  showSpeed(bpm, v, lang==="en" ? `tap · ${tapTimes.length} taps` : `tap · ${tapTimes.length} χτυπήματα`, true);
 }
 function tap(){
   ensureAudio();
+  speedSrc="tap";
   const now=Date.now();
   if(tapTimes.length && now-tapTimes[tapTimes.length-1]>5000) tapTimes=[];
   tapTimes.push(now);
@@ -1890,6 +1936,149 @@ document.addEventListener("keydown",e=>{
   if(e.code==="Space" && !e.repeat){ e.preventDefault(); tap(); tapBtn.classList.add("pressed"); }
 });
 document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.remove("pressed"); });
+
+// ---- auto-listen: footsteps.js ακούει τα βήματα και γράφει στο ίδιο readout ----
+// Πηγές: (α) PhasmListener — Windows helper που στέλνει ΜΟΝΟ τον ήχο του Phasmophobia μέσω
+// ws://localhost (s16le mono 16 kHz, 20 ms frames), (β) getDisplayMedia με «Share system audio».
+// Όλη η ανίχνευση γίνεται εδώ, οπότε το tuning αλλάζει με push στο site, χωρίς νέο .exe.
+const ear=(()=>{
+  const EAR_LS="phasm-ear-v1";
+  let cfg={sens:0.5, port:47213};
+  try{ Object.assign(cfg, JSON.parse(localStorage.getItem(EAR_LS)||"{}")); }catch(e){}
+  const saveCfg=()=>{ try{ localStorage.setItem(EAR_LS, JSON.stringify(cfg)); }catch(e){} };
+
+  const box=document.getElementById("ear"), stateEl=document.getElementById("earState");
+  const bHelper=document.getElementById("earHelper"), bScreen=document.getElementById("earScreen"), bStop=document.getElementById("earStop");
+  const levelEl=document.getElementById("earLevel"), floorEl=document.getElementById("earFloor");
+  const sens=document.getElementById("earSens"), sensVal=document.getElementById("earSensVal");
+
+  let mode=null;            // null | "helper" | "screen"
+  let det=null, ws=null, retry=null, media=null, ctx=null, node=null, blink=null;
+  const T=(el,en)=>lang==="en"?en:el;
+
+  function setState(cls, el, en){
+    stateEl.className="ear-state"+(cls?" "+cls:"");
+    stateEl.textContent=T(el,en);
+  }
+  function newDetector(sampleRate){
+    det=new PhasmFootsteps.FootstepDetector({
+      sampleRate, sensitivity:cfg.sens,
+      onStep:()=>{ // «το άκουσα»: αναβοσβήνει το TAP κουμπί
+        tapBtn.classList.add("pressed"); clearTimeout(blink);
+        blink=setTimeout(()=>tapBtn.classList.remove("pressed"), 90);
+      },
+      onTempo:t=>{
+        if(!t) return; // η σειρά έληξε: κράτα την τελευταία ένδειξη για να φιλτράρεις μετά το hunt
+        speedSrc="auto";
+        const sure=t.confidence>=0.5 && t.steps>=4;
+        showSpeed(t.bpm, t.speed,
+          T(`🎧 auto · ${t.steps} βήματα · σιγουριά ${Math.round(t.confidence*100)}%`, `🎧 auto · ${t.steps} steps · ${Math.round(t.confidence*100)}% sure`), sure);
+      },
+      onLevel:l=>{
+        const pct=x=>Math.max(0,Math.min(100,(x+80)*1.25));
+        levelEl.style.width=pct(l.db)+"%"; floorEl.style.left=pct(l.floor)+"%";
+      },
+    });
+  }
+  function ui(){
+    box.classList.toggle("on", !!mode);
+    bHelper.classList.toggle("on", mode==="helper");
+    bScreen.classList.toggle("on", mode==="screen");
+    bStop.style.display=mode?"inline-block":"none";
+    if(!mode){ setState("", "off", "off"); levelEl.style.width="0"; }
+  }
+
+  // ---- (α) PhasmListener ----
+  function connectHelper(){
+    clearTimeout(retry);
+    setState("wait", "σύνδεση…", "connecting…");
+    let sock;
+    try{ sock=new WebSocket(`ws://localhost:${cfg.port}`); }catch(e){ setState("err","σφάλμα","error"); return; }
+    sock.binaryType="arraybuffer";
+    ws=sock;
+    let opened=false;
+    sock.onopen=()=>{ opened=true; };
+    sock.onmessage=ev=>{
+      if(typeof ev.data==="string"){
+        let m; try{ m=JSON.parse(ev.data); }catch(e){ return; }
+        if(m.type==="hello") newDetector(m.sampleRate||16000);
+        if(m.type==="status"){
+          if(m.state==="capturing") setState("live", "ακούω το game ✓", "hearing the game ✓");
+          else if(m.state==="waiting") setState("wait", "περιμένω το Phasmophobia…", "waiting for Phasmophobia…");
+          else setState("err", "σφάλμα helper", "helper error");
+          if(m.state==="error" && m.message) console.warn("PhasmListener:", m.message);
+          stateEl.title=m.message||"";
+        }
+        return;
+      }
+      if(!det) return;
+      const i16=new Int16Array(ev.data), f=new Float32Array(i16.length);
+      for(let i=0;i<f.length;i++) f[i]=i16[i]/32768;
+      det.process(f);
+    };
+    sock.onclose=()=>{
+      if(ws!==sock) return; // αντικαταστάθηκε / σταμάτησε
+      ws=null;
+      if(mode!=="helper") return;
+      setState(opened?"wait":"err", opened?"χάθηκε, ξαναδοκιμάζω…":"PhasmListener δεν τρέχει", opened?"lost, retrying…":"PhasmListener not running");
+      stateEl.title=T("Άνοιξε το PhasmListener.exe (ή επέτρεψε την πρόσβαση σε τοπικό δίκτυο στον browser).", "Start PhasmListener.exe (or allow local network access in the browser).");
+      retry=setTimeout(connectHelper, 3000);
+    };
+  }
+
+  // ---- (β) ήχος συστήματος μέσω screen share ----
+  const WORKLET=`registerProcessor("phasm-tap",class extends AudioWorkletProcessor{
+    process(inp){const ch=inp[0]; if(ch&&ch.length){const n=ch[0].length,m=new Float32Array(n);
+      for(let c=0;c<ch.length;c++){const d=ch[c];for(let i=0;i<n;i++)m[i]+=d[i]/ch.length;}
+      this.port.postMessage(m,[m.buffer]);} return true;}});`;
+  async function startScreen(){
+    if(!navigator.mediaDevices?.getDisplayMedia){ setState("err","δεν υποστηρίζεται","not supported"); return false; }
+    setState("wait", "διάλεξε οθόνη + «Share system audio»", "pick a screen + “Share system audio”");
+    try{
+      media=await navigator.mediaDevices.getDisplayMedia({video:true,
+        audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}, systemAudio:"include"});
+    }catch(e){
+      console.warn("auto-listen getDisplayMedia:", e);
+      if(e && e.name==="NotAllowedError") setState("err","ακυρώθηκε","cancelled");
+      else setState("err","σφάλμα: "+(e&&e.name||"?"),"error: "+(e&&e.name||"?"));
+      return false;
+    }
+    const at=media.getAudioTracks()[0];
+    media.getVideoTracks().forEach(t=>t.stop()); // θέλουμε μόνο τον ήχο
+    if(!at){ setState("err","χωρίς ήχο — τσέκαρε «Share system audio»","no audio — tick “Share system audio”"); media=null; return false; }
+    at.addEventListener("ended", ()=>{ if(mode==="screen") stop(); });
+    ctx=new AudioContext();
+    const url=URL.createObjectURL(new Blob([WORKLET],{type:"text/javascript"}));
+    await ctx.audioWorklet.addModule(url); URL.revokeObjectURL(url);
+    const src=ctx.createMediaStreamSource(new MediaStream([at]));
+    node=new AudioWorkletNode(ctx,"phasm-tap",{numberOfOutputs:0});
+    newDetector(ctx.sampleRate);
+    node.port.onmessage=e=>det&&det.process(e.data);
+    src.connect(node);
+    setState("live", "ακούω τον ήχο συστήματος ✓", "hearing system audio ✓");
+    return true;
+  }
+
+  function stop(){
+    const m=mode; mode=null;
+    clearTimeout(retry);
+    if(ws){ const s=ws; ws=null; try{ s.close(); }catch(e){} }
+    if(node){ try{ node.port.onmessage=null; node.disconnect(); }catch(e){} node=null; }
+    if(ctx){ ctx.close().catch(()=>{}); ctx=null; }
+    if(media){ media.getTracks().forEach(t=>t.stop()); media=null; }
+    det=null;
+    ui();
+    return m;
+  }
+  bHelper.onclick=()=>{ if(mode==="helper"){ stop(); return; } stop(); mode="helper"; ui(); connectHelper(); };
+  bScreen.onclick=async()=>{ if(mode==="screen"){ stop(); return; } stop(); mode="screen"; ui(); if(!(await startScreen())) { const err=stateEl.textContent, cls=stateEl.className; stop(); stateEl.className=cls; stateEl.textContent=err; } };
+  bStop.onclick=stop;
+
+  function paintSens(){ sens.value=cfg.sens; sensVal.textContent=Math.round(cfg.sens*100)+"%"; }
+  sens.addEventListener("input",()=>{ cfg.sens=Number(sens.value); paintSens(); if(det) det.setSensitivity(cfg.sens); saveCfg(); });
+  paintSens(); ui();
+  return { stop, get mode(){ return mode; } };
+})();
 
 // ---- persistence (refresh-proof evidence board & sanity) ----
 const LS_KEY="phasmo-journal-v1";
