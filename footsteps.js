@@ -38,14 +38,40 @@
   const MIN_STEP_S = 0.17, MAX_STEP_S = 2.7, RESET_GAP_S = 3.2;
   // Ένα βήμα είναι σύντομο: η ενέργεια πρέπει να πέσει DECAY_DB κάτω από το peak μέσα σε CONFIRM_S.
   const DECAY_DB = 8, CONFIRM_S = 0.16;
+  // Πόσο σίγουρος/μακρύς πρέπει να είναι ο ρυθμός για να θεωρηθεί «βήματα».
+  // Ένα βήμα είναι «ρυθμικό» μόνο αν τα δύο τελευταία παράθυρα των 6 βημάτων έχουν από μόνα τους
+  // καθαρό ρυθμό (σιγουριά ≥ LOCAL_CONF) και συμφωνούν μεταξύ τους (±8%). Τυχαίοι ήχοι το περνούν
+  // σπάνια (~1%), ενώ τα βήματα ενός ghost σχεδόν πάντα.
+  const LOCAL_WIN = 6, LOCAL_CONF = 0.6, LOCAL_AGREE = 0.08;
+  const SLOW_PERIOD_S = 1.2, SLOW_CONF = 0.8;
+  // «Δικά σου βήματα»: ο παίκτης ακούει τα βήματά του πάντα από την ίδια απόσταση, άρα με σχεδόν
+  // ίδια ένταση· του ghost δυναμώνουν/σβήνουν καθώς πλησιάζει/απομακρύνεται. Κατώφλια χωρίς
+  // βαθμονόμηση σε πραγματικό ήχο ακόμα — συντηρητικά, ώστε να μην κρύβουν πραγματικό ghost.
+  const SELF_STEPS = 8, SELF_STD_DB = 1.0, SELF_RANGE_DB = 2.6;
+
+  /** Διασπορά έντασης μιας σειράς βημάτων (dB πάνω από τον θόρυβο). */
+  function loudness(strengths) {
+    const a = strengths.filter(x => Number.isFinite(x));
+    if (a.length < 2) return null;
+    const m = a.reduce((x, y) => x + y, 0) / a.length;
+    const std = Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / a.length);
+    const sorted = a.slice().sort((x, y) => x - y);
+    const range = sorted[Math.floor(a.length * 0.9 - 1e-9)] - sorted[Math.floor(a.length * 0.1)]; // 10–90%: αγνοεί 1 κακό βήμα
+    return { mean: m, std, range, n: a.length };
+  }
+  function isSelfLike(strengths) {
+    const l = loudness(strengths);
+    return !!l && l.n >= SELF_STEPS && l.std <= SELF_STD_DB && l.range <= SELF_RANGE_DB;
+  }
 
   class FootstepDetector {
     /**
      * @param {object} o
      * @param {number} o.sampleRate
      * @param {number} [o.sensitivity=0.5]  0 = μόνο δυνατά βήματα, 1 = πιάνει και σιγανά (περισσότερα false positives)
-     * @param {(e:{t:number,strength:number})=>void} [o.onStep]   t σε δευτερόλεπτα ροής
-     * @param {(e:{bpm:number,speed:number,steps:number,confidence:number}|null)=>void} [o.onTempo]
+     * @param {(e:{t:number,strength:number,tempo:object|null,rhythmic:boolean,selfLike:boolean})=>void} [o.onStep]
+     *        t σε δευτερόλεπτα ροής· strength = peak σε dB πάνω από τον θόρυβο
+     * @param {(e:{bpm:number,speed:number,steps:number,confidence:number,selfLike:boolean}|null)=>void} [o.onTempo]
      * @param {(e:{db:number,floor:number})=>void} [o.onLevel]  ~10 φορές/δευτ., για meter
      */
     constructor(o) {
@@ -72,6 +98,9 @@
       this._armed = true;           // περιμένει να πέσει η ενέργεια πριν το επόμενο onset
       this._peakSince = -200;
       this.steps = [];              // χρόνοι (s) τρέχουσας σειράς βημάτων
+      this.strengths = [];          // ένταση κάθε βήματος (peak dB πάνω από τον θόρυβο)
+      this._prevLocal = null;       // ρυθμός του προηγούμενου παραθύρου 6 βημάτων
+      this._run = 0;                // πόσα διαδοχικά ρυθμικά βήματα
       this._lastTempo = null;
     }
 
@@ -82,7 +111,7 @@
       this._gate = lerp(-50, -66, this.sensitivity);   // απόλυτο κατώφλι dBFS
     }
 
-    reset() { this.steps = []; this._lastTempo = null; if (this.onTempo) this.onTempo(null); }
+    reset() { this.steps = []; this.strengths = []; this._prevLocal = null; this._run = 0; this._lastTempo = null; if (this.onTempo) this.onTempo(null); }
 
     /** @param {Float32Array|number[]} samples mono, -1..1 */
     process(samples) {
@@ -122,14 +151,15 @@
       const p = this._pending;
       if (p) {
         if (db > p.peak) p.peak = db;
-        if (db <= p.peak - DECAY_DB) { this._pending = null; this._addStep(p.t, p.strength); }
+        if ((f - p.f) / this._fps < 0.04) { p.e += energy; p.n++; } // ένταση = μέση ενέργεια των πρώτων 40 ms (σταθερότερη από ένα frame)
+        if (db <= p.peak - DECAY_DB) { this._pending = null; this._addStep(p.t, 10 * Math.log10(p.e / p.n + 1e-12) - p.floor); }
         else if ((f - p.f) / this._fps > CONFIRM_S) this._pending = null;
       }
 
       const refractory = (f - this._lastOnsetFrame) / this._fps >= MIN_STEP_S;
       if (!this._pending && loud && rise >= this._rise && this._armed && refractory) {
         this._lastOnsetFrame = f; this._armed = false; this._peakSince = db;
-        this._pending = { t, f, peak: db, strength: db - this._floor };
+        this._pending = { t, f, peak: db, floor: this._floor, e: energy, n: 1 };
       }
 
       // Λήξη σειράς αν σταμάτησαν τα βήματα.
@@ -137,12 +167,35 @@
     }
 
     _addStep(t, strength) {
-      if (this.steps.length && t - this.steps[this.steps.length - 1] > RESET_GAP_S) this.steps = [];
-      this.steps.push(t);
-      if (this.steps.length > 16) this.steps.shift();
-      if (this.onStep) this.onStep({ t, strength });
-      const tempo = estimateTempo(this.steps);
+      if (this.steps.length && t - this.steps[this.steps.length - 1] > RESET_GAP_S) { this.steps = []; this.strengths = []; this._prevLocal = null; this._run = 0; }
+      this.steps.push(t); this.strengths.push(strength);
+      if (this.steps.length > 16) { this.steps.shift(); this.strengths.shift(); }
+
+      // rhythmic: το βήμα ανήκει σε σταθερό ρυθμό. Πόρτες, φωνές, αντικείμενα δεν σχηματίζουν ρυθμό.
+      const local = this.steps.length >= LOCAL_WIN ? estimateTempo(this.steps.slice(-LOCAL_WIN)) : null;
+      const prev = this._prevLocal;
+      // Πολύ αργά βήματα (Deogen κοντά σου, 1 βήμα / 1.2–2.4 s): δεν προλαβαίνουν δύο παράθυρα,
+      // οπότε αρκεί ένα με πολύ καθαρό ρυθμό.
+      const slow = !!local && 60 / local.bpm >= SLOW_PERIOD_S && local.confidence >= SLOW_CONF;
+      const rhythmic = slow || (!!local && local.confidence >= LOCAL_CONF && !!prev && prev.confidence >= LOCAL_CONF &&
+                       Math.abs(local.speed - prev.speed) <= LOCAL_AGREE * local.speed);
+      this._prevLocal = local;
+      this._run = rhythmic ? this._run + 1 : 0;
+
+      // Ένδειξη: ο ρυθμός όλης της σειράς αν συμφωνεί με τον τοπικό (πιο σταθερός), αλλιώς ο τοπικός
+      // (π.χ. μόλις άλλαξε ταχύτητα, Revenant 1.0 → 3.0).
+      const global = estimateTempo(this.steps);
+      let tempo = rhythmic ? ((global && Math.abs(global.speed - local.speed) <= 0.1 * local.speed) ? global : local) : (global || local);
+      // Ένταση μόνο από βήματα του τρέχοντος ρυθμού (όχι από θόρυβο πριν), ως 12.
+      const runLen = Math.min(12, this.steps.length, this._run + LOCAL_WIN);
+      const selfLike = rhythmic && isSelfLike(this.strengths.slice(-runLen));
+      if (tempo) { tempo = Object.assign({}, tempo, { rhythmic, selfLike, steps: this.steps.length }); }
       this._lastTempo = tempo;
+      // run === 1: μόλις αναγνωρίστηκε ρυθμός → τα προηγούμενα βήματα του παραθύρου ανήκουν κι αυτά σε αυτόν.
+      const backfill = rhythmic && this._run === 1
+        ? this.steps.slice(-(LOCAL_WIN + 1), -1).map((x, i, a) => [x, this.strengths[this.strengths.length - 1 - a.length + i]])
+        : null;
+      if (this.onStep) this.onStep({ t, strength, tempo, rhythmic, selfLike, backfill });
       if (this.onTempo) this.onTempo(tempo);
     }
   }
@@ -199,6 +252,8 @@
   // ───────────────────────── Ανάλυση hunt ─────────────────────────
   const WIN = 6;           // βήματα ανά σημείο καμπύλης (5 διαστήματα ≈ 1.5–5 s ανάλογα την ταχύτητα)
   const MIN_CONF = 0.4;    // σημεία με χαμηλότερη σιγουριά δεν μπαίνουν στην καμπύλη
+  const MIN_CURVE = 5;     // λιγότερα σημεία = όχι hunt (λίγα τυχαία χτυπήματα)
+  const MIN_COVERAGE = 0.6;
   const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
   const mad = (a, m) => a.reduce((s, x) => s + Math.abs(x - m), 0);
 
@@ -206,6 +261,7 @@
    * Καμπύλη ταχύτητας και στατιστικά ενός hunt.
    * @param {number[]} times  χρόνοι βημάτων σε δευτερόλεπτα από την αρχή του hunt (αύξουσα σειρά·
    *                          κενά > MAX_STEP_S = το ghost δεν ακουγόταν, χωρίζουν τμήματα)
+   * @param {number[]} [strengths]  ένταση κάθε βήματος (dB πάνω από τον θόρυβο), ίδιο μήκος με times
    * @returns {null|{
    *   curve:[number,number][], duration:number, steps:number, segments:number,
    *   start:number, end:number, mean:number, min:number, max:number,
@@ -213,7 +269,7 @@
    *   steady:number  // δευτερόλεπτα που η ταχύτητα έμεινε σταθερή (για «χωρίς LoS accel»)
    * }}
    */
-  function analyzeHunt(times) {
+  function analyzeHunt(times, strengths) {
     if (!times || times.length < WIN) return null;
     // Τμήματα συνεχόμενων βημάτων
     const segs = [[times[0]]];
@@ -221,14 +277,37 @@
       if (times[i] - times[i - 1] > MAX_STEP_S) segs.push([]);
       segs[segs.length - 1].push(times[i]);
     }
-    const curve = [];
+    const curve = [], wins = []; // wins: [τέλος παραθύρου, αρχή παραθύρου, πέρασε;]
     for (const s of segs) {
       for (let i = WIN - 1; i < s.length; i++) {
         const r = estimateTempo(s.slice(i - WIN + 1, i + 1));
-        if (r && r.confidence >= MIN_CONF) curve.push([s[i], r.speed]);
+        const ok = !!r && r.confidence >= MIN_CONF;
+        wins.push([s[i], s[i - WIN + 1], ok]);
+        if (ok) curve.push([s[i], r.speed]);
       }
     }
-    if (curve.length < 3) return null;
+    if (curve.length < MIN_CURVE) return null;
+    // Ρυθμικό τμήμα = από την αρχή του πρώτου καλού παραθύρου ως το τέλος του τελευταίου.
+    // Θόρυβος πριν/μετά κόβεται· αν μέσα στο τμήμα τα περισσότερα παράθυρα ΔΕΝ έχουν ρυθμό,
+    // δεν είναι βήματα (τυχαίοι ήχοι που κατά σύμπτωση έπεσαν σε ρυθμό για λίγο).
+    const firstT0 = curve[0][0], lastT0 = curve[curve.length - 1][0];
+    const inSpan = wins.filter(w => w[0] >= firstT0 && w[0] <= lastT0);
+    const coverage = inSpan.filter(w => w[2]).length / inSpan.length;
+    if (coverage < MIN_COVERAGE) return null;
+
+    // Κόψιμο άκρων: ένα παράθυρο 6 βημάτων «περνάει» ακόμα κι αν 1–2 από αυτά είναι θόρυβος,
+    // οπότε το τμήμα απλώνεται πάνω σε ήχους πριν/μετά το hunt. Στις άκρες κρατάμε ένα βήμα μόνο
+    // αν το διάστημά του είναι συνεπές με τα δύο επόμενα (ίδιο ±20%, ή διπλό/μισό = χαμένο βήμα).
+    // Συγκρίνει διαστήματα μεταξύ τους, άρα αντέχει και σταδιακή επιτάχυνση/επιβράδυνση.
+    const cons = (a, b) => { const r = a / b; return (r > 0.8 && r < 1.25) || (r > 1.65 && r < 2.4) || (r > 0.42 && r < 0.6); };
+    const ok3 = (d0, d1, d2) => cons(d0, d1) && cons(d1, d2);
+    let span = times.filter(t => t >= wins.find(w => w[2])[1] - 1e-9 && t <= lastT0 + 1e-9);
+    while (span.length > WIN && !ok3(span[1] - span[0], span[2] - span[1], span[3] - span[2])) span.shift();
+    const L = () => span.length - 1;
+    while (span.length > WIN && !ok3(span[L()] - span[L() - 1], span[L() - 1] - span[L() - 2], span[L() - 2] - span[L() - 3])) span.pop();
+    const spanStart = span[0], lastT = span[span.length - 1];
+    const trimmed = curve.filter(p => p[0] >= spanStart + 1e-9 && p[0] <= lastT + 1e-9);
+    if (trimmed.length >= MIN_CURVE) { curve.length = 0; curve.push(...trimmed); }
 
     // Median filter 5 σημείων (στις άκρες το παράθυρο μετατοπίζεται μέσα, ώστε να έχει πάντα 5):
     // έως 2 διαδοχικά λάθος παράθυρα (π.χ. διπλή περίοδος από χαμένα βήματα → μισή ταχύτητα) δεν
@@ -242,8 +321,10 @@
     const v = curve.map(p => p[1]);
     const head = v.slice(0, Math.min(3, v.length)), tail = v.slice(-Math.min(3, v.length));
     const out = {
-      curve, steps: times.length, segments: segs.filter(s => s.length >= 2).length,
-      duration: times[times.length - 1] - times[0],
+      curve, coverage, segments: segs.filter(s => s.length >= 2).length,
+      steps: span.length,
+      loudness: null, selfLike: false,
+      duration: lastT - spanStart, spanStart, spanEnd: lastT,
       start: median(head), end: median(tail), mean: mean(v),
       min: Math.min(...v), max: Math.max(...v),
     };
@@ -280,6 +361,11 @@
       steady = Math.max(steady, t[j] - t[i]);
     }
     out.steady = steady;
+    if (strengths && strengths.length === times.length) {
+      const inSpanStr = strengths.filter((_, i) => times[i] >= spanStart - 1e-9 && times[i] <= lastT + 1e-9);
+      out.loudness = loudness(inSpanStr);
+      out.selfLike = isSelfLike(inSpanStr);
+    }
     return out;
   }
 
@@ -307,7 +393,7 @@
     return null;
   }
 
-  const api = { FootstepDetector, estimateTempo, bpmToSpeed, speedToBpm, analyzeHunt, analyzeGame };
+  const api = { FootstepDetector, estimateTempo, bpmToSpeed, speedToBpm, analyzeHunt, analyzeGame, loudness, isSelfLike };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.PhasmFootsteps = api;
 })(typeof self !== "undefined" ? self : this);

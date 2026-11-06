@@ -375,6 +375,18 @@
   .ear .drain-row{margin:2px 0 4px}
   .ear .smudge-note{font-size:11.5px}
   .ear .smudge-note a{color:var(--nv)}
+  .ear-opts{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:2px 0 6px;font-size:12.5px}
+  .ear-opts .chk{gap:6px}
+  .ear-opts .btn{padding:4px 9px;font-size:12px}
+  .ear-opts .btn:disabled{opacity:.45;cursor:default}
+  .ear-ignored{font-size:11.5px;color:var(--muted);margin:0 0 6px}
+  /* ---------- clickable speed rows ---------- */
+  .speed-row{cursor:pointer;border-radius:6px;transition:background .15s}
+  .speed-row:hover{background:rgba(143,227,136,.05)}
+  .speed-row:focus-visible{outline:1px dashed var(--nv-dim);outline-offset:1px}
+  .speed-row.picked{background:rgba(143,227,136,.12);box-shadow:inset 3px 0 0 var(--nv)}
+  .speed-row.picked .sp::after{content:" ✓";color:var(--nv)}
+  .speed-hint{font-size:11.5px;color:var(--muted);margin:2px 0 6px}
   /* ---------- hunt history ---------- */
   .hl{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
   .hl-head{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:#B9C2CE;margin-bottom:6px}
@@ -675,6 +687,11 @@
               <span id="earSensVal" style="min-width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)">50%</span>
             </label>
           </div>
+          <div class="ear-opts">
+            <label class="chk" title="Τα δικά σου βήματα ακούγονται πάντα από την ίδια απόσταση (σταθερή ένταση)· του ghost δυναμώνουν και σβήνουν / Your own steps are always the same distance away (constant loudness); the ghost's come and go"><input type="checkbox" id="earSelf" checked> 👣 <span class="l-el">Αγνόησε τα δικά μου βήματα</span><span class="l-en">Ignore my own footsteps</span></label>
+            <button class="btn" id="earRec" disabled title="Αποθηκεύει τα τελευταία 2 λεπτά ήχου ως WAV, για να ρυθμιστεί ο detector σε πραγματικό ήχο / Saves the last 2 minutes of audio as a WAV, to tune the detector on real game audio">⏺ <span class="l-el">Κράτα τα τελευταία 2′ (WAV)</span><span class="l-en">Save last 2′ (WAV)</span></button>
+          </div>
+          <div class="ear-ignored" id="earIgnored" hidden></div>
           <div class="smudge-note" id="earNote"><span class="l-el"><strong>PhasmListener</strong> = μικρό Windows app που ακούει ΜΟΝΟ τον ήχο του Phasmophobia (όχι Discord/μουσική) — <a href="https://github.com/Rayzold/phasm/tree/main/footstep-helper" target="_blank" rel="noopener">οδηγίες</a>. <strong>Ήχος συστήματος</strong> = χωρίς εγκατάσταση, αλλά ακούει ό,τι παίζει ο υπολογιστής. Μείνε ακίνητος στο hunt: τα δικά σου βήματα μπερδεύουν τη μέτρηση.</span><span class="l-en"><strong>PhasmListener</strong> = a small Windows app that hears ONLY Phasmophobia's audio (not Discord/music) — <a href="https://github.com/Rayzold/phasm/tree/main/footstep-helper" target="_blank" rel="noopener">setup</a>. <strong>System audio</strong> = nothing to install, but it hears everything your PC plays. Stand still during the hunt: your own footsteps confuse the reading.</span></div>
           <div class="hl" id="huntLog">
             <div class="hl-head"><span>📊 <span class="l-el">Ιστορικό hunts</span><span class="l-en">Hunt history</span></span>
@@ -1017,7 +1034,7 @@
 <script src="tells.js"></script>
 <script src="footsteps.js"></script>
 <script>
-const APP_VERSION = "1.42.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.43.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -1824,16 +1841,16 @@ else pipBtns.forEach(b=>{ b.disabled=true; b.title="Pop-out timers: χρειάζ
 // ---- footstep speed tapper ----
 // Σχέση της κοινότητας (tybayn cheat sheet): βήμα κάθε (1/v − 0.075)s ⇒ v = bpm / (60 + 0.075·bpm)
 const SPEED_REF=[
- {min:0.40,max:3.00,label:"Deogen",note:"0.4 κοντά σου → 3.0 μακριά",noteEn:"0.4 near you → 3.0 far away"},
- {min:0.40,max:3.00,label:"Deildegast",note:"3.0 αρχικά → 0.4 μετά από ~26 αντικείμενα (όχι ο εξοπλισμός σου)",noteEn:"3.0 at first → 0.4 after ~26 items (not your own equipment)"},
+ {min:0.40,max:3.00,label:"Deogen",ghosts:["Deogen"],note:"0.4 κοντά σου → 3.0 μακριά",noteEn:"0.4 near you → 3.0 far away"},
+ {min:0.40,max:3.00,label:"Deildegast",ghosts:["Deildegast"],note:"3.0 αρχικά → 0.4 μετά από ~26 αντικείμενα (όχι ο εξοπλισμός σου)",noteEn:"3.0 at first → 0.4 after ~26 items (not your own equipment)"},
  {min:1.00,max:1.00,label:"Revenant (δεν σε βλέπει) / Thaye (γερασμένο)",labelEn:"Revenant (doesn't see you) / Thaye (aged)",note:"σταθερό",noteEn:"constant"},
- {min:1.40,max:2.70,label:"Hantu",note:"πιο γρήγορο στο κρύο, χωρίς LoS accel",noteEn:"faster in the cold, no LoS accel"},
- {min:1.20,max:2.25,label:"Dayan",note:"1.2 ακίνητος → 2.25 σε κίνηση (<10 m), χωρίς LoS",noteEn:"1.2 still → 2.25 moving (<10 m), no LoS"},
- {min:1.36,max:1.96,label:"Gallu",note:"Weak 1.36 · Normal 1.7 · Angry 1.96",noteEn:"Weak 1.36 · Normal 1.7 · Angry 1.96"},
- {min:1.45,max:1.96,label:"Obambo",note:"calm 1.45 · aggressive 1.96, αλλάζει και μέσα στο hunt",noteEn:"calm 1.45 · aggressive 1.96, can switch mid-hunt"},
- {min:1.50,max:2.25,label:"Moroi",note:"πιο γρήγορο όσο πέφτει το sanity σου · με LoS ως 3.71 (το πιο γρήγορο)",noteEn:"faster as your sanity drops · with LoS up to 3.71 (the fastest)"},
+ {min:1.40,max:2.70,label:"Hantu",ghosts:["Hantu"],note:"πιο γρήγορο στο κρύο, χωρίς LoS accel",noteEn:"faster in the cold, no LoS accel"},
+ {min:1.20,max:2.25,label:"Dayan",ghosts:["Dayan"],note:"1.2 ακίνητος → 2.25 σε κίνηση (<10 m), χωρίς LoS",noteEn:"1.2 still → 2.25 moving (<10 m), no LoS"},
+ {min:1.36,max:1.96,label:"Gallu",ghosts:["Gallu"],note:"Weak 1.36 · Normal 1.7 · Angry 1.96",noteEn:"Weak 1.36 · Normal 1.7 · Angry 1.96"},
+ {min:1.45,max:1.96,label:"Obambo",ghosts:["Obambo"],note:"calm 1.45 · aggressive 1.96, αλλάζει και μέσα στο hunt",noteEn:"calm 1.45 · aggressive 1.96, can switch mid-hunt"},
+ {min:1.50,max:2.25,label:"Moroi",ghosts:["Moroi"],note:"πιο γρήγορο όσο πέφτει το sanity σου · με LoS ως 3.71 (το πιο γρήγορο)",noteEn:"faster as your sanity drops · with LoS up to 3.71 (the fastest)"},
  {min:1.53,max:1.53,label:"Aswang",note:"αργό ξεκίνημα, max LoS σε ~8.7s",noteEn:"slow start, max LoS in ~8.7s"},
- {min:1.53,max:1.87,label:"The Twins",note:"δύο σταθερές ταχύτητες",noteEn:"two fixed speeds"},
+ {min:1.53,max:1.87,label:"The Twins",ghosts:["The Twins"],note:"δύο σταθερές ταχύτητες",noteEn:"two fixed speeds"},
  {min:1.70,max:1.70,label:"Βασική ταχύτητα (τα περισσότερα ghosts)",labelEn:"Base speed (most ghosts)",note:"με line-of-sight ως ×1.65 → ~2.8",noteEn:"with line-of-sight up to ×1.65 → ~2.8"},
  {min:2.21,max:2.21,label:"Kormos (σε ακούει να κινείσαι, >5 m)",labelEn:"Kormos (hears you moving, >5 m)",note:"χωρίς LoS",noteEn:"no LoS"},
  {min:2.50,max:2.50,label:"Raiju (ενεργά ηλεκτρονικά) / Jinn (ρεύμα ON, από μακριά)",labelEn:"Raiju (active electronics) / Jinn (power ON, from afar)",note:""},
@@ -1843,9 +1860,16 @@ const SPEED_REF=[
 const speedRows=document.getElementById("speedRows");
 function buildSpeedRows(){
   speedRows.innerHTML="";
+  const hint=document.createElement("div"); hint.className="speed-hint";
+  hint.textContent = lang==="en" ? "Click the row that matches what you saw: ghosts that don't fit are ruled out. Click again to undo."
+                                 : "Πάτα τη γραμμή που ταιριάζει με αυτό που είδες: όσα ghosts δεν ταιριάζουν αποκλείονται. Ξαναπάτα για ακύρωση.";
+  speedRows.appendChild(hint);
   SPEED_REF.forEach((s,i)=>{
     const d=document.createElement("div");
-    d.className="speed-row"; d.dataset.i=i;
+    d.className="speed-row"+(speedPick===i?" picked":""); d.dataset.i=i;
+    d.tabIndex=0; d.setAttribute("role","button"); d.setAttribute("aria-pressed", speedPick===i?"true":"false");
+    d.onclick=()=>pickSpeedRow(i);
+    d.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pickSpeedRow(i); } };
     const label = lang==="en" ? (s.labelEn||s.label) : s.label;
     const note  = lang==="en" ? (s.noteEn||"") : s.note;
     d.innerHTML=`<span class="sp">${s.min===s.max?s.min.toFixed(2):s.min.toFixed(2)+"–"+s.max.toFixed(2)}</span><span>${label}${note?" — "+note:""}</span>`;
@@ -1854,6 +1878,7 @@ function buildSpeedRows(){
 }
 // ---- speed filter: η μετρημένη ταχύτητα ως extra layer ταυτοποίησης ----
 let speedFilter=null, lastSpeed=null;
+let speedPick=null; // index στο SPEED_REF: «αυτό είδα» (clickable γραμμές)
 const SPEED_DEFAULT=[[1.7,2.81]]; // βασική 1.7 + LoS ×1.65
 const SPEED_OF={ // εύρη m/s ανά ghost όπου διαφέρουν (με LoS όπου ισχύει)
  "Revenant":[[0.9,1.1],[2.9,3.1]],
@@ -1870,7 +1895,15 @@ const SPEED_OF={ // εύρη m/s ανά ghost όπου διαφέρουν (με 
  "Deildegast":[[0.4,3.0]],
 };
 function passesSpeed(g){
-  if(speedFilter===null || g.variableTh) return true; // Mimic: μιμείται και ταχύτητες
+  if(g.variableTh) return true; // Mimic: μιμείται και ταχύτητες
+  if(speedPick!==null){
+    const r=SPEED_REF[speedPick];
+    // Γραμμή-συμπεριφορά (εύρος ενός ghost) → μόνο αυτό το ghost· σταθερή τιμή → φίλτρο ταχύτητας.
+    if(r.ghosts) return r.ghosts.includes(g.name);
+    const ranges=SPEED_OF[g.name]||SPEED_DEFAULT;
+    return ranges.some(x=>r.min>=x[0]-0.1 && r.min<=x[1]+0.1);
+  }
+  if(speedFilter===null) return true;
   const ranges=SPEED_OF[g.name]||SPEED_DEFAULT;
   return ranges.some(r=>speedFilter>=r[0]-0.1 && speedFilter<=r[1]+0.1);
 }
@@ -1879,12 +1912,23 @@ function passesManual(g){ return !manualOut.has(g.name); }
 const speedApply=document.getElementById("speedApply"), speedClear=document.getElementById("speedClear");
 speedApply.onclick=()=>{
   if(lastSpeed===null) return;
-  speedFilter=lastSpeed;
+  speedFilter=lastSpeed; speedPick=null; buildSpeedRows();
   speedClear.textContent="✕ "+speedFilter.toFixed(2)+" m/s";
   speedClear.style.display="inline-block";
   render();
 };
-speedClear.onclick=()=>{ speedFilter=null; speedClear.style.display="none"; render(); };
+speedClear.onclick=()=>{ speedFilter=null; speedPick=null; speedClear.style.display="none"; buildSpeedRows(); render(); };
+function pickSpeedRow(i){
+  speedPick = speedPick===i ? null : i;
+  speedFilter = null;
+  if(speedPick===null){ speedClear.style.display="none"; }
+  else{
+    const r=SPEED_REF[i];
+    const lbl = r.ghosts ? r.ghosts.join(" / ") : r.min.toFixed(2)+" m/s";
+    speedClear.textContent="✕ "+lbl; speedClear.style.display="inline-block";
+  }
+  buildSpeedRows(); render();
+}
 
 // ---- Deildegast item counter: same speedFilter the footstep tapper uses, just a different
 // way of arriving at a measured speed (3.0 m/s base, -0.1 per unique item, floor 0.4 at ~26) ----
@@ -1899,7 +1943,7 @@ document.getElementById("itemMinus").onclick=()=>{ itemsMoved=Math.max(0,itemsMo
 document.getElementById("itemPlus").onclick=()=>{ itemsMoved=Math.min(30,itemsMoved+1); paintItemCounter(); saveState(); };
 document.getElementById("itemReset").onclick=()=>{ itemsMoved=0; paintItemCounter(); saveState(); };
 document.getElementById("itemFilterApply").onclick=()=>{
-  speedFilter=deildegastSpeedFor(itemsMoved);
+  speedFilter=deildegastSpeedFor(itemsMoved); speedPick=null; buildSpeedRows();
   speedClear.textContent="✕ "+speedFilter.toFixed(2)+" m/s";
   speedClear.style.display="inline-block";
   render();
@@ -1995,7 +2039,8 @@ const huntLog=(()=>{
   const HL_LS="phasm-hunts-v1", MERGE_GAP_MS=8000, MIN_STEPS=8, MAX_HUNTS=20;
   const T=(el,en)=>lang==="en"?en:el;
   let hunts=[];                 // [{at:epoch ms, steps:[s]}], χρονολογικά
-  let cur=null;                 // {at, t0, steps:[s], wall}
+  let cur=null;                 // {at, t0, steps:[s], str:[dB], wall}
+  let ignoreSelf=true;          // ορίζεται από το ear (checkbox «Αγνόησε τα δικά μου βήματα»)
   let det0=null;                // ποιος detector γράφει τώρα (αλλαγή → νέο hunt)
   try{ const d=JSON.parse(localStorage.getItem(HL_LS)||"[]"); if(Array.isArray(d)) hunts=d.filter(h=>h&&Array.isArray(h.steps)); }catch(e){}
   const save=()=>{ try{ localStorage.setItem(HL_LS, JSON.stringify(hunts)); }catch(e){} };
@@ -2004,22 +2049,29 @@ const huntLog=(()=>{
   const emptyEl=document.getElementById("hlEmpty"), clearBtn=document.getElementById("hlClear");
   const A=PhasmFootsteps.analyzeHunt;
   const cache=new WeakMap(); // hunt → analysis (τα κλεισμένα hunts δεν αλλάζουν)
-  const analysis=h=>{ if(h===cur) return A(h.steps); if(!cache.has(h)) cache.set(h, A(h.steps)); return cache.get(h); };
+  const analysis=h=>{ if(h===cur) return A(h.steps, h.str); if(!cache.has(h)) cache.set(h, A(h.steps, h.str)); return cache.get(h); };
+  // Ένα hunt εμφανίζεται/καταγράφεται μόνο αν έχει ρυθμό βημάτων (όχι τυχαίους ήχους)
+  // και, αν το ζήτησες, δεν μοιάζει με τα δικά σου βήματα (σταθερή ένταση).
+  const counts=a=>!!a && !(ignoreSelf && a.selfLike);
+  let ignoredMsg=null;
 
   function finalize(){
     if(!cur) return;
-    const h={at:cur.at, steps:cur.steps.map(x=>Math.round(x*1000)/1000)};
+    const h={at:cur.at, steps:cur.steps.map(x=>Math.round(x*1000)/1000), str:cur.str.map(x=>Math.round(x*10)/10)};
     cur=null;
-    if(h.steps.length>=MIN_STEPS && A(h.steps)){ hunts.push(h); if(hunts.length>MAX_HUNTS) hunts.shift(); save(); }
+    const a=h.steps.length>=MIN_STEPS ? A(h.steps, h.str) : null;
+    if(counts(a)){ hunts.push(h); if(hunts.length>MAX_HUNTS) hunts.shift(); save(); }
+    else if(a && a.selfLike) ignoredMsg={at:Date.now(), n:a.steps};
     paint();
   }
   // Καλείται από το ear σε κάθε βήμα που ακούει (t = χρόνος ροής ήχου σε s).
-  function step(t, det){
+  function step(t, det, strength){
     const now=Date.now();
     if(cur && (det!==det0 || now-cur.wall>MERGE_GAP_MS)) finalize();
     det0=det;
-    if(!cur) cur={at:now, t0:t, steps:[], wall:now};
-    cur.steps.push(t-cur.t0); cur.wall=now;
+    if(!cur) cur={at:now, t0:t, steps:[], str:[], wall:now};
+    if(cur.steps.length && t-cur.t0 <= cur.steps[cur.steps.length-1]+1e-6) return; // ήδη καταγεγραμμένο
+    cur.steps.push(t-cur.t0); cur.str.push(Number.isFinite(strength)?strength:NaN); cur.wall=now;
     schedule();
   }
   // Κλείσιμο hunt όταν σωπάσει για > MERGE_GAP_MS (μικρά κενά = το ghost απομακρύνθηκε, ίδιο hunt).
@@ -2036,6 +2088,7 @@ const huntLog=(()=>{
   }
   function hints(a){
     const H=[], add=(strong,html)=>H.push({strong,html});
+    if(a.selfLike) add(false, T("👣 Σταθερή ένταση σε όλα τα βήματα: μάλλον τα δικά σου, όχι του ghost.","👣 Same loudness on every step: probably your own footsteps, not the ghost's."));
     if(a.trend==="switch"){
       const f=a.from, t=a.to;
       if(pair(f,t,1.0,3.0,0.2)) add(true, T(`Πήδηξε ${f.toFixed(2)} → ${t.toFixed(2)}: <b>Revenant</b> (1.0 όταν δεν σε βλέπει, 3.0 όταν σε δει)`, `Jumped ${f.toFixed(2)} → ${t.toFixed(2)}: <b>Revenant</b> (1.0 when it can't see you, 3.0 once it does)`));
@@ -2138,21 +2191,24 @@ const huntLog=(()=>{
     head.appendChild(right); c.appendChild(head);
     if(!a){ const p=document.createElement("div"); p.className="hl-empty"; p.textContent=T("ακούω… (χρειάζονται ~6 καθαρά βήματα)","listening… (needs ~6 clean steps)"); c.appendChild(p); return c; }
     const nums=document.createElement("div"); nums.className="hl-nums";
-    nums.innerHTML=`<span>${T("αρχή","start")} <b>${f2(a.start)}</b></span><span>${T("μ.ό.","avg")} <b>${f2(a.mean)}</b></span><span>min <b>${f2(a.min)}</b></span><span>max <b>${f2(a.max)}</b></span><span>${T("τέλος","end")} <b>${f2(a.end)}</b></span>`;
+    nums.innerHTML=`<span>${T("αρχή","start")} <b>${f2(a.start)}</b></span><span>${T("μ.ό.","avg")} <b>${f2(a.mean)}</b></span><span>min <b>${f2(a.min)}</b></span><span>max <b>${f2(a.max)}</b></span><span>${T("τέλος","end")} <b>${f2(a.end)}</b></span>${a.loudness?`<span title="${T("Πόσο άλλαζε η ένταση των βημάτων: μεγάλη αλλαγή = το ghost πλησίαζε/απομακρυνόταν","How much the step loudness varied: a big change = the ghost moved closer/away")}">${T("ένταση","loudness")} <b>±${a.loudness.std.toFixed(1)} dB</b></span>`:""}`;
     c.appendChild(nums);
     c.appendChild(chart(a));
     hints(a).forEach(x=>{ const d=document.createElement("div"); d.className="hl-hint"+(x.strong?" strong":""); d.innerHTML=x.html; c.appendChild(d); });
     const fb=document.createElement("button"); fb.className="btn"; fb.textContent=T(`🔍 Φίλτρο με αρχική ${f2(a.start)} m/s`,`🔍 Filter by start ${f2(a.start)} m/s`);
-    fb.onclick=()=>{ speedFilter=a.start; speedClear.textContent="✕ "+speedFilter.toFixed(2)+" m/s"; speedClear.style.display="inline-block"; render(); };
+    fb.onclick=()=>{ speedFilter=a.start; speedPick=null; buildSpeedRows(); speedClear.textContent="✕ "+speedFilter.toFixed(2)+" m/s"; speedClear.style.display="inline-block"; render(); };
     c.appendChild(fb);
     return c;
   }
   function paint(){
     const done=hunts.map(h=>({h,a:analysis(h)})).filter(x=>x.a);
     listEl.innerHTML="";
-    if(cur) listEl.appendChild(card(cur, hunts.length+1, true));
+    if(cur && counts(analysis(cur))) listEl.appendChild(card(cur, hunts.length+1, true));
+    const ig=document.getElementById("earIgnored");
+    if(ignoredMsg && Date.now()-ignoredMsg.at<5*60000){ ig.hidden=false; ig.textContent=T(`👣 Αγνόησα ${ignoredMsg.n} βήματα με σταθερή ένταση στις ${hhmm(ignoredMsg.at)} (μάλλον δικά σου).`,`👣 Ignored ${ignoredMsg.n} steps with constant loudness at ${hhmm(ignoredMsg.at)} (probably yours).`); }
+    else ig.hidden=true;
     for(let i=hunts.length-1;i>=0;i--) listEl.appendChild(card(hunts[i], i+1, false));
-    emptyEl.style.display=(cur||hunts.length)?"none":"";
+    emptyEl.style.display=((cur&&counts(analysis(cur)))||hunts.length)?"none":"";
     clearBtn.style.display=hunts.length?"inline-block":"none";
     // σύνοψη παιχνιδιού
     sumEl.innerHTML=""; gameEl.innerHTML="";
@@ -2169,15 +2225,16 @@ const huntLog=(()=>{
       if(g){ const d=document.createElement("div"); d.className="hl-hint"+(g.strong?" strong":""); d.innerHTML=g.html; gameEl.appendChild(d); }
     }
   }
-  function clear(){ cur=null; hunts=[]; save(); paint(); }
+  function clear(){ cur=null; hunts=[]; ignoredMsg=null; save(); paint(); }
+  function setIgnoreSelf(v){ ignoreSelf=!!v; paint(); }
   clearBtn.onclick=clear;
   paint();
-  return { step, finalize, clear, paint };
+  return { step, finalize, clear, paint, setIgnoreSelf };
 })();
 
 const ear=(()=>{
   const EAR_LS="phasm-ear-v1";
-  let cfg={sens:0.5, port:47213};
+  let cfg={sens:0.5, port:47213, ignoreSelf:true};
   try{ Object.assign(cfg, JSON.parse(localStorage.getItem(EAR_LS)||"{}")); }catch(e){}
   const saveCfg=()=>{ try{ localStorage.setItem(EAR_LS, JSON.stringify(cfg)); }catch(e){} };
 
@@ -2197,15 +2254,23 @@ const ear=(()=>{
   function newDetector(sampleRate){
     det=new PhasmFootsteps.FootstepDetector({
       sampleRate, sensitivity:cfg.sens,
-      onStep:e=>{ // «το άκουσα»: αναβοσβήνει το TAP κουμπί + καταγραφή στο ιστορικό hunts
-        huntLog.step(e.t, det);
+      onStep:e=>{ // καταγραφή στο ιστορικό hunts· το TAP αναβοσβήνει μόνο για βήματα με ρυθμό
+        if(!e.rhythmic) return; // πόρτες, φωνές, αντικείμενα: χωρίς ρυθμό → ούτε ιστορικό ούτε ένδειξη
+        if(e.backfill) e.backfill.forEach(([t,st])=>huntLog.step(t, det, st));
+        huntLog.step(e.t, det, e.strength);
+        if(cfg.ignoreSelf && e.selfLike) return; // δικά σου βήματα
         tapBtn.classList.add("pressed"); clearTimeout(blink);
         blink=setTimeout(()=>tapBtn.classList.remove("pressed"), 90);
       },
       onTempo:t=>{
         if(!t) return; // η σειρά έληξε: κράτα την τελευταία ένδειξη για να φιλτράρεις μετά το hunt
+        if(!t.rhythmic) return; // χωρίς σταθερό ρυθμό = όχι βήματα
+        if(cfg.ignoreSelf && t.selfLike){
+          if(speedSrc!=="tap") tapSrcEl.textContent=T("👣 μάλλον δικά σου βήματα (σταθερή ένταση) · αγνοήθηκαν","👣 probably your own footsteps (constant loudness) · ignored");
+          return;
+        }
         speedSrc="auto";
-        const sure=t.confidence>=0.5 && t.steps>=4;
+        const sure=t.confidence>=0.6 && t.steps>=8;
         showSpeed(t.bpm, t.speed,
           T(`🎧 auto · ${t.steps} βήματα · σιγουριά ${Math.round(t.confidence*100)}%`, `🎧 auto · ${t.steps} steps · ${Math.round(t.confidence*100)}% sure`), sure);
       },
@@ -2249,6 +2314,7 @@ const ear=(()=>{
       if(!det) return;
       const i16=new Int16Array(ev.data), f=new Float32Array(i16.length);
       for(let i=0;i<f.length;i++) f[i]=i16[i]/32768;
+      rec.push(i16, det.fs);
       det.process(f);
     };
     sock.onclose=()=>{
@@ -2288,7 +2354,7 @@ const ear=(()=>{
     const src=ctx.createMediaStreamSource(new MediaStream([at]));
     node=new AudioWorkletNode(ctx,"phasm-tap",{numberOfOutputs:0});
     newDetector(ctx.sampleRate);
-    node.port.onmessage=e=>det&&det.process(e.data);
+    node.port.onmessage=e=>{ if(!det) return; rec.pushFloat(e.data, ctx.sampleRate); det.process(e.data); };
     src.connect(node);
     setState("live", "ακούω τον ήχο συστήματος ✓", "hearing system audio ✓");
     return true;
@@ -2310,10 +2376,41 @@ const ear=(()=>{
   bScreen.onclick=async()=>{ if(mode==="screen"){ stop(); return; } stop(); mode="screen"; ui(); if(!(await startScreen())) { const err=stateEl.textContent, cls=stateEl.className; stop(); stateEl.className=cls; stateEl.textContent=err; } };
   bStop.onclick=stop;
 
+  // ---- εγγραφή: κρατάει τα τελευταία 2 λεπτά ήχου (ό,τι ακούει και ο detector) για αποθήκευση σε WAV ----
+  const recBtn=document.getElementById("earRec");
+  const rec=(()=>{
+    const KEEP_S=120; let chunks=[], total=0, rate=0;
+    function push(i16, r){
+      if(r!==rate){ chunks=[]; total=0; rate=r; }
+      chunks.push(i16.slice ? i16.slice() : new Int16Array(i16)); total+=i16.length;
+      while(chunks.length && total-chunks[0].length>=KEEP_S*rate){ total-=chunks[0].length; chunks.shift(); }
+      if(recBtn.disabled && total>rate*5) recBtn.disabled=false;
+    }
+    function pushFloat(f32, r){ const o=new Int16Array(f32.length); for(let i=0;i<f32.length;i++){ const x=Math.max(-1,Math.min(1,f32[i])); o[i]=Math.round(x*32767); } push(o, r); }
+    function save(){
+      if(!total) return;
+      const dataBytes=total*2, buf=new ArrayBuffer(44+dataBytes), v=new DataView(buf);
+      const w=(o,str)=>{ for(let i=0;i<str.length;i++) v.setUint8(o+i,str.charCodeAt(i)); };
+      w(0,"RIFF"); v.setUint32(4,36+dataBytes,true); w(8,"WAVE"); w(12,"fmt "); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+      v.setUint32(24,rate,true); v.setUint32(28,rate*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,"data"); v.setUint32(40,dataBytes,true);
+      let off=44; for(const c of chunks){ new Int16Array(buf, off, c.length).set(c); off+=c.length*2; }
+      const d=new Date(), pad=n=>String(n).padStart(2,"0");
+      const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([buf],{type:"audio/wav"}));
+      a.download=`phasm-audio-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.wav`;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 10000);
+    }
+    return { push, pushFloat, save, get seconds(){ return rate?total/rate:0; } };
+  })();
+  recBtn.onclick=()=>rec.save();
+
+  const selfChk=document.getElementById("earSelf");
+  selfChk.checked=cfg.ignoreSelf!==false; huntLog.setIgnoreSelf(selfChk.checked);
+  selfChk.addEventListener("change",()=>{ cfg.ignoreSelf=selfChk.checked; huntLog.setIgnoreSelf(cfg.ignoreSelf); saveCfg(); });
+
   function paintSens(){ sens.value=cfg.sens; sensVal.textContent=Math.round(cfg.sens*100)+"%"; }
   sens.addEventListener("input",()=>{ cfg.sens=Number(sens.value); paintSens(); if(det) det.setSensitivity(cfg.sens); saveCfg(); });
   paintSens(); ui();
-  return { stop, get mode(){ return mode; } };
+  return { stop, get mode(){ return mode; }, rec };
 })();
 
 // ---- persistence (refresh-proof evidence board & sanity) ----
@@ -2378,7 +2475,7 @@ document.getElementById("resetBtn").onclick=()=>{
   EV.forEach(e=>state[e.k]=0);
   BEHAVIORS.forEach(b=>bhState[b.id]=0);
   sanFilter.checked=false;
-  speedFilter=null; speedClear.style.display="none";
+  speedFilter=null; speedPick=null; speedClear.style.display="none"; buildSpeedRows();
   manualOut.clear();
   huntLog.clear(); // νέο παιχνίδι = νέο ιστορικό hunts
   render();

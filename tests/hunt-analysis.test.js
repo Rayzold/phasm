@@ -64,6 +64,23 @@ for (const s0 of [99, 7, 2026]) {
 
 check("too few steps → null", analyzeHunt([0, 0.5, 1, 1.5]) === null);
 
+// Τυχαίοι ήχοι (πόρτες, φωνές, αντικείμενα, ambience): ακανόνιστα onsets → ΟΧΙ hunt.
+function randomOnsets(rate, dur) { const ts = []; let t = 0.2; while (t < dur) { t += Math.max(0.17, -Math.log(rnd() + 1e-12) / rate); ts.push(t); } return ts; }
+let falseHunts = 0, trials = 0;
+for (const s0 of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) for (const rate of [0.7, 1.5, 3]) {
+  seed = s0 * 31 + rate * 7; trials++;
+  if (analyzeHunt(randomOnsets(rate, 25))) falseHunts++;
+}
+check(`random sounds → no hunt (${trials} trials)`, falseHunts === 0, `${falseHunts} false hunts`);
+
+// Πραγματικό hunt με θόρυβο πριν και μετά: η διάρκεια/τα βήματα αφορούν μόνο το ρυθμικό κομμάτι.
+{
+  seed = 4040;
+  const pre = randomOnsets(1.5, 6), hunt = walk(() => 1.7, 15).map(t => t + 7), post = randomOnsets(1.5, 5).map(t => t + 23);
+  const r = analyzeHunt([...pre, ...hunt, ...post].sort((a, b) => a - b));
+  check("hunt with junk before/after → trimmed", r && close(r.mean, 1.7) && r.duration < 17 && r.duration > 12 && r.spanStart > 5.5, r ? `${fmt(r)} dur ${r.duration.toFixed(1)} span ${r.spanStart.toFixed(1)}–${r.spanEnd.toFixed(1)} cov ${r.coverage.toFixed(2)}` : "null");
+}
+
 // Από hunt σε hunt
 const g = s => JSON.stringify(analyzeGame(s));
 check("twins 1.53/1.87", analyzeGame([1.53, 1.88, 1.52])?.kind === "twins", g([1.53, 1.88, 1.52]));

@@ -44,7 +44,8 @@ function scene(v, o = {}) {
   for (let t = start, k = 0; t < dur - 0.2; t += T, k++) {
     if (o.miss && rnd() < o.miss) continue;
     const approach = o.approach ? 0.25 + 0.75 * (t - start) / (dur - start) : 1; // πλησιάζει → δυναμώνει
-    const amp = (o.amp || 0.25) * approach * (1 + (o.ampVar || 0.3) * (rnd() - 0.5));
+    const wander = o.wander ? Math.pow(10, (o.wander * Math.sin(2 * Math.PI * (t - start) / 7)) / 20) : 1; // πλησιάζει-απομακρύνεται
+    const amp = (o.amp || 0.25) * approach * wander * (1 + (o.ampVar ?? 0.3) * (rnd() - 0.5));
     const jitter = (o.jitter || 0.004) * gauss();
     thud(buf, Math.round((t + jitter) * FS), amp);
     truth.push(t);
@@ -54,12 +55,13 @@ function scene(v, o = {}) {
   return { buf, truth };
 }
 
+// last = η τελευταία ένδειξη που θα έβλεπε ο χρήστης (μόνο ρυθμικά βήματα περνούν στο UI)
 function run(buf, sens = 0.5) {
-  let last = null, best = null; const steps = [];
+  let last = null, any = null; const steps = [];
   const det = new FootstepDetector({ sampleRate: FS, sensitivity: sens,
-    onStep: e => steps.push(e.t), onTempo: t => { if (t) { last = t; if (!best || t.steps >= best.steps) best = t; } } });
+    onStep: e => steps.push(e.t), onTempo: t => { if (t) { any = t; if (t.rhythmic) last = t; } } });
   for (let i = 0; i < buf.length; i += 320) det.process(buf.subarray(i, i + 320)); // 20 ms chunks σαν τον helper
-  return { last, steps };
+  return { last, any, steps };
 }
 
 let fails = 0, total = 0;
@@ -90,7 +92,7 @@ for (const s0 of [12345, 777, 31337]) {
   seed = s0;
   for (const c of CASES) {
     for (const v of SPEEDS) {
-      const dur = v < 0.6 ? 16 : 10;
+      const dur = v < 0.6 ? 30 : 10; // 0.4 m/s = 1 βήμα / 2.4 s: χρειάζεται ~30 s για αρκετά βήματα
       const { buf, truth } = scene(v, Object.assign({ dur }, c.o));
       const { last, steps } = run(buf);
       const ok = last && Math.abs(last.speed - v) <= Math.max(0.05, 0.03 * v);
@@ -106,6 +108,20 @@ for (const s0 of [12345, 777, 31337]) {
   const buf = new Float32Array(a.buf.length + b.buf.length); buf.set(a.buf); buf.set(b.buf, a.buf.length);
   const { last } = run(buf);
   check("speed switch 1.0 → 3.0 mid-hunt", last && Math.abs(last.speed - 3.0) < 0.06, last ? last.speed.toFixed(2) : "none");
+}
+// 1b) Δικά σου βήματα (ίδια απόσταση → σχεδόν ίδια ένταση) vs ghost που πλησιάζει/απομακρύνεται.
+// Ο συνθετικός ήχος έχει ~±0.8 dB θόρυβο μέτρησης, οπότε ελέγχουμε ποσοστά σε πολλά seeds:
+// τα δικά σου πρέπει να πιάνονται τις περισσότερες φορές, ghost που κινείται ποτέ.
+{
+  const seeds = [2468, 1357, 42, 7, 99, 123, 555, 9001, 31, 64];
+  let own = 0, ghostFlagged = 0, ghostRuns = 0;
+  for (const sd of seeds) {
+    seed = sd; const o = run(scene(1.6, { dur: 12, ampVar: 0.06 }).buf); if (o.last && o.last.selfLike) own++;
+    seed = sd; const a = run(scene(1.7, { dur: 12, approach: true }).buf); ghostRuns++; if (!a.last || a.last.selfLike) ghostFlagged++;
+    seed = sd; const w = run(scene(1.7, { dur: 14, wander: 6 }).buf); ghostRuns++; if (!w.last || w.last.selfLike) ghostFlagged++;
+  }
+  check(`own footsteps flagged as yours (≥6/${seeds.length}; συντηρητικό ώστε να μην κρύβεται ghost)`, own >= 6, `${own}/${seeds.length}`);
+  check(`moving ghost never flagged as yours`, ghostFlagged === 0, `${ghostFlagged}/${ghostRuns} flagged or missing`);
 }
 // 2) Σιωπή / μόνο θόρυβος / μόνο φωνές: δεν πρέπει να «βρει» ρυθμό με υψηλή σιγουριά
 {
