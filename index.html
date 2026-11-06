@@ -688,7 +688,7 @@
             </label>
           </div>
           <div class="ear-opts">
-            <label class="chk" title="Τα δικά σου βήματα ακούγονται πάντα από την ίδια απόσταση (σταθερή ένταση)· του ghost δυναμώνουν και σβήνουν / Your own steps are always the same distance away (constant loudness); the ghost's come and go"><input type="checkbox" id="earSelf" checked> 👣 <span class="l-el">Αγνόησε τα δικά μου βήματα</span><span class="l-en">Ignore my own footsteps</span></label>
+            <label class="chk" title="Ο παίκτης περπατάει με 1.6 m/s, το ghost συνήθως 1.7: σειρές στα ~1.6 θεωρούνται δικά σου βήματα / Players walk at 1.6 m/s, ghosts usually 1.7: series at ~1.6 count as your own steps"><input type="checkbox" id="earSelf" checked> 👣 <span class="l-el">Αγνόησε τα δικά μου βήματα</span><span class="l-en">Ignore my own footsteps</span></label>
             <button class="btn" id="earRec" disabled title="Αποθηκεύει τα τελευταία 2 λεπτά ήχου ως WAV, για να ρυθμιστεί ο detector σε πραγματικό ήχο / Saves the last 2 minutes of audio as a WAV, to tune the detector on real game audio">⏺ <span class="l-el">Κράτα τα τελευταία 2′ (WAV)</span><span class="l-en">Save last 2′ (WAV)</span></button>
           </div>
           <div class="ear-ignored" id="earIgnored" hidden></div>
@@ -1034,7 +1034,7 @@
 <script src="tells.js"></script>
 <script src="footsteps.js"></script>
 <script>
-const APP_VERSION = "1.43.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.44.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -2088,7 +2088,8 @@ const huntLog=(()=>{
   }
   function hints(a){
     const H=[], add=(strong,html)=>H.push({strong,html});
-    if(a.selfLike) add(false, T("👣 Σταθερή ένταση σε όλα τα βήματα: μάλλον τα δικά σου, όχι του ghost.","👣 Same loudness on every step: probably your own footsteps, not the ghost's."));
+    if(a.selfLike) add(false, T("👣 Σταθερά ~1.6 m/s = ταχύτητα περπατήματος παίκτη: μάλλον εσύ, όχι το ghost (εκτός αν είναι Twins/Moroi/Hantu).","👣 Steady ~1.6 m/s = player walking speed: probably you, not the ghost (unless Twins/Moroi/Hantu)."));
+    if(a.playerSprint) add(false, T("🏃 ~3.0 m/s για ≤3 s: μάλλον εσύ που έτρεξες (sprint), όχι Revenant.","🏃 ~3.0 m/s for ≤3 s: probably you sprinting, not a Revenant."));
     if(a.trend==="switch"){
       const f=a.from, t=a.to;
       if(pair(f,t,1.0,3.0,0.2)) add(true, T(`Πήδηξε ${f.toFixed(2)} → ${t.toFixed(2)}: <b>Revenant</b> (1.0 όταν δεν σε βλέπει, 3.0 όταν σε δει)`, `Jumped ${f.toFixed(2)} → ${t.toFixed(2)}: <b>Revenant</b> (1.0 when it can't see you, 3.0 once it does)`));
@@ -2205,7 +2206,7 @@ const huntLog=(()=>{
     listEl.innerHTML="";
     if(cur && counts(analysis(cur))) listEl.appendChild(card(cur, hunts.length+1, true));
     const ig=document.getElementById("earIgnored");
-    if(ignoredMsg && Date.now()-ignoredMsg.at<5*60000){ ig.hidden=false; ig.textContent=T(`👣 Αγνόησα ${ignoredMsg.n} βήματα με σταθερή ένταση στις ${hhmm(ignoredMsg.at)} (μάλλον δικά σου).`,`👣 Ignored ${ignoredMsg.n} steps with constant loudness at ${hhmm(ignoredMsg.at)} (probably yours).`); }
+    if(ignoredMsg && Date.now()-ignoredMsg.at<5*60000){ ig.hidden=false; ig.textContent=T(`👣 Αγνόησα ${ignoredMsg.n} βήματα στα ~1.6 m/s στις ${hhmm(ignoredMsg.at)} (περπάτημα παίκτη, μάλλον εσύ).`,`👣 Ignored ${ignoredMsg.n} steps at ~1.6 m/s at ${hhmm(ignoredMsg.at)} (player walking speed, probably you).`); }
     else ig.hidden=true;
     for(let i=hunts.length-1;i>=0;i--) listEl.appendChild(card(hunts[i], i+1, false));
     emptyEl.style.display=((cur&&counts(analysis(cur)))||hunts.length)?"none":"";
@@ -2266,13 +2267,14 @@ const ear=(()=>{
         if(!t) return; // η σειρά έληξε: κράτα την τελευταία ένδειξη για να φιλτράρεις μετά το hunt
         if(!t.rhythmic) return; // χωρίς σταθερό ρυθμό = όχι βήματα
         if(cfg.ignoreSelf && t.selfLike){
-          if(speedSrc!=="tap") tapSrcEl.textContent=T("👣 μάλλον δικά σου βήματα (σταθερή ένταση) · αγνοήθηκαν","👣 probably your own footsteps (constant loudness) · ignored");
+          if(speedSrc!=="tap") tapSrcEl.textContent=T(`👣 ${t.speed.toFixed(2)} m/s = περπάτημα παίκτη (1.6): μάλλον εσύ · αγνοήθηκε`,`👣 ${t.speed.toFixed(2)} m/s = player walking speed (1.6): probably you · ignored`);
           return;
         }
         speedSrc="auto";
         const sure=t.confidence>=0.6 && t.steps>=8;
+        const sprint = t.maybeSprint ? T(" · ή εσύ που τρέχεις"," · or you sprinting") : "";
         showSpeed(t.bpm, t.speed,
-          T(`🎧 auto · ${t.steps} βήματα · σιγουριά ${Math.round(t.confidence*100)}%`, `🎧 auto · ${t.steps} steps · ${Math.round(t.confidence*100)}% sure`), sure);
+          T(`🎧 auto · ${t.steps} βήματα · σιγουριά ${Math.round(t.confidence*100)}%`, `🎧 auto · ${t.steps} steps · ${Math.round(t.confidence*100)}% sure`)+sprint, sure);
       },
       onLevel:l=>{
         const pct=x=>Math.max(0,Math.min(100,(x+80)*1.25));

@@ -81,6 +81,19 @@ check(`random sounds → no hunt (${trials} trials)`, falseHunts === 0, `${false
   check("hunt with junk before/after → trimmed", r && close(r.mean, 1.7) && r.duration < 17 && r.duration > 12 && r.spanStart > 5.5, r ? `${fmt(r)} dur ${r.duration.toFixed(1)} span ${r.spanStart.toFixed(1)}–${r.spanEnd.toFixed(1)} cov ${r.coverage.toFixed(2)}` : "null");
 }
 
+// Δικά σου βήματα (1.6) / sprint (3.0 για ≤3 s) vs ghost
+{
+  seed = 77;
+  const walkMe = analyzeHunt(walk(() => 1.6, 15));
+  check("constant 1.6 → your own steps", walkMe && walkMe.selfLike === true, fmt(walkMe));
+  const gallu = analyzeHunt(walk(() => 1.7, 15));
+  check("constant 1.7 → not you", gallu && gallu.selfLike === false, fmt(gallu));
+  const sprint = analyzeHunt(walk(() => 3.0, 3.2));
+  check("3.0 for ~3 s → your sprint", sprint && sprint.playerSprint === true, sprint ? fmt(sprint) + ` dur ${sprint.duration.toFixed(1)}` : "null");
+  const rev = analyzeHunt(walk(() => 3.0, 12));
+  check("3.0 for 12 s → not a sprint (Revenant)", rev && rev.playerSprint === false, rev ? fmt(rev) + ` dur ${rev.duration.toFixed(1)}` : "null");
+}
+
 // Από hunt σε hunt
 const g = s => JSON.stringify(analyzeGame(s));
 check("twins 1.53/1.87", analyzeGame([1.53, 1.88, 1.52])?.kind === "twins", g([1.53, 1.88, 1.52]));

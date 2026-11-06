@@ -157,10 +157,14 @@
   // σπάνια (~1%), ενώ τα βήματα ενός ghost σχεδόν πάντα.
   const LOCAL_WIN = 6, LOCAL_CONF = 0.6, LOCAL_AGREE = 0.08;
   const SLOW_PERIOD_S = 1.2, SLOW_CONF = 0.8;
-  // «Δικά σου βήματα»: ο παίκτης ακούει τα βήματά του πάντα από την ίδια απόσταση, άρα με σχεδόν
-  // ίδια ένταση· του ghost δυναμώνουν/σβήνουν καθώς πλησιάζει/απομακρύνεται. Κατώφλια χωρίς
-  // βαθμονόμηση σε πραγματικό ήχο ακόμα — συντηρητικά, ώστε να μην κρύβουν πραγματικό ghost.
-  const SELF_STEPS = 8, SELF_STD_DB = 1.0, SELF_RANGE_DB = 2.6;
+  // «Δικά σου βήματα»: ο παίκτης περπατάει με 1.6 m/s και τρέχει με 3.0 m/s για ≤3 s (Phasmophobia
+  // Wiki, Player). Σε πραγματικό ήχο (Ridgeview, βροχή) τα βήματα του παίκτη μετρήθηκαν 1.57–1.60 m/s
+  // και του Gallu (normal, 1.7) 1.65–1.72, ενώ η ένταση άλλαζε ±2–6 dB και στα δύο, οπότε η
+  // διάκριση γίνεται με την ταχύτητα. Προσοχή: Twins (1.53), Moroi, Hantu μπορεί να πέσουν κοντά.
+  const PLAYER_WALK_LO = 1.54, PLAYER_WALK_HI = 1.615;
+  const PLAYER_SPRINT_LO = 2.88, PLAYER_SPRINT_HI = 3.12, PLAYER_SPRINT_MAX_S = 3.5;
+  const isPlayerWalk = v => v >= PLAYER_WALK_LO && v <= PLAYER_WALK_HI;
+  const isPlayerSprintSpeed = v => v >= PLAYER_SPRINT_LO && v <= PLAYER_SPRINT_HI;
 
   /** Διασπορά έντασης μιας σειράς βημάτων (dB πάνω από τον θόρυβο). */
   function loudness(strengths) {
@@ -172,19 +176,15 @@
     const range = sorted[Math.floor(a.length * 0.9 - 1e-9)] - sorted[Math.floor(a.length * 0.1)]; // 10–90%: αγνοεί 1 κακό βήμα
     return { mean: m, std, range, n: a.length };
   }
-  function isSelfLike(strengths) {
-    const l = loudness(strengths);
-    return !!l && l.n >= SELF_STEPS && l.std <= SELF_STD_DB && l.range <= SELF_RANGE_DB;
-  }
 
   class FootstepDetector {
     /**
      * @param {object} o
      * @param {number} o.sampleRate
      * @param {number} [o.sensitivity=0.5]  0 = μόνο δυνατά βήματα, 1 = πιάνει και σιγανά (περισσότερα false positives)
-     * @param {(e:{t:number,strength:number,tempo:object|null,rhythmic:boolean,selfLike:boolean})=>void} [o.onStep]
+     * @param {(e:{t:number,strength:number,tempo:object|null,rhythmic:boolean,selfLike:boolean,maybeSprint:boolean})=>void} [o.onStep]
      *        t σε δευτερόλεπτα ροής· strength = peak σε dB πάνω από τον θόρυβο
-     * @param {(e:{bpm:number,speed:number,steps:number,confidence:number,selfLike:boolean}|null)=>void} [o.onTempo]
+     * @param {(e:{bpm:number,speed:number,steps:number,confidence:number,rhythmic:boolean,selfLike:boolean,maybeSprint:boolean}|null)=>void} [o.onTempo]
      * @param {(e:{db:number,floor:number})=>void} [o.onLevel]  ~10 φορές/δευτ., για meter
      */
     constructor(o) {
@@ -310,16 +310,17 @@
       // (π.χ. μόλις άλλαξε ταχύτητα, Revenant 1.0 → 3.0).
       const global = estimateTempo(this.steps);
       let tempo = rhythmic ? ((global && Math.abs(global.speed - local.speed) <= 0.1 * local.speed) ? global : local) : (global || local);
-      // Ένταση μόνο από βήματα του τρέχοντος ρυθμού (όχι από θόρυβο πριν), ως 12.
-      const runLen = Math.min(12, this.steps.length, this._run + LOCAL_WIN);
-      const selfLike = rhythmic && isSelfLike(this.strengths.slice(-runLen));
-      if (tempo) { tempo = Object.assign({}, tempo, { rhythmic, selfLike, steps: this.steps.length }); }
+      // Δικά σου βήματα: ρυθμός στην ταχύτητα περπατήματος του παίκτη (1.6 m/s).
+      const selfLike = rhythmic && !!tempo && isPlayerWalk(tempo.speed);
+      // 3.0 m/s: είτε Revenant που σε βλέπει είτε εσύ που τρέχεις (sprint ≤3 s) — μόνο ετικέτα.
+      const maybeSprint = rhythmic && !!tempo && isPlayerSprintSpeed(tempo.speed);
+      if (tempo) { tempo = Object.assign({}, tempo, { rhythmic, selfLike, maybeSprint, steps: this.steps.length }); }
       this._lastTempo = tempo;
       // run === 1: μόλις αναγνωρίστηκε ρυθμός → τα προηγούμενα βήματα του παραθύρου ανήκουν κι αυτά σε αυτόν.
       const backfill = rhythmic && this._run === 1
         ? this.steps.slice(-(LOCAL_WIN + 1), -1).map((x, i, a) => [x, this.strengths[this.strengths.length - 1 - a.length + i]])
         : null;
-      if (this.onStep) this.onStep({ t, strength, tempo, rhythmic, selfLike, backfill });
+      if (this.onStep) this.onStep({ t, strength, tempo, rhythmic, selfLike, maybeSprint, backfill });
       if (this.onTempo) this.onTempo(tempo);
     }
   }
@@ -447,7 +448,7 @@
     const out = {
       curve, coverage, segments: segs.filter(s => s.length >= 2).length,
       steps: span.length,
-      loudness: null, selfLike: false,
+      loudness: null, selfLike: false, playerSprint: false,
       duration: lastT - spanStart, spanStart, spanEnd: lastT,
       start: median(head), end: median(tail), mean: mean(v),
       min: Math.min(...v), max: Math.max(...v),
@@ -488,8 +489,11 @@
     if (strengths && strengths.length === times.length) {
       const inSpanStr = strengths.filter((_, i) => times[i] >= spanStart - 1e-9 && times[i] <= lastT + 1e-9);
       out.loudness = loudness(inSpanStr);
-      out.selfLike = isSelfLike(inSpanStr);
     }
+    // Δικά σου βήματα: όλη η σειρά σταθερά στην ταχύτητα περπατήματος του παίκτη.
+    out.selfLike = out.trend === "constant" && isPlayerWalk(median(v));
+    // Εσύ που τρέχεις: σύντομη σειρά (≤3.5 s) στα ~3.0 m/s.
+    out.playerSprint = out.duration <= PLAYER_SPRINT_MAX_S && isPlayerSprintSpeed(median(v));
     return out;
   }
 
@@ -517,7 +521,7 @@
     return null;
   }
 
-  const api = { FootstepDetector, estimateTempo, bpmToSpeed, speedToBpm, analyzeHunt, analyzeGame, loudness, isSelfLike };
+  const api = { FootstepDetector, estimateTempo, bpmToSpeed, speedToBpm, analyzeHunt, analyzeGame, loudness, isPlayerWalk, isPlayerSprintSpeed };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.PhasmFootsteps = api;
 })(typeof self !== "undefined" ? self : this);
