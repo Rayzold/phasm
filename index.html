@@ -369,6 +369,8 @@
   .ear .smudge-btns{margin-bottom:6px}
   .ear .btn{padding:6px 10px;font-size:12.5px}
   .ear .btn.on{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.1)}
+  .los-btn.on{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.1)}
+  .hl-hint .btn{padding:2px 8px;font-size:11px;margin:4px 0 0;display:inline-block}
   .ear-meter{position:relative;height:6px;border-radius:4px;background:#1a212c;overflow:hidden;margin:4px 0 6px}
   .ear-meter>div{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--nv-dim);transition:width .1s linear}
   .ear-meter>i{position:absolute;top:0;bottom:0;width:2px;background:var(--warn);opacity:.7;left:0}
@@ -711,6 +713,8 @@
         <div class="smudge-btns">
           <button class="btn" id="speedApply" disabled><span class="l-el">🔗 Φίλτραρε με αυτή την ταχύτητα</span><span class="l-en">🔗 Filter by this speed</span></button>
           <button class="btn ghostvar" id="speedClear" style="display:none"></button>
+          <button class="btn los-btn" id="losUp" title="Το ghost γινόταν πιο γρήγορο όσο σε έβλεπε: αποκλείει Hantu, Kormos, Deildegast, Thaye, Deogen, Dayan / The ghost got faster while it saw you: rules out Hantu, Kormos, Deildegast, Thaye, Deogen, Dayan">📈 <span class="l-el">Επιτάχυνε με LoS</span><span class="l-en">LoS speed-up</span></button>
+          <button class="btn los-btn" id="losNone" title="Σε έβλεπε αλλά η ταχύτητα δεν ανέβηκε: μόνο Hantu, Kormos, Deildegast, Thaye, Deogen, Dayan (+ Mimic) / It saw you but didn't speed up: only Hantu, Kormos, Deildegast, Thaye, Deogen, Dayan (+ Mimic)">➖ <span class="l-el">Χωρίς LoS επιτάχυνση</span><span class="l-en">No LoS speed-up</span></button>
         </div>
         <div class="speed-rows" id="speedRows"></div>
         <div class="smudge-note"><span class="l-el">Χτύπα ρυθμικά μαζί με τα βήματα του ghost στο hunt (5+ taps για ακρίβεια — παύση 5s μηδενίζει). Οι γραμμές που ταιριάζουν με τη μετρημένη ταχύτητα ανάβουν πράσινες. Το κουμπί φίλτρου κόβει από το ταμπλό όσα ghosts δεν κινούνται ποτέ έτσι — προσεγγιστικό όμως, μην αποκλείεις μόνο από αυτό.</span><span class="l-en">Tap along with the ghost's footsteps during a hunt (5+ taps for accuracy — a 5s pause resets). Rows matching the measured speed light up green. The filter button cuts ghosts that never move at this speed from the board — approximate though, don't exclude on it alone.</span></div>
@@ -1034,7 +1038,7 @@
 <script src="tells.js"></script>
 <script src="footsteps.js"></script>
 <script>
-const APP_VERSION = "1.44.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.45.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -1251,6 +1255,8 @@ const BEHAVIORS = [
  // "advanced" ερωτήσεις του questionnaire.html.
  {id:"deogenSpeed",   label:"Αργό από κοντά, γρήγορο από μακριά",       en:"Slow up close, fast from far",             ic:"🐌", include:["Deogen","The Mimic"], group:"hunt"},
  {id:"revenantLos",   label:"Σέρνεται → sprint μόλις σε είδε",          en:"Crawls → sprints once it sees you",        ic:"👀", include:["Revenant","The Mimic"], group:"hunt"},
+ {id:"losSpeedup",    label:"Επιτάχυνε όσο με έβλεπε (LoS)",           en:"Sped up while it saw me (LoS)",            ic:"📈", exclude:["Hantu","Kormos","Deildegast","Thaye","Deogen","Dayan"], group:"hunt"},
+ {id:"noLosSpeedup",  label:"ΔΕΝ επιτάχυνε όσο με έβλεπε (LoS)",       en:"Did NOT speed up while it saw me (LoS)",   ic:"➖", include:["Hantu","Kormos","Deildegast","Thaye","Deogen","Dayan","The Mimic"], group:"hunt"},
  {id:"thayeAge",      label:"Ξεκίνησε γρήγορο, «κουράστηκε» με την ώρα",en:"Started fast, 'got tired' over time",      ic:"⏳", include:["Thaye","The Mimic"], group:"hunt"},
  {id:"raijuElec",     label:"Πιο γρήγορο/hunt νωρίς κοντά σε ηλεκτρονικά",en:"Faster/hunts earlier near electronics",  ic:"🔌", include:["Raiju","The Mimic"], group:"hunt"},
  {id:"galluEnrage",   label:"Crucifix/incense/salt το εξαγρίωσαν",      en:"Crucifix/incense/salt enraged it",         ic:"😡", include:["Gallu","The Mimic"], group:"hunt"},
@@ -1298,13 +1304,27 @@ const bhGrid = document.getElementById("bhGrid");
 const otGrid = document.getElementById("otGrid");
 const huntBhGrid = document.getElementById("huntBhGrid");
 const testGrid = document.getElementById("testGrid");
+// LoS: «επιτάχυνε» και «δεν επιτάχυνε» αποκλείουν το ένα το άλλο.
+const LOS_PAIR={losSpeedup:"noLosSpeedup", noLosSpeedup:"losSpeedup"};
+function setLos(id){
+  const on=!bhState[id];
+  bhState[id]=on?1:0;
+  if(on) bhState[LOS_PAIR[id]]=0;
+  render();
+}
+function paintLos(){
+  const up=document.getElementById("losUp"), none=document.getElementById("losNone");
+  if(!up) return;
+  up.classList.toggle("on", bhState.losSpeedup===1); none.classList.toggle("on", bhState.noLosSpeedup===1);
+  up.setAttribute("aria-pressed", bhState.losSpeedup===1); none.setAttribute("aria-pressed", bhState.noLosSpeedup===1);
+}
 function buildBhBoard(){
   bhGrid.innerHTML=""; otGrid.innerHTML=""; huntBhGrid.innerHTML=""; testGrid.innerHTML="";
   BEHAVIORS.forEach(bh=>{
     const b=document.createElement("button");
     b.className="ev"; b.dataset.bh=bh.id;
     b.innerHTML=`<span class="mark"></span><span class="ic">${bh.ic}</span><span class="name">${lang==="en"?bh.en:bh.label}</span>`;
-    b.onclick=()=>{ bhState[bh.id]=bhState[bh.id]?0:1; render(); };
+    b.onclick=()=>{ if(LOS_PAIR[bh.id]) setLos(bh.id); else { bhState[bh.id]=bhState[bh.id]?0:1; render(); } };
     const target = bh.group==="other" ? otGrid : bh.group==="hunt" ? huntBhGrid : bh.group==="test" ? testGrid : bhGrid;
     target.appendChild(b);
   });
@@ -1604,6 +1624,7 @@ function render(){
     b.textContent=(on?"✓ ":"")+(lang==="en"?"Filter":"Φίλτρο");
   });
 
+  paintLos();
   saveState();
 }
 
@@ -1918,6 +1939,8 @@ speedApply.onclick=()=>{
   render();
 };
 speedClear.onclick=()=>{ speedFilter=null; speedPick=null; speedClear.style.display="none"; buildSpeedRows(); render(); };
+document.getElementById("losUp").onclick=()=>{ setLos("losSpeedup"); if(typeof huntLog!=="undefined") huntLog.paint(); };
+document.getElementById("losNone").onclick=()=>{ setLos("noLosSpeedup"); if(typeof huntLog!=="undefined") huntLog.paint(); };
 function pickSpeedRow(i){
   speedPick = speedPick===i ? null : i;
   speedFilter = null;
@@ -2087,7 +2110,7 @@ const huntLog=(()=>{
     return SPEED_REF.filter(s=>s.max-s.min<2 && v>=s.min-0.08 && v<=s.max+0.08).map(s=>lang==="en"?(s.labelEn||s.label):s.label);
   }
   function hints(a){
-    const H=[], add=(strong,html)=>H.push({strong,html});
+    const H=[], add=(strong,html,bh)=>H.push({strong,html,bh});
     if(a.selfLike) add(false, T("👣 Σταθερά ~1.6 m/s = ταχύτητα περπατήματος παίκτη: μάλλον εσύ, όχι το ghost (εκτός αν είναι Twins/Moroi/Hantu).","👣 Steady ~1.6 m/s = player walking speed: probably you, not the ghost (unless Twins/Moroi/Hantu)."));
     if(a.playerSprint) add(false, T("🏃 ~3.0 m/s για ≤3 s: μάλλον εσύ που έτρεξες (sprint), όχι Revenant.","🏃 ~3.0 m/s for ≤3 s: probably you sprinting, not a Revenant."));
     if(a.trend==="switch"){
@@ -2098,10 +2121,10 @@ const huntLog=(()=>{
       else if(pair(f,t,1.45,1.96,0.1)) add(true, T(`${f.toFixed(2)} ↔ ${t.toFixed(2)}: <b>Obambo</b> (calm ↔ aggressive)`, `${f.toFixed(2)} ↔ ${t.toFixed(2)}: <b>Obambo</b> (calm ↔ aggressive)`));
       else add(false, T(`Απότομη αλλαγή ${f.toFixed(2)} → ${t.toFixed(2)} m/s: ghost με μεταβλητή ταχύτητα (Revenant, Dayan, Kormos, Obambo, Deogen…)`, `Sudden change ${f.toFixed(2)} → ${t.toFixed(2)} m/s: a variable-speed ghost (Revenant, Dayan, Kormos, Obambo, Deogen…)`));
     }
-    if(a.trend==="accelerating") add(false, T(`Επιτάχυνε ${a.start.toFixed(2)} → ${a.end.toFixed(2)}: φυσιολογικό όσο σε βλέπει (LoS, ως ×1.65). <b>Δεν</b> ταιριάζει σε Hantu, Dayan, Kormos (χωρίς LoS accel).`, `Sped up ${a.start.toFixed(2)} → ${a.end.toFixed(2)}: normal while it sees you (LoS, up to ×1.65). Does <b>not</b> fit Hantu, Dayan, Kormos (no LoS accel).`));
+    if(a.trend==="accelerating") add(false, T(`Επιτάχυνε ${a.start.toFixed(2)} → ${a.end.toFixed(2)}: φυσιολογικό όσο σε βλέπει (LoS, ως ×1.65). <b>Δεν</b> ταιριάζει σε Hantu, Dayan, Kormos (χωρίς LoS accel).`, `Sped up ${a.start.toFixed(2)} → ${a.end.toFixed(2)}: normal while it sees you (LoS, up to ×1.65). Does <b>not</b> fit Hantu, Dayan, Kormos (no LoS accel).`), "losSpeedup");
     if(a.trend==="slowing") add(a.end<1.3, T(`Επιβράδυνε ${a.start.toFixed(2)} → ${a.end.toFixed(2)}${a.end<1.3?": <b>Deogen</b> (3.0 μακριά → 0.4 κοντά σου)":""}`, `Slowed ${a.start.toFixed(2)} → ${a.end.toFixed(2)}${a.end<1.3?": <b>Deogen</b> (3.0 far away → 0.4 near you)":""}`));
     if(a.max>=3.15) add(true, T(`Max ${a.max.toFixed(2)} m/s: πάνω από 3.1 φτάνει μόνο ο <b>Moroi</b> (με LoS και χαμηλό sanity, ως 3.71)`, `Max ${a.max.toFixed(2)} m/s: only <b>Moroi</b> goes above 3.1 (LoS + low sanity, up to 3.71)`));
-    if(a.trend==="constant" && a.steady>=10 && a.mean>=1.35 && a.mean<=2.75) add(false, T(`Σταθερή ${a.mean.toFixed(2)} για ${Math.round(a.steady)} s: αν σε έβλεπε όλη αυτή την ώρα, δεν έχει LoS accel → Hantu / Dayan / Kormos`, `Steady ${a.mean.toFixed(2)} for ${Math.round(a.steady)} s: if it had line of sight the whole time, it has no LoS accel → Hantu / Dayan / Kormos`));
+    if(a.trend==="constant" && a.steady>=10 && a.mean>=1.35 && a.mean<=2.75) add(false, T(`Σταθερή ${a.mean.toFixed(2)} για ${Math.round(a.steady)} s: αν σε έβλεπε όλη αυτή την ώρα, δεν έχει LoS accel → Hantu / Dayan / Kormos`, `Steady ${a.mean.toFixed(2)} for ${Math.round(a.steady)} s: if it had line of sight the whole time, it has no LoS accel → Hantu / Dayan / Kormos`), "noLosSpeedup");
     const r=refsFor(a.start);
     if(r.length) add(false, T(`Αρχική ${a.start.toFixed(2)} ταιριάζει: ${r.join(" · ")}`, `Start ${a.start.toFixed(2)} fits: ${r.join(" · ")}`));
     return H;
@@ -2195,7 +2218,17 @@ const huntLog=(()=>{
     nums.innerHTML=`<span>${T("αρχή","start")} <b>${f2(a.start)}</b></span><span>${T("μ.ό.","avg")} <b>${f2(a.mean)}</b></span><span>min <b>${f2(a.min)}</b></span><span>max <b>${f2(a.max)}</b></span><span>${T("τέλος","end")} <b>${f2(a.end)}</b></span>${a.loudness?`<span title="${T("Πόσο άλλαζε η ένταση των βημάτων: μεγάλη αλλαγή = το ghost πλησίαζε/απομακρυνόταν","How much the step loudness varied: a big change = the ghost moved closer/away")}">${T("ένταση","loudness")} <b>±${a.loudness.std.toFixed(1)} dB</b></span>`:""}`;
     c.appendChild(nums);
     c.appendChild(chart(a));
-    hints(a).forEach(x=>{ const d=document.createElement("div"); d.className="hl-hint"+(x.strong?" strong":""); d.innerHTML=x.html; c.appendChild(d); });
+    hints(a).forEach(x=>{
+      const d=document.createElement("div"); d.className="hl-hint"+(x.strong?" strong":""); d.innerHTML=x.html;
+      if(x.bh){ // ένα πάτημα: «ναι, έτσι ήταν» → ενεργοποιεί το αντίστοιχο φίλτρο LoS
+        const b=document.createElement("button"); b.className="btn"+(bhState[x.bh]===1?" on":"");
+        b.textContent = x.bh==="losSpeedup" ? T((bhState[x.bh]?"✓ ":"")+"📈 Ναι, επιτάχυνε με LoS",(bhState[x.bh]?"✓ ":"")+"📈 Yes, LoS speed-up")
+                                            : T((bhState[x.bh]?"✓ ":"")+"➖ Ναι, με έβλεπε χωρίς να επιταχύνει",(bhState[x.bh]?"✓ ":"")+"➖ Yes, it saw me and didn't speed up");
+        b.onclick=()=>{ setLos(x.bh); paint(); };
+        d.appendChild(document.createElement("br")); d.appendChild(b);
+      }
+      c.appendChild(d);
+    });
     const fb=document.createElement("button"); fb.className="btn"; fb.textContent=T(`🔍 Φίλτρο με αρχική ${f2(a.start)} m/s`,`🔍 Filter by start ${f2(a.start)} m/s`);
     fb.onclick=()=>{ speedFilter=a.start; speedPick=null; buildSpeedRows(); speedClear.textContent="✕ "+speedFilter.toFixed(2)+" m/s"; speedClear.style.display="inline-block"; render(); };
     c.appendChild(fb);
