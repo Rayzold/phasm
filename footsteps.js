@@ -24,6 +24,119 @@
     };
   }
 
+  // ───────────── Spectral-flux onsets (ανθεκτικό σε σταθερό θόρυβο: βροχή, αέρας, βουητό) ─────────────
+  // Μετράει πόσο ΑΥΞΑΝΕΤΑΙ ξαφνικά το φάσμα (log-magnitude) από frame σε frame, όχι πόσο δυνατός
+  // είναι ο ήχος. Βάση: Dixon 2006 «Onset detection revisited», Böck & Widmer 2013 «SuperFlux»
+  // (max-filter στη συχνότητα + σύγκριση με frame μ=2 πίσω), peak-picking κατά Böck 2012.
+
+  /** In-place iterative radix-2 FFT (re, im: Float64Array μήκους 2^k). */
+  function fft(re, im) {
+    const n = re.length;
+    for (let i = 1, j = 0; i < n; i++) {
+      let bit = n >> 1;
+      for (; j & bit; bit >>= 1) j ^= bit;
+      j ^= bit;
+      if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; }
+    }
+    for (let len = 2; len <= n; len <<= 1) {
+      const ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang), h = len >> 1;
+      for (let i = 0; i < n; i += len) {
+        let cr = 1, ci = 0;
+        for (let k = 0; k < h; k++) {
+          const a = i + k, b = a + h;
+          const tr = re[b] * cr - im[b] * ci, ti = re[b] * ci + im[b] * cr;
+          re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti;
+          const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr;
+        }
+      }
+    }
+  }
+
+  class FluxOnsets {
+    /** @param {{fs:number, onOnset:(t:number,strength:number)=>void, onLevel?:(l:{db:number,floor:number})=>void}} o */
+    constructor(o) {
+      this.fs = o.fs; this.onOnset = o.onOnset; this.onLevel = o.onLevel || null;
+      this.N = 1 << Math.round(Math.log2(this.fs * 0.032));           // ~32 ms παράθυρο
+      this.hop = Math.round(this.fs / 200);                             // 5 ms
+      this.fps = this.fs / this.hop;
+      this.kLo = Math.max(1, Math.ceil(FLUX_LO_HZ * this.N / this.fs));
+      this.kHi = Math.floor(Math.min(FLUX_HI_HZ, this.fs * 0.45) * this.N / this.fs);
+      this.win = new Float64Array(this.N).map((_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / this.N));
+      this.ring = new Float32Array(this.N); this.rpos = 0; this.filled = 0; this.sinceHop = 0;
+      this.re = new Float64Array(this.N); this.im = new Float64Array(this.N);
+      this.hist = [];                         // log-spectra των τελευταίων frames (για μ=2)
+      this.flux = []; this.bandDb = [];       // ανά frame
+      this.frame = 0; this.lastOnset = -1e9;
+      this.dbHist = []; this.floor = -90;
+      this.setSensitivity(0.5);
+    }
+    setSensitivity(s) {
+      this.alpha = lerp(2.6, 1.5, s);         // πόσες φορές πάνω από τον τοπικό μέσο όρο του flux
+      this.delta = lerp(0.9, 0.35, s);        // + σταθερό περιθώριο (μονάδες flux / bin)
+      this.gate = lerp(-58, -72, s);          // απόλυτο κατώφλι ενέργειας band (dBFS)
+    }
+    process(x) {
+      for (let i = 0; i < x.length; i++) {
+        this.ring[this.rpos] = x[i]; this.rpos = (this.rpos + 1) % this.N;
+        if (this.filled < this.N) this.filled++;
+        if (++this.sinceHop >= this.hop) { this.sinceHop = 0; if (this.filled === this.N) this._frame(); }
+      }
+    }
+    _frame() {
+      const N = this.N, re = this.re, im = this.im;
+      for (let i = 0; i < N; i++) { re[i] = this.ring[(this.rpos + i) % N] * this.win[i]; im[i] = 0; }
+      fft(re, im);
+      const K = this.kHi - this.kLo + 1, L = new Float32Array(K);
+      let pow = 0;
+      for (let k = 0; k < K; k++) {
+        const kk = k + this.kLo, p = re[kk] * re[kk] + im[kk] * im[kk];
+        pow += p;
+        L[k] = Math.log1p(FLUX_GAMMA * Math.sqrt(p) / N);
+      }
+      const db = 10 * Math.log10(pow / (N * N) + 1e-12);
+      // SuperFlux: σύγκριση με frame 2 πίσω, max-filter ±1 bin στη συχνότητα (αγνοεί μικρές μετατοπίσεις).
+      const prev = this.hist.length >= 2 ? this.hist[this.hist.length - 2] : null;
+      let f = 0;
+      if (prev) for (let k = 0; k < K; k++) {
+        const ref = Math.max(prev[k], k > 0 ? prev[k - 1] : 0, k < K - 1 ? prev[k + 1] : 0);
+        const d = L[k] - ref; if (d > 0) f += d;
+      }
+      f /= K;
+      this.hist.push(L); if (this.hist.length > 3) this.hist.shift();
+      this.flux.push(f); this.bandDb.push(db);
+      const n = this.frame++;
+
+      // Θόρυβος βάθους (για ένταση/meter): 25ο εκατοστημόριο των τελευταίων ~3 s.
+      this.dbHist.push(db); if (this.dbHist.length > 3 * this.fps) this.dbHist.shift();
+      if (n % 20 === 0) { const s = this.dbHist.slice().sort((a, b) => a - b); this.floor = s[Math.floor(s.length * 0.25)]; }
+      if (this.onLevel && n % 20 === 0) this.onLevel({ db, floor: this.floor });
+
+      // Peak-picking με καθυστέρηση W_POST frames: το frame c είναι onset αν είναι τοπικό μέγιστο
+      // στο [c-W_PRE, c+W_POST] και ξεπερνά τον μέσο όρο του [c-W_AVG, c+W_POST] × alpha + delta.
+      const c = n - W_POST;
+      if (c < W_AVG) { this._trim(); return; }
+      const F = this.flux, off = this.frame - F.length, at = i => F[i - off];
+      const fc = at(c);
+      let isMax = true;
+      for (let i = c - W_PRE; i <= c + W_POST; i++) if (i !== c && at(i) > fc) { isMax = false; break; }
+      if (isMax) {
+        let m = 0; for (let i = c - W_AVG; i <= c + W_POST; i++) m += at(i);
+        m /= (W_AVG + W_POST + 1);
+        const loudDb = Math.max(this.bandDb[c - off], this.bandDb[c - off + 1] ?? -200, this.bandDb[c - off + 2] ?? -200);
+        if (fc >= m * this.alpha + this.delta * FLUX_UNIT && loudDb > this.gate && (c - this.lastOnset) / this.fps >= MIN_STEP_S) {
+          this.lastOnset = c;
+          // Ένταση βήματος: μέγιστη ενέργεια band στα επόμενα ~40 ms, πάνω από τον θόρυβο βάθους.
+          let pk = -200; for (let i = c; i <= Math.min(n, c + 8); i++) pk = Math.max(pk, this.bandDb[i - off]);
+          this.onOnset(c / this.fps, pk - this.floor);
+        }
+      }
+      this._trim();
+    }
+    _trim() { const keep = W_AVG + W_POST + 12; if (this.flux.length > keep) { const d = this.flux.length - keep; this.flux.splice(0, d); this.bandDb.splice(0, d); } }
+  }
+  const FLUX_LO_HZ = 60, FLUX_HI_HZ = 4000, FLUX_GAMMA = 100, FLUX_UNIT = 0.02;
+  const W_PRE = 6, W_POST = 3, W_AVG = 40;   // frames των 5 ms: ±30/15 ms max, ~200 ms μέσος όρος
+
   const lerp = (a, b, t) => a + (b - a) * t;
   function median(arr) {
     const s = arr.slice().sort((a, b) => a - b), m = s.length >> 1;
@@ -102,10 +215,20 @@
       this._prevLocal = null;       // ρυθμός του προηγούμενου παραθύρου 6 βημάτων
       this._run = 0;                // πόσα διαδοχικά ρυθμικά βήματα
       this._lastTempo = null;
+      // "flux" (προεπιλογή): spectral flux, αγνοεί σταθερό θόρυβο. "energy": το αρχικό band-energy.
+      this.method = o.method || "flux";
+      if (this.method === "flux") {
+        this._flux = new FluxOnsets({ fs: this.fs, onOnset: (t, st) => { this._checkGap(t); this._addStep(t, st); },
+          onLevel: l => { if (this.onLevel) this.onLevel(l); this._checkGap(this._flux.frame / this._flux.fps); } });
+        this._flux.setSensitivity(this.sensitivity);
+      }
     }
+
+    _checkGap(t) { if (this.steps.length && t - this.steps[this.steps.length - 1] > RESET_GAP_S) this.reset(); }
 
     setSensitivity(s) {
       this.sensitivity = Math.max(0, Math.min(1, s));
+      if (this._flux) this._flux.setSensitivity(this.sensitivity);
       this._overFloor = lerp(16, 7, this.sensitivity); // dB πάνω από τον θόρυβο βάθους
       this._rise = lerp(9, 4, this.sensitivity);       // dB άνοδος μέσα σε ~30 ms
       this._gate = lerp(-50, -66, this.sensitivity);   // απόλυτο κατώφλι dBFS
@@ -115,6 +238,7 @@
 
     /** @param {Float32Array|number[]} samples mono, -1..1 */
     process(samples) {
+      if (this._flux) { this._flux.process(samples); return; }
       for (let i = 0; i < samples.length; i++) {
         const y = this._lp2(this._lp1(this._hp2(this._hp1(samples[i]))));
         this._acc += y * y;
