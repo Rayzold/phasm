@@ -196,7 +196,118 @@
     return { bpm, speed: bpmToSpeed(bpm), steps: times.length, confidence };
   }
 
-  const api = { FootstepDetector, estimateTempo, bpmToSpeed, speedToBpm };
+  // ───────────────────────── Ανάλυση hunt ─────────────────────────
+  const WIN = 6;           // βήματα ανά σημείο καμπύλης (5 διαστήματα ≈ 1.5–5 s ανάλογα την ταχύτητα)
+  const MIN_CONF = 0.4;    // σημεία με χαμηλότερη σιγουριά δεν μπαίνουν στην καμπύλη
+  const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+  const mad = (a, m) => a.reduce((s, x) => s + Math.abs(x - m), 0);
+
+  /**
+   * Καμπύλη ταχύτητας και στατιστικά ενός hunt.
+   * @param {number[]} times  χρόνοι βημάτων σε δευτερόλεπτα από την αρχή του hunt (αύξουσα σειρά·
+   *                          κενά > MAX_STEP_S = το ghost δεν ακουγόταν, χωρίζουν τμήματα)
+   * @returns {null|{
+   *   curve:[number,number][], duration:number, steps:number, segments:number,
+   *   start:number, end:number, mean:number, min:number, max:number,
+   *   trend:"constant"|"accelerating"|"slowing"|"switch"|"variable", from?:number, to?:number, switchAt?:number,
+   *   steady:number  // δευτερόλεπτα που η ταχύτητα έμεινε σταθερή (για «χωρίς LoS accel»)
+   * }}
+   */
+  function analyzeHunt(times) {
+    if (!times || times.length < WIN) return null;
+    // Τμήματα συνεχόμενων βημάτων
+    const segs = [[times[0]]];
+    for (let i = 1; i < times.length; i++) {
+      if (times[i] - times[i - 1] > MAX_STEP_S) segs.push([]);
+      segs[segs.length - 1].push(times[i]);
+    }
+    const curve = [];
+    for (const s of segs) {
+      for (let i = WIN - 1; i < s.length; i++) {
+        const r = estimateTempo(s.slice(i - WIN + 1, i + 1));
+        if (r && r.confidence >= MIN_CONF) curve.push([s[i], r.speed]);
+      }
+    }
+    if (curve.length < 3) return null;
+
+    // Median filter 5 σημείων (στις άκρες το παράθυρο μετατοπίζεται μέσα, ώστε να έχει πάντα 5):
+    // έως 2 διαδοχικά λάθος παράθυρα (π.χ. διπλή περίοδος από χαμένα βήματα → μισή ταχύτητα) δεν
+    // γίνονται «min» ή «αρχική ταχύτητα». Πραγματικές αλλαγές (Revenant 1→3) διατηρούνται,
+    // γιατί ο median κρατάει τα σκαλοπάτια.
+    const raw = curve.map(p => p[1]), F = Math.min(5, raw.length);
+    for (let i = 0; i < curve.length; i++) {
+      const a = Math.max(0, Math.min(raw.length - F, i - (F >> 1)));
+      curve[i][1] = median(raw.slice(a, a + F));
+    }
+    const v = curve.map(p => p[1]);
+    const head = v.slice(0, Math.min(3, v.length)), tail = v.slice(-Math.min(3, v.length));
+    const out = {
+      curve, steps: times.length, segments: segs.filter(s => s.length >= 2).length,
+      duration: times[times.length - 1] - times[0],
+      start: median(head), end: median(tail), mean: mean(v),
+      min: Math.min(...v), max: Math.max(...v),
+    };
+
+    // Μοντέλα: σταθερό / γραμμικό (επιτάχυνση-επιβράδυνση) / σκαλοπάτι (απότομη αλλαγή).
+    const n = v.length, med = median(v);
+    const constErr = mad(v, med) / n;
+    const t = curve.map(p => p[0]), tm = mean(t), vm = mean(v);
+    let sxx = 0, sxy = 0;
+    for (let i = 0; i < n; i++) { sxx += (t[i] - tm) ** 2; sxy += (t[i] - tm) * (v[i] - vm); }
+    const slope = sxx > 0 ? sxy / sxx : 0;
+    let linErr = 0;
+    for (let i = 0; i < n; i++) linErr += Math.abs(v[i] - (vm + slope * (t[i] - tm)));
+    linErr /= n;
+    let step = null;
+    for (let k = 2; k <= n - 2; k++) {
+      const L = v.slice(0, k), R = v.slice(k), mL = median(L), mR = median(R);
+      const e = (mad(L, mL) + mad(R, mR)) / n;
+      if (!step || e < step.e) step = { e, k, mL, mR };
+    }
+
+    if (constErr < 0.06 * med || (out.max - out.min) < 0.15) out.trend = "constant";
+    else if (step && step.e < 0.6 * linErr && Math.abs(step.mR - step.mL) > 0.35) {
+      out.trend = "switch"; out.from = step.mL; out.to = step.mR; out.switchAt = t[step.k];
+    } else if (out.end - out.start > 0.25 && slope > 0) out.trend = "accelerating";
+    else if (out.start - out.end > 0.25 && slope < 0) out.trend = "slowing";
+    else out.trend = "variable";
+
+    // Η μεγαλύτερη συνεχόμενη διάρκεια με ταχύτητα εντός ±7% (χωρίς επιτάχυνση).
+    let steady = 0;
+    for (let i = 0; i < n; i++) {
+      let j = i;
+      while (j + 1 < n && Math.abs(v[j + 1] - v[i]) <= 0.07 * v[i] && t[j + 1] - t[j] <= MAX_STEP_S * 2) j++;
+      steady = Math.max(steady, t[j] - t[i]);
+    }
+    out.steady = steady;
+    return out;
+  }
+
+  /**
+   * Μοτίβα από hunt σε hunt, με βάση την αρχική ταχύτητα κάθε hunt (πριν τυχόν επιτάχυνση LoS).
+   * @param {number[]} starts  αρχικές ταχύτητες, με χρονολογική σειρά
+   * @returns {{kind:"twins"|"decreasing"|"increasing"|"stable", detail?:string}|null}
+   */
+  function analyzeGame(starts) {
+    if (!starts || starts.length < 2) return null;
+    const near = (x, c) => Math.abs(x - c) <= 0.08;
+    const lo = starts.filter(s => near(s, 1.53)).length, hi = starts.filter(s => near(s, 1.87)).length;
+    if (lo >= 1 && hi >= 1 && lo + hi === starts.length) return { kind: "twins" };
+    if (starts.length >= 3) {
+      let dec = true, inc = true;
+      for (let i = 1; i < starts.length; i++) {
+        if (starts[i] > starts[i - 1] + 0.05) dec = false;
+        if (starts[i] < starts[i - 1] - 0.05) inc = false;
+      }
+      const span = starts[starts.length - 1] - starts[0];
+      if (dec && span <= -0.3) return { kind: "decreasing" };
+      if (inc && span >= 0.3) return { kind: "increasing" };
+    }
+    if (Math.max(...starts) - Math.min(...starts) < 0.12) return { kind: "stable" };
+    return null;
+  }
+
+  const api = { FootstepDetector, estimateTempo, bpmToSpeed, speedToBpm, analyzeHunt, analyzeGame };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.PhasmFootsteps = api;
 })(typeof self !== "undefined" ? self : this);

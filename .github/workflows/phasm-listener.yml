@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: "22"
       - name: Detector tests
-        run: node tests/footsteps.test.js
+        run: node tests/footsteps.test.js && node tests/hunt-analysis.test.js
       - name: Publish win-x64
         run: dotnet publish footstep-helper -c Release -r win-x64 -o out
       - uses: actions/upload-artifact@v4
