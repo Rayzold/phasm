@@ -55,17 +55,20 @@
   class FluxOnsets {
     /** @param {{fs:number, onOnset:(t:number,strength:number)=>void, onLevel?:(l:{db:number,floor:number})=>void}} o */
     constructor(o) {
-      this.fs = o.fs; this.onOnset = o.onOnset; this.onLevel = o.onLevel || null;
+      this.fs = o.fs; this.onOnset = o.onOnset; this.onLevel = o.onLevel || null; this.onLow = o.onLow || null;
       this.N = 1 << Math.round(Math.log2(this.fs * 0.032));           // ~32 ms παράθυρο
       this.hop = Math.round(this.fs / 200);                             // 5 ms
       this.fps = this.fs / this.hop;
       this.kLo = Math.max(1, Math.ceil(FLUX_LO_HZ * this.N / this.fs));
       this.kHi = Math.floor(Math.min(FLUX_HI_HZ, this.fs * 0.45) * this.N / this.fs);
+      this.kLowN = Math.max(1, Math.floor(AC_HI_HZ * this.N / this.fs) - this.kLo + 1); // bins 60–1000 Hz για το rhythm path
       this.win = new Float64Array(this.N).map((_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / this.N));
       this.ring = new Float32Array(this.N); this.rpos = 0; this.filled = 0; this.sinceHop = 0;
       this.re = new Float64Array(this.N); this.im = new Float64Array(this.N);
       this.hist = [];                         // log-spectra των τελευταίων frames (για μ=2)
-      this.flux = []; this.bandDb = []; this.cent = []; // ανά frame
+      this.flux = []; this.bandDb = []; this.cent = []; this.bass = []; // ανά frame
+      this.kB0 = Math.max(1, Math.ceil(30 * this.N / this.fs)); this.kB100 = Math.floor(100 * this.N / this.fs);
+      this.kB1 = Math.floor(1000 * this.N / this.fs);
       this.frame = 0; this.lastOnset = -1e9;
       this.dbHist = []; this.floor = -90;
       this.setSensitivity(0.5);
@@ -94,6 +97,9 @@
         L[k] = Math.log1p(FLUX_GAMMA * Math.sqrt(p) / N);
       }
       this.cent.push(pow > 0 ? pf / pow * this.fs / N : 0); // spectral centroid (Hz) του frame
+      let bLo = 0, bAll = 0; // μερίδιο ενέργειας κάτω από 100 Hz (μέσα στα 30–1000 Hz): ο χτύπος καρδιάς είναι σχεδόν όλος εκεί
+      for (let kk = this.kB0; kk <= this.kB1; kk++) { const p = re[kk] * re[kk] + im[kk] * im[kk]; bAll += p; if (kk <= this.kB100) bLo += p; }
+      this.bass.push(bAll > 0 ? bLo / bAll : 0);
       const db = 10 * Math.log10(pow / (N * N) + 1e-12);
       // SuperFlux: σύγκριση με frame 2 πίσω, max-filter ±1 bin στη συχνότητα (αγνοεί μικρές μετατοπίσεις).
       const prev = this.hist.length >= 2 ? this.hist[this.hist.length - 2] : null;
@@ -103,6 +109,11 @@
         const d = L[k] - ref; if (d > 0) f += d;
       }
       f /= K;
+      if (this.onLow) { // απλό flux χαμηλών (χωρίς max-filter) για autocorrelation: πιάνει και σιγανά/πνιγμένα βήματα
+        let lf = 0; if (prev) for (let k = 0; k < this.kLowN; k++) { const d = L[k] - prev[k]; if (d > 0) lf += d; }
+        const cent = this.cent[this.cent.length - 1];
+        this.onLow(cent > CLICK_CENTROID_HZ ? 0 : lf / this.kLowN); // clicks (διακόπτης) έξω και από εδώ
+      }
       this.hist.push(L); if (this.hist.length > 3) this.hist.shift();
       this.flux.push(f); this.bandDb.push(db);
       const n = this.frame++;
@@ -125,23 +136,71 @@
         m /= (W_AVG + W_POST + 1);
         const loudDb = Math.max(this.bandDb[c - off], this.bandDb[c - off + 1] ?? -200, this.bandDb[c - off + 2] ?? -200);
         // Click (διακόπτης, πόρτα, αντικείμενο): ενέργεια ψηλά στο φάσμα. Τα βήματα είναι γδούποι κάτω από ~500 Hz.
-        let cl = 0, cd = -200;
-        for (let i = c; i <= c + 2; i++) { const d = this.bandDb[i - off] ?? -200; if (d > cd) { cd = d; cl = this.cent[i - off]; } }
+        let cl = 0, cd = -200, bs = 0;
+        for (let i = c; i <= c + 2; i++) { const d = this.bandDb[i - off] ?? -200; if (d > cd) { cd = d; cl = this.cent[i - off]; bs = this.bass[i - off]; } }
         const click = cl > CLICK_CENTROID_HZ;
         if (!click && fc >= m * this.alpha + this.delta * FLUX_UNIT && loudDb > this.gate && (c - this.lastOnset) / this.fps >= MIN_STEP_S) {
           this.lastOnset = c;
           // Ένταση βήματος: μέγιστη ενέργεια band στα επόμενα ~40 ms, πάνω από τον θόρυβο βάθους.
           let pk = -200; for (let i = c; i <= Math.min(n, c + 8); i++) pk = Math.max(pk, this.bandDb[i - off]);
-          this.onOnset(c / this.fps, pk - this.floor);
+          this.onOnset(c / this.fps, pk - this.floor, bs);
         }
       }
       this._trim();
     }
-    _trim() { const keep = W_AVG + W_POST + 12; if (this.flux.length > keep) { const d = this.flux.length - keep; this.flux.splice(0, d); this.bandDb.splice(0, d); this.cent.splice(0, d); } }
+    _trim() { const keep = W_AVG + W_POST + 12; if (this.flux.length > keep) { const d = this.flux.length - keep; this.flux.splice(0, d); this.bandDb.splice(0, d); this.cent.splice(0, d); this.bass.splice(0, d); } }
   }
   const FLUX_LO_HZ = 60, FLUX_HI_HZ = 4000, FLUX_GAMMA = 100, FLUX_UNIT = 0.02;
   // Σε πραγματικό ήχο (7/11): διακόπτης φωτός median centroid ~2000 Hz (90% > 1270), βήματα ghost/παίκτη 170–450 Hz.
   const CLICK_CENTROID_HZ = 1000;
+  // Χτύπος καρδιάς (7/11, Kormos + Deogen κοντά): περίοδος 0.60–0.61 s, 89–97% ενέργειας < 100 Hz· βήματα 7–30%.
+  const HEART_LO_S = 0.595, HEART_HI_S = 0.625, HEART_BASS = 0.75;
+
+  // ───────── Rhythm path: autocorrelation του low-band flux (χαλί, βήματα κάτω από ανάσα) ─────────
+  // Πιάνει τον ρυθμό χωρίς να χρειάζεται κάθε βήμα ξεχωριστά. Σε πραγματικό ήχο (7/11): σκληρό δάπεδο
+  // και χαλί 1.61 m/s (παίκτης), Normal 1.69 (1.7)· score βημάτων 0.10–0.26, διακόπτης/ησυχία 0.01–0.05.
+  const AC_HI_HZ = 1000, AC_WIN_S = 12, AC_MIN_S = 8, AC_EVERY_S = 0.5, AC_MIN_SCORE = 0.08, AC_IDLE_S = 3;
+  // shortcut: το rhythm path αναφέρει ΜΟΝΟ ρυθμό περπατήματος παίκτη (δικά σου βήματα σε χαλί κ.λπ.).
+  // Σε hunt Deogen βγάζει 1.46 / 0.66 m/s χωρίς ground truth → θα έδειχνε λάθος ghosts. Άνοιξέ το για
+  // ghosts όταν υπάρξουν ηχογραφήσεις με γνωστά βήματα ghost σε χαλί / κάτω από ανάσα.
+  /**
+   * Περίοδος βημάτων από envelope onsets με comb autocorrelation: μέσο AC στα P,2P,3P,4P μείον τις
+   * κοιλάδες ανάμεσα. Το comb λύνει τη σύγχυση αρμονικών (P vs 2P/3P) που έχει το σκέτο μέγιστο AC.
+   * @param {ArrayLike<number>} env  ένα δείγμα ανά frame
+   * @returns {{period:number,bpm:number,speed:number,score:number}|null}
+   */
+  function combTempo(env, fps) {
+    const n = env.length; if (n < 2 * fps) return null;
+    let mu = 0; for (let i = 0; i < n; i++) mu += env[i]; mu /= n;
+    const x = new Float64Array(n); for (let i = 0; i < n; i++) x[i] = env[i] - mu;
+    const maxLag = Math.min(Math.round(6 * fps), n >> 1), ac = new Float64Array(maxLag + 1);
+    for (let l = 0; l <= maxLag; l++) { let s = 0; for (let i = 0; i + l < n; i++) s += x[i] * x[i + l]; ac[l] = s; }
+    if (!(ac[0] > 0)) return null;
+    for (let l = maxLag; l >= 0; l--) ac[l] /= ac[0];
+    const at = L => { const i = Math.round(L * fps), w = Math.max(1, Math.round(0.03 * i)); if (i + w > maxLag) return NaN;
+      let m = -Infinity; for (let j = i - w; j <= i + w; j++) m = Math.max(m, ac[j]); return m; };
+    const lim = maxLag / fps;
+    let best = null;
+    for (let P = 0.3; P <= MAX_STEP_S; P += 0.005) {
+      let pk = 0, va = 0, c = 0;
+      for (let k = 1; k <= 4 && k * P <= lim; k++) { const a = at(k * P), b = at((k - 0.5) * P); if (Number.isNaN(a) || Number.isNaN(b)) break; pk += a; va += b; c++; }
+      if (c < 2) continue;
+      const score = (pk - va) / c;
+      if (!best || score > best.score + 0.01) best = { period: P, score }; // αύξουσα P + περιθώριο: σε ισοπαλία η μικρότερη περίοδος
+    }
+    if (!best) return null;
+    // Ακριβέστερη περίοδος: κορυφή (με παραβολική παρεμβολή) γύρω από kP, μέσος όρος των peak_k / k.
+    const ests = [];
+    for (let k = 1; k <= 4 && k * best.period <= lim; k++) {
+      const c0 = k * best.period * fps, lo = Math.max(1, Math.floor(c0 * 0.95)), hi = Math.min(maxLag - 1, Math.ceil(c0 * 1.05));
+      let j = lo; for (let i = lo; i <= hi; i++) if (ac[i] > ac[j]) j = i;
+      const den = ac[j - 1] - 2 * ac[j] + ac[j + 1], d = den < 0 ? 0.5 * (ac[j - 1] - ac[j + 1]) / den : 0;
+      ests.push((j + d) / fps / k);
+    }
+    const period = ests.length ? median(ests) : best.period;
+    const bpm = 60 / period;
+    return { period, bpm, speed: bpmToSpeed(bpm), score: best.score };
+  }
   const W_PRE = 6, W_POST = 3, W_AVG = 40;   // frames των 5 ms: ±30/15 ms max, ~200 ms μέσος όρος
 
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -219,16 +278,35 @@
       this._peakSince = -200;
       this.steps = [];              // χρόνοι (s) τρέχουσας σειράς βημάτων
       this.strengths = [];          // ένταση κάθε βήματος (peak dB πάνω από τον θόρυβο)
+      this._bass = [];              // μερίδιο < 100 Hz κάθε βήματος (για τον χτύπο καρδιάς)
       this._prevLocal = null;       // ρυθμός του προηγούμενου παραθύρου 6 βημάτων
       this._run = 0;                // πόσα διαδοχικά ρυθμικά βήματα
       this._lastTempo = null;
       // "flux" (προεπιλογή): spectral flux, αγνοεί σταθερό θόρυβο. "energy": το αρχικό band-energy.
       this.method = o.method || "flux";
       if (this.method === "flux") {
-        this._flux = new FluxOnsets({ fs: this.fs, onOnset: (t, st) => { this._checkGap(t); this._addStep(t, st); },
-          onLevel: l => { if (this.onLevel) this.onLevel(l); this._checkGap(this._flux.frame / this._flux.fps); } });
+        this._flux = new FluxOnsets({ fs: this.fs, onOnset: (t, st, b) => { this._checkGap(t); this._addStep(t, st, b); },
+          onLevel: l => { if (this.onLevel) this.onLevel(l); this._checkGap(this._flux.frame / this._flux.fps); },
+          onLow: v => this._acPush(v) });
+        const fps = this._flux.fps;
+        this._ac = new Float32Array(Math.round(AC_WIN_S * fps)); this._acN = 0; this._acPos = 0;
+        this._acEvery = Math.round(AC_EVERY_S * fps); this._lastRhythmicT = -1e9;
         this._flux.setSensitivity(this.sensitivity);
       }
+    }
+
+    // Rhythm path: τρέχει μόνο όταν τα μεμονωμένα βήματα δεν δίνουν ρυθμό (χαλί, ανάσα από πάνω).
+    _acPush(v) {
+      const buf = this._ac; buf[this._acPos] = v; this._acPos = (this._acPos + 1) % buf.length;
+      if (this._acN < buf.length) this._acN++;
+      const fps = this._flux.fps, t = this._flux.frame / fps;
+      if (this._flux.frame % this._acEvery || this._acN < AC_MIN_S * fps || t - this._lastRhythmicT < AC_IDLE_S || !this.onTempo) return;
+      const n = this._acN, env = new Float32Array(n);
+      for (let i = 0; i < n; i++) env[i] = buf[(this._acPos - n + i + buf.length) % buf.length];
+      const r = combTempo(env, fps);
+      if (!r || r.score < AC_MIN_SCORE || !isPlayerWalk(r.speed)) return;
+      this.onTempo({ bpm: r.bpm, speed: r.speed, steps: 0, confidence: Math.min(1, r.score / 0.25), rhythmic: true,
+        selfLike: isPlayerWalk(r.speed), maybeSprint: isPlayerSprintSpeed(r.speed), source: "ac" });
     }
 
     _checkGap(t) { if (this.steps.length && t - this.steps[this.steps.length - 1] > RESET_GAP_S) this.reset(); }
@@ -241,7 +319,7 @@
       this._gate = lerp(-50, -66, this.sensitivity);   // απόλυτο κατώφλι dBFS
     }
 
-    reset() { this.steps = []; this.strengths = []; this._prevLocal = null; this._run = 0; this._lastTempo = null; if (this.onTempo) this.onTempo(null); }
+    reset() { this.steps = []; this.strengths = []; this._bass = []; this._prevLocal = null; this._run = 0; this._lastTempo = null; if (this.onTempo) this.onTempo(null); }
 
     /** @param {Float32Array|number[]} samples mono, -1..1 */
     process(samples) {
@@ -297,10 +375,10 @@
       if (this.steps.length && t - this.steps[this.steps.length - 1] > RESET_GAP_S) this.reset();
     }
 
-    _addStep(t, strength) {
-      if (this.steps.length && t - this.steps[this.steps.length - 1] > RESET_GAP_S) { this.steps = []; this.strengths = []; this._prevLocal = null; this._run = 0; }
-      this.steps.push(t); this.strengths.push(strength);
-      if (this.steps.length > 16) { this.steps.shift(); this.strengths.shift(); }
+    _addStep(t, strength, bass) {
+      if (this.steps.length && t - this.steps[this.steps.length - 1] > RESET_GAP_S) { this.steps = []; this.strengths = []; this._bass = []; this._prevLocal = null; this._run = 0; }
+      this.steps.push(t); this.strengths.push(strength); this._bass.push(bass ?? 0);
+      if (this.steps.length > 16) { this.steps.shift(); this.strengths.shift(); this._bass.shift(); }
 
       // rhythmic: το βήμα ανήκει σε σταθερό ρυθμό. Πόρτες, φωνές, αντικείμενα δεν σχηματίζουν ρυθμό.
       const local = this.steps.length >= LOCAL_WIN ? estimateTempo(this.steps.slice(-LOCAL_WIN)) : null;
@@ -308,10 +386,15 @@
       // Πολύ αργά βήματα (Deogen κοντά σου, 1 βήμα / 1.2–2.4 s): δεν προλαβαίνουν δύο παράθυρα,
       // οπότε αρκεί ένα με πολύ καθαρό ρυθμό.
       const slow = !!local && 60 / local.bpm >= SLOW_PERIOD_S && local.confidence >= SLOW_CONF;
-      const rhythmic = slow || (!!local && local.confidence >= LOCAL_CONF && !!prev && prev.confidence >= LOCAL_CONF &&
-                       Math.abs(local.speed - prev.speed) <= LOCAL_AGREE * local.speed);
+      // Χτύπος καρδιάς του παίκτη (ghost κοντά σε hunt): σταθερά ~98 bpm, σχεδόν όλος κάτω από 100 Hz.
+      // Και τα δύο μαζί → δεν είναι βήματα. Ghost με πραγματικά βήματα στα ~1.46 m/s (Hantu) έχει κανονικό φάσμα.
+      const heartbeat = !!local && 60 / local.bpm >= HEART_LO_S && 60 / local.bpm <= HEART_HI_S &&
+                        median(this._bass.slice(-LOCAL_WIN)) >= HEART_BASS;
+      const rhythmic = !heartbeat && (slow || (!!local && local.confidence >= LOCAL_CONF && !!prev && prev.confidence >= LOCAL_CONF &&
+                       Math.abs(local.speed - prev.speed) <= LOCAL_AGREE * local.speed));
       this._prevLocal = local;
       this._run = rhythmic ? this._run + 1 : 0;
+      if (rhythmic) this._lastRhythmicT = t;
 
       // Ένδειξη: ο ρυθμός όλης της σειράς αν συμφωνεί με τον τοπικό (πιο σταθερός), αλλιώς ο τοπικός
       // (π.χ. μόλις άλλαξε ταχύτητα, Revenant 1.0 → 3.0).
@@ -528,7 +611,7 @@
     return null;
   }
 
-  const api = { FootstepDetector, estimateTempo, bpmToSpeed, speedToBpm, analyzeHunt, analyzeGame, loudness, isPlayerWalk, isPlayerSprintSpeed };
+  const api = { FootstepDetector, estimateTempo, combTempo, bpmToSpeed, speedToBpm, analyzeHunt, analyzeGame, loudness, isPlayerWalk, isPlayerSprintSpeed };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.PhasmFootsteps = api;
 })(typeof self !== "undefined" ? self : this);

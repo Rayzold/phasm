@@ -2326,8 +2326,9 @@ const ear=(()=>{
         speedSrc="auto";
         const sure=t.confidence>=0.6 && t.steps>=8;
         const sprint = t.maybeSprint ? T(" · ή εσύ που τρέχεις"," · or you sprinting") : "";
+        const src = t.source==="ac" ? T("ρυθμός (σιγανά βήματα)","rhythm (quiet steps)") : T(`${t.steps} βήματα`,`${t.steps} steps`);
         showSpeed(t.bpm, t.speed,
-          T(`🎧 auto · ${t.steps} βήματα · σιγουριά ${Math.round(t.confidence*100)}%`, `🎧 auto · ${t.steps} steps · ${Math.round(t.confidence*100)}% sure`)+sprint, sure);
+          T(`🎧 auto · ${src} · σιγουριά ${Math.round(t.confidence*100)}%`, `🎧 auto · ${src} · ${Math.round(t.confidence*100)}% sure`)+sprint, sure);
       },
       onLevel:l=>{
         const pct=x=>Math.max(0,Math.min(100,(x+80)*1.25));

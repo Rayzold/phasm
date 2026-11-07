@@ -137,5 +137,36 @@ for (const s0 of [12345, 777, 31337]) {
   const r3 = run(sw);
   check("rhythmic light-switch clicks → no tempo", !r3.last, r3.last ? `${r3.last.speed.toFixed(2)} m/s, ${r3.steps.length} onsets` : `${r3.steps.length} onsets`);
 }
+// 2b) Χτύπος καρδιάς του παίκτη (ghost κοντά): ~98 bpm, πολύ μπάσο (lub-dub ~50 Hz) → όχι βήματα.
+{
+  seed = 5150;
+  const hb = scene(1.7, { dur: 12, start: 99 }).buf;
+  const beat = (at, amp) => { for (let i = 0; i < 0.09 * FS && at + i < hb.length; i++) hb[at + i] += amp * Math.exp(-i / FS / 0.03) * Math.sin(2 * Math.PI * 50 * i / FS); };
+  for (let t = 0.5; t < 11.5; t += 0.61) { beat(Math.round(t * FS), 0.3); beat(Math.round((t + 0.2) * FS), 0.04); } // «dub» πολύ πιο αδύναμο, όπως στον ήχο του παιχνιδιού
+  const r = run(hb);
+  check("player heartbeat (98 bpm, sub-100 Hz) → no tempo", !r.last, r.last ? `${r.last.speed.toFixed(2)} m/s, ${r.steps.length} onsets` : `${r.steps.length} onsets`);
+}
+// 3) Rhythm path (autocorrelation): πολύ σιγανά δικά σου βήματα (χαλί) → «εσύ», χωρίς onsets.
+{
+  const { combTempo, isPlayerWalk } = require(path.join(__dirname, "..", "footsteps.js"));
+  const fps = 200, P = 60 / speedToBpm(1.6), env = new Float32Array(12 * fps);
+  seed = 2024; for (let i = 0; i < env.length; i++) env[i] = 0.3 * Math.abs(gauss());
+  for (let t = 0.3; t < 12; t += P) env[Math.round(t * fps)] += 1.0;
+  const r = combTempo(env, fps);
+  check("combTempo: 1.6 m/s pulses in noise", r && Math.abs(r.speed - 1.6) < 0.03 && isPlayerWalk(r.speed), r ? `${r.speed.toFixed(3)} score ${r.score.toFixed(2)}` : "null");
+  const noise = env.map(() => 0.3 * Math.abs(gauss()));
+  const rn = combTempo(noise, fps);
+  check("combTempo: noise only → low score", !rn || rn.score < 0.08, rn ? `score ${rn.score.toFixed(3)}` : "null");
+  let ac = [];
+  seed = 77; const soft = scene(1.6, { dur: 16, amp: 0.012, ampVar: 0.1 }).buf;
+  const det = new FootstepDetector({ sampleRate: FS, onTempo: t => { if (t && t.source === "ac") ac.push(t); } });
+  for (let i = 0; i < soft.length; i += 320) det.process(soft.subarray(i, i + 320));
+  check("soft own steps → rhythm path says 'you'", ac.length > 0 && ac.every(t => t.selfLike), `${ac.length} readings${ac.length ? ", " + ac[ac.length - 1].speed.toFixed(2) + " m/s" : ""}`);
+  ac = []; seed = 999;
+  const quiet = scene(1.7, { dur: 16, start: 99 }).buf;
+  const det2 = new FootstepDetector({ sampleRate: FS, onTempo: t => { if (t && t.source === "ac") ac.push(t); } });
+  for (let i = 0; i < quiet.length; i += 320) det2.process(quiet.subarray(i, i + 320));
+  check("noise only → rhythm path silent", ac.length === 0, `${ac.length} readings`);
+}
 console.log(`\n${total - fails}/${total} passed`);
 process.exit(fails ? 1 : 0);
