@@ -2122,6 +2122,7 @@ const huntLog=(()=>{
   function schedule(){ if(pending) return; pending=true; setTimeout(()=>{ pending=false; paint(); }, 400); }
 
   // ---- hints από τα δεδομένα του SPEED_REF ----
+  const VERY_SLOW=1.15; // m/s
   const near=(x,c,tol=0.15)=>Math.abs(x-c)<=tol;
   const pair=(a,b,x,y,tol)=>(near(a,x,tol)&&near(b,y,tol))||(near(a,y,tol)&&near(b,x,tol));
   function refsFor(v){
@@ -2142,6 +2143,8 @@ const huntLog=(()=>{
     }
     if(a.trend==="accelerating") add(false, T(`Επιτάχυνε ${a.start.toFixed(2)} → ${a.end.toFixed(2)}: φυσιολογικό όσο σε βλέπει (LoS, ως ×1.65). <b>Δεν</b> ταιριάζει σε Hantu, Dayan, Kormos (χωρίς LoS accel).`, `Sped up ${a.start.toFixed(2)} → ${a.end.toFixed(2)}: normal while it sees you (LoS, up to ×1.65). Does <b>not</b> fit Hantu, Dayan, Kormos (no LoS accel).`), "losSpeedup");
     if(a.trend==="slowing") add(a.end<1.3, T(`Επιβράδυνε ${a.start.toFixed(2)} → ${a.end.toFixed(2)}${a.end<1.3?": <b>Deogen</b> (3.0 μακριά → 0.4 κοντά σου)":""}`, `Slowed ${a.start.toFixed(2)} → ${a.end.toFixed(2)}${a.end<1.3?": <b>Deogen</b> (3.0 far away → 0.4 near you)":""}`));
+    // Κάτω από ~1.15 m/s πάνε μόνο λίγα ghosts (Dayan ακίνητος = 1.2, Hantu min ~1.44).
+    if(a.min<VERY_SLOW) add(true, T(`🐢 Πολύ αργό κατά διαστήματα (min ${a.min.toFixed(2)} m/s): <b>Deildegast</b> · <b>Deogen</b> · <b>Thaye</b> (γερασμένο) · <b>Revenant</b> (χωρίς LoS)`, `🐢 Very slow at times (min ${a.min.toFixed(2)} m/s): <b>Deildegast</b> · <b>Deogen</b> · <b>Thaye</b> (old) · <b>Revenant</b> (no LoS)`));
     if(a.max>=3.15) add(true, T(`Max ${a.max.toFixed(2)} m/s: πάνω από 3.1 φτάνει μόνο ο <b>Moroi</b> (με LoS και χαμηλό sanity, ως 3.71)`, `Max ${a.max.toFixed(2)} m/s: only <b>Moroi</b> goes above 3.1 (LoS + low sanity, up to 3.71)`));
     if(a.trend==="constant" && a.steady>=10 && a.mean>=1.35 && a.mean<=2.75) add(false, T(`Σταθερή ${a.mean.toFixed(2)} για ${Math.round(a.steady)} s: αν σε έβλεπε όλη αυτή την ώρα, δεν έχει LoS accel → Hantu / Dayan / Kormos`, `Steady ${a.mean.toFixed(2)} for ${Math.round(a.steady)} s: if it had line of sight the whole time, it has no LoS accel → Hantu / Dayan / Kormos`), "noLosSpeedup");
     const r=refsFor(a.start);
@@ -2325,7 +2328,8 @@ const ear=(()=>{
         }
         speedSrc="auto";
         const sure=t.confidence>=0.6 && t.steps>=8;
-        const sprint = t.maybeSprint ? T(" · ή εσύ που τρέχεις"," · or you sprinting") : "";
+        const sprint = t.maybeSprint ? T(" · ή εσύ που τρέχεις"," · or you sprinting")
+                     : t.speed<1.15 ? T(" · 🐢 πολύ αργό: Deildegast / Deogen / Thaye / Revenant χωρίς LoS"," · 🐢 very slow: Deildegast / Deogen / Thaye / Revenant no LoS") : "";
         const src = t.source==="ac" ? T("ρυθμός (σιγανά βήματα)","rhythm (quiet steps)") : T(`${t.steps} βήματα`,`${t.steps} steps`);
         showSpeed(t.bpm, t.speed,
           T(`🎧 auto · ${src} · σιγουριά ${Math.round(t.confidence*100)}%`, `🎧 auto · ${src} · ${Math.round(t.confidence*100)}% sure`)+sprint, sure);
