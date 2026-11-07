@@ -160,6 +160,23 @@
     font-size:12px;letter-spacing:3px;color:var(--nv-dim);
     text-transform:uppercase;margin-bottom:12px;
   }
+  /* ---------- collapsible sections (κουμπί ▾/▸ σε κάθε ενότητα) ---------- */
+  .c-tog{background:none;border:1px solid var(--line);color:var(--nv-dim);border-radius:6px;width:24px;height:22px;
+    line-height:18px;padding:0;margin-right:8px;cursor:pointer;font-size:12px;vertical-align:middle;flex:0 0 auto;
+    font-family:system-ui,sans-serif;letter-spacing:0;transition:border-color .15s,color .15s}
+  .c-tog:hover,.c-tog:focus-visible{border-color:var(--nv);color:var(--nv);outline:none}
+  .c-tog[aria-expanded="false"]{color:var(--nv)}
+  .c-label{cursor:pointer;user-select:none}
+  .panel.c-collapsed{padding-bottom:4px}
+  .panel.c-collapsed > :not(.c-head){display:none!important}
+  .panel.c-collapsed > .c-head{margin-bottom:8px!important}
+  .ear.c-collapsed > :not(.ear-head){display:none!important}
+  .ear.c-collapsed .ear-head{margin-bottom:0}
+  .hl.c-collapsed > :not(.hl-head){display:none!important}
+  .c-hidden{display:none!important}
+  .c-sum{font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:none;font-family:system-ui,sans-serif;margin-left:8px}
+  #collapseAll{cursor:pointer}
+  #collapseAll:hover{border-color:var(--nv);color:var(--nv)}
   /* ---------- evidence toggles ---------- */
   .ev-grid{display:flex;flex-wrap:wrap;gap:9px}
   .ev{
@@ -542,6 +559,7 @@
     <a href="quiz.html">🎓 <span class="l-el">Εξετάσεις</span><span class="l-en">Exams</span></a>
     <button id="wakeBtn" class="sel" style="margin-left:auto" title="Κράτα την οθόνη αναμμένη όσο είσαι στη σελίδα"><span class="wakeIc">🔅</span> <span class="l-el">Κράτα Ξύπνια</span><span class="l-en">Keep Awake</span></button>
     <button id="minBtn" class="sel" title="Minimal: μόνο evidence, sanity/smudge & ghosts">Minimal</button>
+    <button id="collapseAll" class="sel" title="Μάζεψε / άνοιξε όλες τις ενότητες · Collapse / expand all sections">⊟</button>
     <button id="langBtn" class="sel" title="Ελληνικά / English">ΕΛ</button>
     <select id="diffSel" class="sel" title="Difficulty">
       <option value="amateur">Amateur</option>
@@ -1038,7 +1056,7 @@
 <script src="tells.js"></script>
 <script src="footsteps.js"></script>
 <script>
-const APP_VERSION = "1.45.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.46.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -1625,6 +1643,7 @@ function render(){
   });
 
   paintLos();
+  if(window.phasmSections) window.phasmSections.refresh();
   saveState();
 }
 
@@ -2258,6 +2277,7 @@ const huntLog=(()=>{
       const g=gameHint(starts);
       if(g){ const d=document.createElement("div"); d.className="hl-hint"+(g.strong?" strong":""); d.innerHTML=g.html; gameEl.appendChild(d); }
     }
+    if(window.phasmSections) window.phasmSections.refresh(); // «· N hunts» όταν είναι μαζεμένο
   }
   function clear(){ cur=null; hunts=[]; ignoredMsg=null; save(); paint(); }
   function setIgnoreSelf(v){ ignoreSelf=!!v; paint(); }
@@ -2572,6 +2592,75 @@ function spy(){
   toTopBtn.classList.toggle("show", scrollY>600);
 }
 addEventListener("scroll",spy,{passive:true});
+
+// ---- Ενότητες που «μαζεύουν»: κουμπί ▾/▸ σε κάθε τίτλο, η επιλογή θυμάται ανά συσκευή ----
+window.phasmSections=(()=>{
+  const KEY="phasm-collapsed-v1";
+  let st={}; try{ st=JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){ st={}; }
+  const save=()=>{ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} };
+  const T=(el,en)=>lang==="en"?en:el;
+  const items=[];
+  // key: μοναδικό · box: στοιχείο που παίρνει .c-collapsed (ή null) · head/label: τίτλος · body(): ό,τι κρύβεται χωρίς box · sum(): περίληψη όταν είναι κλειστό
+  function add({key, box=null, head, label, body=null, sum=null}){
+    if(!head || !label) return;
+    const btn=document.createElement("button");
+    btn.type="button"; btn.className="c-tog"; btn.textContent="▾";
+    // .c-head μόνο για τον τίτλο του ίδιου του box: οι τίτλοι υπο-ομάδων μέσα σε ένα panel πρέπει να κρύβονται μαζί του.
+    label.prepend(btn); label.classList.add("c-label"); head.classList.add(box ? "c-head" : "c-subhead");
+    const sumEl=document.createElement("span"); sumEl.className="c-sum"; label.appendChild(sumEl);
+    const it={key, box, btn, body, sum, sumEl, label};
+    btn.addEventListener("click", e=>{ e.stopPropagation(); toggle(key); });
+    label.addEventListener("click", e=>{ if(e.target.closest("button, input, select, a, textarea")) return; toggle(key); });
+    items.push(it); apply(it);
+  }
+  function apply(it){
+    const c=!!st[it.key];
+    if(it.box) it.box.classList.toggle("c-collapsed", c);
+    if(it.body) it.body().forEach(el=>el && el.classList.toggle("c-hidden", c));
+    it.btn.setAttribute("aria-expanded", String(!c)); it.btn.textContent = c ? "▸" : "▾";
+    it.btn.title = c ? T("Άνοιγμα ενότητας","Expand section") : T("Μάζεμα ενότητας","Collapse section");
+    it.sumEl.textContent = c && it.sum ? it.sum() : "";
+  }
+  function set(key, c){ if(c) st[key]=1; else delete st[key]; save(); items.filter(i=>i.key===key).forEach(apply); paintAll(); if(typeof spy==="function") spy(); }
+  function toggle(key){ set(key, !st[key]); }
+  const allBtn=document.getElementById("collapseAll");
+  function paintAll(){
+    const anyOpen=items.some(i=>!st[i.key]);
+    allBtn.textContent = anyOpen ? "⊟" : "⊞";
+    allBtn.title = anyOpen ? T("Μάζεψε όλες τις ενότητες","Collapse all sections") : T("Άνοιξε όλες τις ενότητες","Expand all sections");
+  }
+  allBtn.onclick=()=>{ const anyOpen=items.some(i=>!st[i.key]); items.forEach(i=>{ if(anyOpen) st[i.key]=1; else delete st[i.key]; }); save(); items.forEach(apply); paintAll(); spy(); };
+
+  // 1. Κύριες ενότητες (panels)
+  document.querySelectorAll(".panel.anchor-target[id]").forEach(p=>{
+    const head=p.firstElementChild;
+    const label=head.classList.contains("panel-label") ? head : head.querySelector(".panel-label");
+    add({key:p.id, box:p, head, label});
+  });
+  // 2. Ghost Journal (δεν είναι panel: τίτλος + grid)
+  const gh=document.getElementById("ghosts");
+  if(gh) add({key:"ghosts", head:gh, label:gh.querySelector(".panel-label"),
+    body:()=>[document.getElementById("grid"), document.getElementById("empty")],
+    sum:()=>T(`${document.getElementById("cnt").textContent} πιθανά`,`${document.getElementById("cnt").textContent} possible`)});
+  // 3. Ομάδες φίλτρων μέσα στο Evidence Board — η περίληψη δείχνει πόσα είναι ενεργά, για να μην ξεχαστούν
+  ["bhGrid","otGrid","testGrid","huntBhGrid"].forEach(id=>{
+    const grid=document.getElementById(id), label=grid && grid.previousElementSibling;
+    if(!label || !label.classList.contains("panel-label")) return;
+    add({key:"ev-"+id, head:label, label, body:()=>[grid],
+      sum:()=>{ const n=grid.querySelectorAll(".ev.on").length; return n ? T(`· ${n} ενεργά`,`· ${n} active`) : ""; }});
+  });
+  // 4. Μέσα στο Hunt Toolkit: Auto-listen και Ιστορικό hunts
+  const ear=document.getElementById("ear");
+  if(ear) add({key:"ear", box:ear, head:ear.querySelector(".ear-head"), label:ear.querySelector(".ear-head > span:first-child")});
+  const hl=document.getElementById("huntLog");
+  if(hl) add({key:"huntlog", box:hl, head:hl.querySelector(".hl-head"), label:hl.querySelector(".hl-head > span:first-child"),
+    sum:()=>{ const n=hl.querySelectorAll("#hlList .hl-card").length; return n ? `· ${n} hunts` : ""; }});
+
+  // Πάτημα στο μενού πλοήγησης → άνοιξε την ενότητα αν είναι μαζεμένη
+  navLinks.forEach(a=>a.addEventListener("click",()=>{ const k=a.getAttribute("href").slice(1); if(st[k]) set(k,false); }));
+  paintAll();
+  return { refresh(){ items.forEach(apply); paintAll(); }, set, isCollapsed:k=>!!st[k] };
+})();
 toTopBtn.onclick=()=>scrollTo({top:0,behavior:"smooth"});
 
 // ---- manual «κράτα την οθόνη αναμμένη» toggle (πέρα από timers/auto-drain) ----
