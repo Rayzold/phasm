@@ -65,7 +65,7 @@
       this.ring = new Float32Array(this.N); this.rpos = 0; this.filled = 0; this.sinceHop = 0;
       this.re = new Float64Array(this.N); this.im = new Float64Array(this.N);
       this.hist = [];                         // log-spectra των τελευταίων frames (για μ=2)
-      this.flux = []; this.bandDb = [];       // ανά frame
+      this.flux = []; this.bandDb = []; this.cent = []; // ανά frame
       this.frame = 0; this.lastOnset = -1e9;
       this.dbHist = []; this.floor = -90;
       this.setSensitivity(0.5);
@@ -87,12 +87,13 @@
       for (let i = 0; i < N; i++) { re[i] = this.ring[(this.rpos + i) % N] * this.win[i]; im[i] = 0; }
       fft(re, im);
       const K = this.kHi - this.kLo + 1, L = new Float32Array(K);
-      let pow = 0;
+      let pow = 0, pf = 0;
       for (let k = 0; k < K; k++) {
         const kk = k + this.kLo, p = re[kk] * re[kk] + im[kk] * im[kk];
-        pow += p;
+        pow += p; pf += p * kk;
         L[k] = Math.log1p(FLUX_GAMMA * Math.sqrt(p) / N);
       }
+      this.cent.push(pow > 0 ? pf / pow * this.fs / N : 0); // spectral centroid (Hz) του frame
       const db = 10 * Math.log10(pow / (N * N) + 1e-12);
       // SuperFlux: σύγκριση με frame 2 πίσω, max-filter ±1 bin στη συχνότητα (αγνοεί μικρές μετατοπίσεις).
       const prev = this.hist.length >= 2 ? this.hist[this.hist.length - 2] : null;
@@ -123,7 +124,11 @@
         let m = 0; for (let i = c - W_AVG; i <= c + W_POST; i++) m += at(i);
         m /= (W_AVG + W_POST + 1);
         const loudDb = Math.max(this.bandDb[c - off], this.bandDb[c - off + 1] ?? -200, this.bandDb[c - off + 2] ?? -200);
-        if (fc >= m * this.alpha + this.delta * FLUX_UNIT && loudDb > this.gate && (c - this.lastOnset) / this.fps >= MIN_STEP_S) {
+        // Click (διακόπτης, πόρτα, αντικείμενο): ενέργεια ψηλά στο φάσμα. Τα βήματα είναι γδούποι κάτω από ~500 Hz.
+        let cl = 0, cd = -200;
+        for (let i = c; i <= c + 2; i++) { const d = this.bandDb[i - off] ?? -200; if (d > cd) { cd = d; cl = this.cent[i - off]; } }
+        const click = cl > CLICK_CENTROID_HZ;
+        if (!click && fc >= m * this.alpha + this.delta * FLUX_UNIT && loudDb > this.gate && (c - this.lastOnset) / this.fps >= MIN_STEP_S) {
           this.lastOnset = c;
           // Ένταση βήματος: μέγιστη ενέργεια band στα επόμενα ~40 ms, πάνω από τον θόρυβο βάθους.
           let pk = -200; for (let i = c; i <= Math.min(n, c + 8); i++) pk = Math.max(pk, this.bandDb[i - off]);
@@ -132,9 +137,11 @@
       }
       this._trim();
     }
-    _trim() { const keep = W_AVG + W_POST + 12; if (this.flux.length > keep) { const d = this.flux.length - keep; this.flux.splice(0, d); this.bandDb.splice(0, d); } }
+    _trim() { const keep = W_AVG + W_POST + 12; if (this.flux.length > keep) { const d = this.flux.length - keep; this.flux.splice(0, d); this.bandDb.splice(0, d); this.cent.splice(0, d); } }
   }
   const FLUX_LO_HZ = 60, FLUX_HI_HZ = 4000, FLUX_GAMMA = 100, FLUX_UNIT = 0.02;
+  // Σε πραγματικό ήχο (7/11): διακόπτης φωτός median centroid ~2000 Hz (90% > 1270), βήματα ghost/παίκτη 170–450 Hz.
+  const CLICK_CENTROID_HZ = 1000;
   const W_PRE = 6, W_POST = 3, W_AVG = 40;   // frames των 5 ms: ±30/15 ms max, ~200 ms μέσος όρος
 
   const lerp = (a, b, t) => a + (b - a) * t;

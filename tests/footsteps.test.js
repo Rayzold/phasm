@@ -131,6 +131,11 @@ for (const s0 of [12345, 777, 31337]) {
   const vox = scene(1.7, { dur: 10, start: 99, voices: 12 }).buf;
   const r2 = run(vox);
   check("voices only → no confident tempo", !r2.last || r2.last.confidence < 0.5, r2.last ? `${r2.last.speed.toFixed(2)} conf ${r2.last.confidence.toFixed(2)}` : `${r2.steps.length} onsets`);
+  // Διακόπτης φωτός που αναβοσβήνει ρυθμικά (πραγματικό bug 7/11: έβγαινε «hunt 3.10 m/s»).
+  const sw = scene(1.7, { dur: 12, start: 99 }).buf;
+  for (let t = 0.5; t < 11.5; t += 0.245) click(sw, Math.round(t * FS), 0.3);
+  const r3 = run(sw);
+  check("rhythmic light-switch clicks → no tempo", !r3.last, r3.last ? `${r3.last.speed.toFixed(2)} m/s, ${r3.steps.length} onsets` : `${r3.steps.length} onsets`);
 }
 console.log(`\n${total - fails}/${total} passed`);
 process.exit(fails ? 1 : 0);
