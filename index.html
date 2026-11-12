@@ -170,9 +170,6 @@
   .panel.c-collapsed{padding-bottom:4px}
   .panel.c-collapsed > :not(.c-head){display:none!important}
   .panel.c-collapsed > .c-head{margin-bottom:8px!important}
-  .ear.c-collapsed > :not(.ear-head){display:none!important}
-  .ear.c-collapsed .ear-head{margin-bottom:0}
-  .hl.c-collapsed > :not(.hl-head){display:none!important}
   .c-hidden{display:none!important}
   .c-sum{font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:none;font-family:system-ui,sans-serif;margin-left:8px}
   #collapseAll{cursor:pointer}
@@ -375,30 +372,7 @@
   .tap-readout .dim{color:var(--muted);font-size:13px}
   .tap-readout.unsure #tapBpm,.tap-readout.unsure #tapMs{color:var(--warn)}
   .tap-src{display:block;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:11px;color:var(--muted);letter-spacing:normal;margin-top:2px;min-height:14px}
-  /* ---------- auto-listen (footsteps.js + PhasmListener) ---------- */
-  .ear{border:1px dashed var(--line);border-radius:8px;padding:9px 10px 8px;margin:0 0 10px;background:rgba(143,227,136,.025)}
-  .ear.on{border-style:solid;border-color:var(--nv-dim)}
-  .ear-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-size:12.5px;color:#B9C2CE}
-  .ear-state{font-size:11.5px;padding:2px 9px;border-radius:12px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-  .ear-state.live{color:var(--nv);border-color:var(--nv-dim);background:rgba(143,227,136,.08)}
-  .ear-state.wait{color:var(--warn);border-color:#6b5a2a}
-  .ear-state.err{color:var(--danger);border-color:var(--danger)}
-  .ear .smudge-btns{margin-bottom:6px}
-  .ear .btn{padding:6px 10px;font-size:12.5px}
-  .ear .btn.on{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.1)}
   .los-btn.on{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.1)}
-  .hl-hint .btn{padding:2px 8px;font-size:11px;margin:4px 0 0;display:inline-block}
-  .ear-meter{position:relative;height:6px;border-radius:4px;background:#1a212c;overflow:hidden;margin:4px 0 6px}
-  .ear-meter>div{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--nv-dim);transition:width .1s linear}
-  .ear-meter>i{position:absolute;top:0;bottom:0;width:2px;background:var(--warn);opacity:.7;left:0}
-  .ear .drain-row{margin:2px 0 4px}
-  .ear .smudge-note{font-size:11.5px}
-  .ear .smudge-note a{color:var(--nv)}
-  .ear-opts{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:2px 0 6px;font-size:12.5px}
-  .ear-opts .chk{gap:6px}
-  .ear-opts .btn{padding:4px 9px;font-size:12px}
-  .ear-opts .btn:disabled{opacity:.45;cursor:default}
-  .ear-ignored{font-size:11.5px;color:var(--muted);margin:0 0 6px}
   /* ---------- clickable speed rows ---------- */
   .speed-row{cursor:pointer;border-radius:6px;transition:background .15s}
   .speed-row:hover{background:rgba(143,227,136,.05)}
@@ -406,51 +380,6 @@
   .speed-row.picked{background:rgba(143,227,136,.12);box-shadow:inset 3px 0 0 var(--nv)}
   .speed-row.picked .sp::after{content:" ✓";color:var(--nv)}
   .speed-hint{font-size:11.5px;color:var(--muted);margin:2px 0 6px}
-  /* ---------- hunt history ---------- */
-  .hl{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
-  .hl-head{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:#B9C2CE;margin-bottom:6px}
-  .hl-head .btn{padding:3px 8px;font-size:11.5px}
-  .hl-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:6px;margin-bottom:6px}
-  .hl-summary:empty{display:none}
-  .hl-stat{background:#121821;border:1px solid var(--line);border-radius:6px;padding:4px 6px;text-align:center}
-  .hl-stat b{display:block;font-size:15px;color:var(--nv);font-variant-numeric:tabular-nums;font-weight:600}
-  .hl-stat span{font-size:10.5px;color:var(--muted)}
-  .hl-hint{font-size:12px;line-height:1.4;color:#C9D1DB;padding:4px 8px;border-left:2px solid var(--warn);background:rgba(240,198,116,.06);margin:4px 0;border-radius:0 4px 4px 0}
-  .hl-hint.strong{border-left-color:var(--nv);background:rgba(143,227,136,.07)}
-  .hl-hint b{color:var(--nv)}
-  .hl-card{border:1px solid var(--line);border-radius:7px;padding:7px 8px;margin:6px 0;background:#0f141b}
-  .hl-card.live{border-color:var(--nv-dim);box-shadow:0 0 0 1px rgba(143,227,136,.15) inset}
-  .hl-ch{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:12px;color:#B9C2CE;flex-wrap:wrap}
-  .hl-ch .meta{color:var(--muted);font-size:11px}
-  .hl-ch .x{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px}
-  .hl-ch .x:hover{color:var(--danger)}
-  .hl-trend{font-size:11px;padding:1px 7px;border-radius:10px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-  .hl-trend.constant{color:#9fb7d6}.hl-trend.accelerating{color:var(--warn)}.hl-trend.slowing{color:#d6a0e6}.hl-trend.switch{color:var(--danger)}
-  .hl-nums{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);margin:4px 0 2px;font-variant-numeric:tabular-nums}
-  .hl-nums b{color:#E6EBF1;font-weight:600}
-  .hl-card .btn{padding:3px 8px;font-size:11.5px;margin-top:3px}
-  .hl-empty{font-size:11.5px;color:var(--muted)}
-  .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);margin-right:4px;animation:hlPulse 1s infinite}
-  @keyframes hlPulse{50%{opacity:.25}}
-  .hl-chart{display:block;width:100%;height:auto;margin:4px 0 2px;touch-action:pan-y;outline:none;cursor:crosshair}
-  .hl-chart:focus-visible{outline:1px dashed var(--nv-dim);outline-offset:2px}
-  .hl-chart .g{stroke:#1f2733;stroke-width:1}
-  .hl-chart .g.minor{stroke:#171e28}
-  .hl-chart .ax{fill:var(--muted);font-size:9px;font-family:system-ui,sans-serif}
-  .hl-chart .ref{stroke:#6b7483;stroke-width:1;stroke-dasharray:4 3}
-  .hl-chart .ref-l{fill:#8A93A3}
-  .hl-chart .sw{stroke:#6b7483;stroke-width:1;stroke-dasharray:2 3}
-  .hl-chart .ln{fill:none;stroke:var(--nv);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
-  .hl-chart .pt{fill:var(--nv);stroke:#0f141b;stroke-width:2}
-  .hl-chart .lbl{fill:#E6EBF1;font-size:9.5px;font-weight:600;font-family:system-ui,sans-serif;font-variant-numeric:tabular-nums}
-  .hl-chart .cross{stroke:#8A93A3;stroke-width:1}
-  .hl-chart .tip{fill:#1a212c;stroke:#2e3846}
-  .hl-chart .tip-t{fill:#E6EBF1;font-size:10px;font-weight:600;font-family:system-ui,sans-serif;font-variant-numeric:tabular-nums}
-  .speed-rows{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
-  .speed-row{display:flex;gap:8px;align-items:baseline;font-size:12.5px;color:var(--muted);border:1px solid transparent;border-radius:6px;padding:3px 8px}
-  .speed-row .sp{font-family:"Special Elite",monospace;color:#B9C2CE;white-space:nowrap;min-width:86px;font-variant-numeric:tabular-nums}
-  .speed-row.hit{border-color:var(--nv);color:var(--nv);background:rgba(143,227,136,.06)}
-  .speed-row.hit .sp{color:var(--nv)}
   /* ---------- threshold quick-reference ---------- */
   .thresh-wrap{overflow-x:auto}
   table.thresh{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
@@ -591,9 +520,6 @@
       <label class="chk">🧠 <span class="l-el">Drain ×</span><span class="l-en">Drain ×</span>
         <input id="ccMult" class="sel" type="number" min="0" max="5" step="0.1" style="width:60px">
       </label>
-      <label class="chk" title="Ghost speed του custom lobby. Οι ταχύτητες που μετράει το tapper και ο listener διαιρούνται με αυτό πριν συγκριθούν με τα ghosts / The lobby's ghost speed. Speeds measured by the tapper and the listener are divided by it before they're compared with the ghosts">👻 <span class="l-el">Ghost speed</span><span class="l-en">Ghost speed</span>
-        <select id="ccSpeed" class="sel"><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option></select>
-      </label>
     </div>
     <div class="sanity-note" style="margin-top:8px"><span class="l-el">Για community lobbies με custom ρυθμίσεις (π.χ. "Apocalypse"-style) — ρύθμισε τα δικά σου νούμερα εδώ και θα χρησιμοποιηθούν παντού στη σελίδα σαν να ήταν προεπιλεγμένο επίπεδο.</span><span class="l-en">For community lobbies with custom settings (e.g. "Apocalypse"-style) — set your own numbers here and they're used everywhere on the page just like a built-in preset.</span></div>
   </div>
@@ -696,35 +622,6 @@
         <div class="tool-title">Footstep Speed Tapper</div>
         <button class="tap-btn" id="tapBtn">TAP<small><span class="l-el">ή πάτα Space</span><span class="l-en">or press Space</span></small></button>
         <div class="tap-readout" id="tapReadout"><span id="tapBpm">–</span><span class="dim"> bpm · </span><span id="tapMs">–</span><span class="dim"> m/s</span><span class="tap-src" id="tapSrc"></span></div>
-        <div class="ear" id="ear">
-          <div class="ear-head"><span>🎧 <span class="l-el">Αυτόματο άκουσμα βημάτων</span><span class="l-en">Auto-listen for footsteps</span></span><span class="ear-state" id="earState">off</span></div>
-          <div class="smudge-btns">
-            <button class="btn" id="earHelper" title="PhasmListener: ακούει ΜΟΝΟ το Phasmophobia (όχι Discord) / hears ONLY Phasmophobia (not Discord)">🖥️ <span class="l-el">PhasmListener</span><span class="l-en">PhasmListener</span></button>
-            <button class="btn" id="earScreen" title="Share screen + «Share system audio» (Chrome/Edge)">🔊 <span class="l-el">Ήχος συστήματος</span><span class="l-en">System audio</span></button>
-            <button class="btn" id="earStop" style="display:none">■ Stop</button>
-          </div>
-          <div class="ear-meter" title="Ένταση / level · κίτρινο = θόρυβος βάθους / yellow = noise floor"><div id="earLevel"></div><i id="earFloor"></i></div>
-          <div class="drain-row">
-            <label class="chk" style="flex:1;min-width:220px"><span style="white-space:nowrap">🎚️ <span class="l-el">Ευαισθησία</span><span class="l-en">Sensitivity</span></span>
-              <input type="range" id="earSens" min="0" max="1" step="0.05" value="0.5" style="flex:1;margin:0 8px">
-              <span id="earSensVal" style="min-width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)">50%</span>
-            </label>
-          </div>
-          <div class="ear-opts">
-            <label class="chk" title="Ο παίκτης περπατάει με 1.6 m/s, το ghost συνήθως 1.7: σειρές στα ~1.6 θεωρούνται δικά σου βήματα / Players walk at 1.6 m/s, ghosts usually 1.7: series at ~1.6 count as your own steps"><input type="checkbox" id="earSelf" checked> 👣 <span class="l-el">Αγνόησε τα δικά μου βήματα</span><span class="l-en">Ignore my own footsteps</span></label>
-            <button class="btn" id="earRec" disabled title="Αποθηκεύει τα τελευταία 2 λεπτά ήχου ως WAV, για να ρυθμιστεί ο detector σε πραγματικό ήχο / Saves the last 2 minutes of audio as a WAV, to tune the detector on real game audio">⏺ <span class="l-el">Κράτα τα τελευταία 2′ (WAV)</span><span class="l-en">Save last 2′ (WAV)</span></button>
-          </div>
-          <div class="ear-ignored" id="earIgnored" hidden></div>
-          <div class="smudge-note" id="earNote"><span class="l-el"><strong>PhasmListener</strong> = μικρό Windows app που ακούει ΜΟΝΟ τον ήχο του Phasmophobia (όχι Discord/μουσική) — <a href="https://github.com/Rayzold/phasm/tree/main/footstep-helper" target="_blank" rel="noopener">οδηγίες</a>. <strong>Ήχος συστήματος</strong> = χωρίς εγκατάσταση, αλλά ακούει ό,τι παίζει ο υπολογιστής. Μείνε ακίνητος στο hunt: τα δικά σου βήματα μπερδεύουν τη μέτρηση.</span><span class="l-en"><strong>PhasmListener</strong> = a small Windows app that hears ONLY Phasmophobia's audio (not Discord/music) — <a href="https://github.com/Rayzold/phasm/tree/main/footstep-helper" target="_blank" rel="noopener">setup</a>. <strong>System audio</strong> = nothing to install, but it hears everything your PC plays. Stand still during the hunt: your own footsteps confuse the reading.</span></div>
-          <div class="hl" id="huntLog">
-            <div class="hl-head"><span>📊 <span class="l-el">Ιστορικό hunts</span><span class="l-en">Hunt history</span></span>
-              <button class="btn" id="hlClear" style="display:none">🗑 <span class="l-el">Καθαρισμός</span><span class="l-en">Clear</span></button></div>
-            <div id="hlSummary" class="hl-summary"></div>
-            <div id="hlGame"></div>
-            <div id="hlList"></div>
-            <div class="hl-empty" id="hlEmpty"><span class="l-el">Κάθε hunt που ακούγεται καταγράφεται εδώ: αρχική / μέση / ελάχιστη / μέγιστη ταχύτητα, γράφημα και τι μοτίβο δείχνει.</span><span class="l-en">Every hunt it hears is logged here: start / average / min / max speed, a graph, and what the pattern points to.</span></div>
-          </div>
-        </div>
         <div class="drain-row" style="margin:2px 0 10px">
           <label class="chk" style="flex:1;min-width:220px" title="Calibration"><span style="white-space:nowrap">🎚️ <span class="l-el">Βαθμονόμηση</span><span class="l-en">Calibration</span></span>
             <input type="range" id="tapCalib" min="-1" max="1" step="0.05" value="0" style="flex:1;margin:0 8px">
@@ -1057,9 +954,8 @@
 <script src="ghosts-data.js"></script>
 <script src="timers-core.js"></script>
 <script src="tells.js"></script>
-<script src="footsteps.js"></script>
 <script>
-const APP_VERSION = "1.48.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
+const APP_VERSION = "1.47.0"; // καθαρά διακοσμητικό (footer) — δεν χρειάζεται πια sync με το sw.js, δες σχόλιο εκεί
 document.getElementById("verTxt").textContent = "v"+APP_VERSION;
 
 const state = {}; // key -> 0 unknown, 1 on, 2 off
@@ -1236,13 +1132,10 @@ const DIFF = DIFFICULTIES;
 let diff = "intermediate";
 // Custom difficulty: τιμές που ο χρήστης ορίζει με το χέρι όταν επιλέγει "Custom" (π.χ. community
 // "Apocalypse"-style lobbies). Το DIFF.custom ξαναχτίζεται από αυτό όποτε αλλάζει κάποιο πεδίο.
-let customCfg = {mult:1.5, small:20, medium:40, large:50, grace:4, evid:3, speed:1};
-const GHOST_SPEEDS=[0.5,0.75,1,1.25,1.5];
+let customCfg = {mult:1.5, small:20, medium:40, large:50, grace:4, evid:3};
 function rebuildCustomDiff(){
-  DIFF.custom = {label:"Custom", mult:customCfg.mult, hunts:{small:customCfg.small,medium:customCfg.medium,large:customCfg.large}, grace:customCfg.grace, evid:customCfg.evid, speed:customCfg.speed};
+  DIFF.custom = {label:"Custom", mult:customCfg.mult, hunts:{small:customCfg.small,medium:customCfg.medium,large:customCfg.large}, grace:customCfg.grace, evid:customCfg.evid};
 }
-// Πολλαπλασιαστής ταχύτητας ghost: μόνο το Custom τον αλλάζει (τα presets του παιχνιδιού είναι 100%).
-function ghostMult(){ return (DIFF[diff] && DIFF[diff].speed) || 1; }
 rebuildCustomDiff();
 function clampCC(c){
   if(!c || typeof c!=="object") return null;
@@ -1253,7 +1146,6 @@ function clampCC(c){
     large: (typeof c.large==="number"  && c.large>0  && c.large<=300)  ? c.large  : customCfg.large,
     grace: (typeof c.grace==="number"  && c.grace>=0 && c.grace<=60)   ? c.grace  : customCfg.grace,
     mult:  (typeof c.mult==="number"   && c.mult>=0  && c.mult<=10)    ? c.mult   : customCfg.mult,
-    speed: GHOST_SPEEDS.includes(c.speed) ? c.speed : 1,
   };
 }
 
@@ -1965,8 +1857,8 @@ speedApply.onclick=()=>{
   render();
 };
 speedClear.onclick=()=>{ speedFilter=null; speedPick=null; speedClear.style.display="none"; buildSpeedRows(); render(); };
-document.getElementById("losUp").onclick=()=>{ setLos("losSpeedup"); if(typeof huntLog!=="undefined") huntLog.paint(); };
-document.getElementById("losNone").onclick=()=>{ setLos("noLosSpeedup"); if(typeof huntLog!=="undefined") huntLog.paint(); };
+document.getElementById("losUp").onclick=()=>{ setLos("losSpeedup"); };
+document.getElementById("losNone").onclick=()=>{ setLos("noLosSpeedup"); };
 function pickSpeedRow(i){
   speedPick = speedPick===i ? null : i;
   speedFilter = null;
@@ -2030,23 +1922,21 @@ tapCalib.addEventListener("input",()=>{
 });
 
 let tapTimes=[];
-let speedSrc=null; // "tap" | "auto": ποιος έγραψε τελευταίος στο readout
+let speedSrc=null; // "tap" όταν το readout έχει τιμή από taps
 const tapBpmEl=document.getElementById("tapBpm"), tapMsEl=document.getElementById("tapMs");
 const tapReadout=document.getElementById("tapReadout"), tapSrcEl=document.getElementById("tapSrc");
-const bpmToSpeed=PhasmFootsteps.bpmToSpeed; // ίδια σχέση: v = bpm / (60 + 0.075·bpm)
+const bpmToSpeed=bpm=>bpm/(60+0.075*bpm); // v σε m/s από βήματα ανά λεπτό
 function clearSpeed(){
   tapBpmEl.textContent="–"; tapMsEl.textContent="–"; tapSrcEl.textContent="";
   tapReadout.classList.remove("unsure");
   lastSpeed=null; speedApply.disabled=true;
   speedRows.querySelectorAll(".speed-row").forEach(r=>r.classList.remove("hit"));
 }
-// Κοινό readout για taps και auto-listen. sure=false → κίτρινο, χωρίς φίλτρο.
-function showSpeed(bpm, vRaw, srcLabel, sure){
-  // vRaw = ό,τι ακούστηκε· v = στην κλίμακα των ghosts (÷ ghost speed του custom difficulty)
-  const m=ghostMult(), v=vRaw/m;
+// Readout της ταχύτητας από taps. sure=false → κίτρινο, χωρίς φίλτρο.
+function showSpeed(bpm, v, srcLabel, sure){
   tapBpmEl.textContent=Math.round(bpm);
-  tapMsEl.textContent=m===1 ? vRaw.toFixed(2) : `${vRaw.toFixed(2)} → ${v.toFixed(2)}`;
-  tapSrcEl.textContent=(srcLabel||"")+(m===1 ? "" : (lang==="en" ? ` · ghost speed ${Math.round(m*100)}%` : ` · ghost speed ${Math.round(m*100)}%`));
+  tapMsEl.textContent=v.toFixed(2);
+  tapSrcEl.textContent=srcLabel||"";
   tapReadout.classList.toggle("unsure", !sure);
   lastSpeed=sure ? v : null; speedApply.disabled=!sure;
   speedRows.querySelectorAll(".speed-row").forEach(r=>{
@@ -2079,413 +1969,6 @@ document.addEventListener("keydown",e=>{
   if(e.code==="Space" && !e.repeat){ e.preventDefault(); tap(); tapBtn.classList.add("pressed"); }
 });
 document.addEventListener("keyup",e=>{ if(e.code==="Space") tapBtn.classList.remove("pressed"); });
-
-// ---- auto-listen: footsteps.js ακούει τα βήματα και γράφει στο ίδιο readout ----
-// Πηγές: (α) PhasmListener — Windows helper που στέλνει ΜΟΝΟ τον ήχο του Phasmophobia μέσω
-// ws://localhost (s16le mono 16 kHz, 20 ms frames), (β) getDisplayMedia με «Share system audio».
-// Όλη η ανίχνευση γίνεται εδώ, οπότε το tuning αλλάζει με push στο site, χωρίς νέο .exe.
-// ---- Ιστορικό hunts: κάθε σειρά βημάτων από το auto-listen γίνεται «hunt» με καμπύλη ταχύτητας,
-// στατιστικά (αρχή / μ.ό. / min / max / τέλος), μοτίβο (σταθερό, επιτάχυνση, απότομη αλλαγή…) και hints. ----
-const huntLog=(()=>{
-  const HL_LS="phasm-hunts-v1", MERGE_GAP_MS=8000, MIN_STEPS=8, MAX_HUNTS=20;
-  const T=(el,en)=>lang==="en"?en:el;
-  let hunts=[];                 // [{at:epoch ms, steps:[s]}], χρονολογικά
-  let cur=null;                 // {at, t0, steps:[s], str:[dB], wall}
-  let ignoreSelf=true;          // ορίζεται από το ear (checkbox «Αγνόησε τα δικά μου βήματα»)
-  let det0=null;                // ποιος detector γράφει τώρα (αλλαγή → νέο hunt)
-  try{ const d=JSON.parse(localStorage.getItem(HL_LS)||"[]"); if(Array.isArray(d)) hunts=d.filter(h=>h&&Array.isArray(h.steps)); }catch(e){}
-  const save=()=>{ try{ localStorage.setItem(HL_LS, JSON.stringify(hunts)); }catch(e){} };
-
-  const listEl=document.getElementById("hlList"), sumEl=document.getElementById("hlSummary"), gameEl=document.getElementById("hlGame");
-  const emptyEl=document.getElementById("hlEmpty"), clearBtn=document.getElementById("hlClear");
-  const A=PhasmFootsteps.analyzeHunt;
-  const cache=new WeakMap(); // hunt → analysis (τα κλεισμένα hunts δεν αλλάζουν)
-  const analysis=h=>{
-    if(h===cur) return A(h.steps, h.str);
-    const m=PhasmFootsteps.getGhostSpeed(), c=cache.get(h);
-    if(!c || c.m!==m) cache.set(h, {m, a:A(h.steps, h.str)});
-    return cache.get(h).a;
-  };
-  // Ένα hunt εμφανίζεται/καταγράφεται μόνο αν έχει ρυθμό βημάτων (όχι τυχαίους ήχους)
-  // και, αν το ζήτησες, δεν μοιάζει με τα δικά σου βήματα (σταθερή ένταση).
-  const counts=a=>!!a && !(ignoreSelf && a.selfLike);
-  let ignoredMsg=null;
-
-  function finalize(){
-    if(!cur) return;
-    const h={at:cur.at, steps:cur.steps.map(x=>Math.round(x*1000)/1000), str:cur.str.map(x=>Math.round(x*10)/10)};
-    cur=null;
-    const a=h.steps.length>=MIN_STEPS ? A(h.steps, h.str) : null;
-    if(counts(a)){ hunts.push(h); if(hunts.length>MAX_HUNTS) hunts.shift(); save(); }
-    else if(a && a.selfLike) ignoredMsg={at:Date.now(), n:a.steps};
-    paint();
-  }
-  // Καλείται από το ear σε κάθε βήμα που ακούει (t = χρόνος ροής ήχου σε s).
-  function step(t, det, strength){
-    const now=Date.now();
-    if(cur && (det!==det0 || now-cur.wall>MERGE_GAP_MS)) finalize();
-    det0=det;
-    if(!cur) cur={at:now, t0:t, steps:[], str:[], wall:now};
-    if(cur.steps.length && t-cur.t0 <= cur.steps[cur.steps.length-1]+1e-6) return; // ήδη καταγεγραμμένο
-    cur.steps.push(t-cur.t0); cur.str.push(Number.isFinite(strength)?strength:NaN); cur.wall=now;
-    schedule();
-  }
-  // Κλείσιμο hunt όταν σωπάσει για > MERGE_GAP_MS (μικρά κενά = το ghost απομακρύνθηκε, ίδιο hunt).
-  setInterval(()=>{ if(cur && Date.now()-cur.wall>MERGE_GAP_MS) finalize(); }, 1000);
-  let pending=false;
-  function schedule(){ if(pending) return; pending=true; setTimeout(()=>{ pending=false; paint(); }, 400); }
-
-  // ---- hints από τα δεδομένα του SPEED_REF ----
-  const VERY_SLOW=1.15; // m/s
-  const near=(x,c,tol=0.15)=>Math.abs(x-c)<=tol;
-  const pair=(a,b,x,y,tol)=>(near(a,x,tol)&&near(b,y,tol))||(near(a,y,tol)&&near(b,x,tol));
-  function refsFor(v){
-    // Deogen / Deildegast (0.4–3.0) ταιριάζουν πάντα· τους πιάνει το hint επιβράδυνσης.
-    return SPEED_REF.filter(s=>s.max-s.min<2 && v>=s.min-0.08 && v<=s.max+0.08).map(s=>lang==="en"?(s.labelEn||s.label):s.label);
-  }
-  function hints(a){
-    const H=[], add=(strong,html,bh)=>H.push({strong,html,bh});
-    if(a.selfLike) add(false, T("👣 Σταθερά ~1.6 m/s = ταχύτητα περπατήματος παίκτη: μάλλον εσύ, όχι το ghost (εκτός αν είναι Twins/Moroi/Hantu).","👣 Steady ~1.6 m/s = player walking speed: probably you, not the ghost (unless Twins/Moroi/Hantu)."));
-    if(a.playerSprint) add(false, T("🏃 ~3.0 m/s για ≤3 s: μάλλον εσύ που έτρεξες (sprint), όχι Revenant.","🏃 ~3.0 m/s for ≤3 s: probably you sprinting, not a Revenant."));
-    if(a.trend==="switch"){
-      const f=a.from, t=a.to;
-      if(pair(f,t,1.0,3.0,0.2)) add(true, T(`Πήδηξε ${f.toFixed(2)} → ${t.toFixed(2)}: <b>Revenant</b> (1.0 όταν δεν σε βλέπει, 3.0 όταν σε δει)`, `Jumped ${f.toFixed(2)} → ${t.toFixed(2)}: <b>Revenant</b> (1.0 when it can't see you, 3.0 once it does)`));
-      else if(pair(f,t,1.2,2.25)) add(true, T(`${f.toFixed(2)} ↔ ${t.toFixed(2)}: <b>Dayan</b> (1.2 όταν είσαι ακίνητος, 2.25 όταν κινείσαι κοντά του)`, `${f.toFixed(2)} ↔ ${t.toFixed(2)}: <b>Dayan</b> (1.2 while you're still, 2.25 when you move nearby)`));
-      else if(pair(f,t,1.7,2.21,0.1)) add(true, T(`${f.toFixed(2)} → ${t.toFixed(2)}: <b>Kormos</b> (2.21 όταν σε ακούει να κινείσαι)`, `${f.toFixed(2)} → ${t.toFixed(2)}: <b>Kormos</b> (2.21 when it hears you move)`));
-      else if(pair(f,t,1.45,1.96,0.1)) add(true, T(`${f.toFixed(2)} ↔ ${t.toFixed(2)}: <b>Obambo</b> (calm ↔ aggressive)`, `${f.toFixed(2)} ↔ ${t.toFixed(2)}: <b>Obambo</b> (calm ↔ aggressive)`));
-      else add(false, T(`Απότομη αλλαγή ${f.toFixed(2)} → ${t.toFixed(2)} m/s: ghost με μεταβλητή ταχύτητα (Revenant, Dayan, Kormos, Obambo, Deogen…)`, `Sudden change ${f.toFixed(2)} → ${t.toFixed(2)} m/s: a variable-speed ghost (Revenant, Dayan, Kormos, Obambo, Deogen…)`));
-    }
-    if(a.trend==="accelerating") add(false, T(`Επιτάχυνε ${a.start.toFixed(2)} → ${a.end.toFixed(2)}: φυσιολογικό όσο σε βλέπει (LoS, ως ×1.65). <b>Δεν</b> ταιριάζει σε Hantu, Dayan, Kormos (χωρίς LoS accel).`, `Sped up ${a.start.toFixed(2)} → ${a.end.toFixed(2)}: normal while it sees you (LoS, up to ×1.65). Does <b>not</b> fit Hantu, Dayan, Kormos (no LoS accel).`), "losSpeedup");
-    if(a.trend==="slowing") add(a.end<1.3, T(`Επιβράδυνε ${a.start.toFixed(2)} → ${a.end.toFixed(2)}${a.end<1.3?": <b>Deogen</b> (3.0 μακριά → 0.4 κοντά σου)":""}`, `Slowed ${a.start.toFixed(2)} → ${a.end.toFixed(2)}${a.end<1.3?": <b>Deogen</b> (3.0 far away → 0.4 near you)":""}`));
-    // Κάτω από ~1.15 m/s πάνε μόνο λίγα ghosts (Dayan ακίνητος = 1.2, Hantu min ~1.44).
-    if(a.min<VERY_SLOW) add(true, T(`🐢 Πολύ αργό κατά διαστήματα (min ${a.min.toFixed(2)} m/s): <b>Deildegast</b> · <b>Deogen</b> · <b>Thaye</b> (γερασμένο) · <b>Revenant</b> (χωρίς LoS)`, `🐢 Very slow at times (min ${a.min.toFixed(2)} m/s): <b>Deildegast</b> · <b>Deogen</b> · <b>Thaye</b> (old) · <b>Revenant</b> (no LoS)`));
-    if(a.max>=3.15) add(true, T(`Max ${a.max.toFixed(2)} m/s: πάνω από 3.1 φτάνει μόνο ο <b>Moroi</b> (με LoS και χαμηλό sanity, ως 3.71)`, `Max ${a.max.toFixed(2)} m/s: only <b>Moroi</b> goes above 3.1 (LoS + low sanity, up to 3.71)`));
-    if(a.trend==="constant" && a.steady>=10 && a.mean>=1.35 && a.mean<=2.75) add(false, T(`Σταθερή ${a.mean.toFixed(2)} για ${Math.round(a.steady)} s: αν σε έβλεπε όλη αυτή την ώρα, δεν έχει LoS accel → Hantu / Dayan / Kormos`, `Steady ${a.mean.toFixed(2)} for ${Math.round(a.steady)} s: if it had line of sight the whole time, it has no LoS accel → Hantu / Dayan / Kormos`), "noLosSpeedup");
-    const r=refsFor(a.start);
-    if(r.length) add(false, T(`Αρχική ${a.start.toFixed(2)} ταιριάζει: ${r.join(" · ")}`, `Start ${a.start.toFixed(2)} fits: ${r.join(" · ")}`));
-    return H;
-  }
-  function gameHint(starts){
-    const g=PhasmFootsteps.analyzeGame(starts);
-    if(!g) return null;
-    if(g.kind==="twins") return {strong:true, html:T("Δύο σταθερές ταχύτητες (~1.53 / ~1.87) σε διαφορετικά hunts: <b>The Twins</b>","Two fixed speeds (~1.53 / ~1.87) across hunts: <b>The Twins</b>")};
-    if(g.kind==="decreasing") return {strong:true, html:T("Η αρχική ταχύτητα πέφτει από hunt σε hunt: <b>Thaye</b> (γερνάει) ή <b>Deildegast</b> (μετακινεί αντικείμενα)","Start speed drops hunt after hunt: <b>Thaye</b> (ageing) or <b>Deildegast</b> (moving items)")};
-    if(g.kind==="increasing") return {strong:true, html:T("Η αρχική ταχύτητα ανεβαίνει από hunt σε hunt: <b>Moroi</b> (πέφτει το sanity σας)","Start speed rises hunt after hunt: <b>Moroi</b> (your sanity is dropping)")};
-    if(g.kind==="stable") return {strong:false, html:T("Ίδια αρχική ταχύτητα σε όλα τα hunts (δεν είναι Twins / Thaye / Moroi με αλλαγή)","Same start speed in every hunt (no Twins / Thaye / Moroi drift)")};
-    return null;
-  }
-
-  // ---- line graph: ταχύτητα (m/s) στον χρόνο (s) ----
-  const NS="http://www.w3.org/2000/svg";
-  const el=(n,attrs,parent)=>{ const e=document.createElementNS(NS,n); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; };
-  function chart(a){
-    const W=320, Hh=128, L=30, R=8, Tp=8, B=20, pw=W-L-R, ph=Hh-Tp-B;
-    const yMin=0, yMax=Math.max(3.5, Math.ceil(a.max*2)/2);
-    const t0=a.curve[0][0], xMax=Math.max(5, a.curve[a.curve.length-1][0]-t0);
-    const X=t=>L+(t-t0)/xMax*pw, Y=v=>Tp+(1-(v-yMin)/(yMax-yMin))*ph;
-    const svg=el("svg",{viewBox:`0 0 ${W} ${Hh}`,class:"hl-chart",role:"img",tabindex:"0",
-      "aria-label":T(`Ταχύτητα στον χρόνο: από ${a.start.toFixed(2)} έως ${a.end.toFixed(2)} m/s, min ${a.min.toFixed(2)}, max ${a.max.toFixed(2)}`,`Speed over time: ${a.start.toFixed(2)} to ${a.end.toFixed(2)} m/s, min ${a.min.toFixed(2)}, max ${a.max.toFixed(2)}`)});
-    // πλέγμα + άξονας y
-    for(let v=0; v<=yMax+1e-9; v+=0.5){
-      const major=Math.abs(v%1)<1e-9;
-      el("line",{x1:L,x2:W-R,y1:Y(v),y2:Y(v),class:major?"g":"g minor"},svg);
-      if(major){ const tx=el("text",{x:L-5,y:Y(v)+3.5,class:"ax","text-anchor":"end"},svg); tx.textContent=v.toFixed(0); }
-    }
-    const yl=el("text",{x:4,y:Tp+6,class:"ax"},svg); yl.textContent="m/s";
-    // άξονας x
-    const stepX=xMax>40?10:xMax>16?5:2;
-    for(let s=0; s<=xMax+1e-9; s+=stepX){ const tx=el("text",{x:X(t0+s),y:Hh-6,class:"ax","text-anchor":s===0?"start":"middle"},svg); tx.textContent=s+"s"; }
-    // αναφορά 1.7 (βασική)
-    el("line",{x1:L,x2:W-R,y1:Y(1.7),y2:Y(1.7),class:"ref"},svg);
-    const rl=el("text",{x:W-R-2,y:Y(1.7)-3,class:"ax ref-l","text-anchor":"end"},svg); rl.textContent=T("1.7 βασική","1.7 base");
-    // σημείο απότομης αλλαγής
-    if(a.trend==="switch") el("line",{x1:X(a.switchAt),x2:X(a.switchAt),y1:Tp,y2:Tp+ph,class:"sw"},svg);
-    // γραμμή (σπάει στα κενά όπου το ghost δεν ακουγόταν)
-    let d="", prev=null;
-    for(const [t,v] of a.curve){ d+=(prev!==null && t-prev>5.4?"M":(d?"L":"M"))+X(t).toFixed(1)+","+Y(v).toFixed(1); prev=t; }
-    el("path",{d,class:"ln"},svg);
-    // ετικέτες μόνο σε min / max
-    const iMax=a.curve.findIndex(p=>p[1]===a.max), iMin=a.curve.findIndex(p=>p[1]===a.min);
-    const mark=(i,above)=>{ const [t,v]=a.curve[i]; el("circle",{cx:X(t),cy:Y(v),r:3.5,class:"pt"},svg);
-      const tx=el("text",{x:Math.min(W-R-14,Math.max(L+14,X(t))),y:above?Y(v)-6:Y(v)+12,class:"lbl","text-anchor":"middle"},svg); tx.textContent=v.toFixed(2); };
-    if(a.max-a.min>=0.15){ mark(iMax,true); mark(iMin,false); }
-    // crosshair + tooltip (ποντίκι, αφή, πλήκτρα ← →)
-    const cross=el("line",{y1:Tp,y2:Tp+ph,class:"cross",visibility:"hidden"},svg);
-    const dot=el("circle",{r:4,class:"pt hov",visibility:"hidden"},svg);
-    const tipG=el("g",{visibility:"hidden"},svg), tipR=el("rect",{rx:4,class:"tip",height:17},tipG), tipT=el("text",{class:"tip-t",y:12},tipG);
-    let idx=-1;
-    const show=i=>{
-      idx=Math.max(0,Math.min(a.curve.length-1,i)); const [t,v]=a.curve[idx], x=X(t), y=Y(v);
-      cross.setAttribute("x1",x); cross.setAttribute("x2",x); dot.setAttribute("cx",x); dot.setAttribute("cy",y);
-      tipT.textContent=`${v.toFixed(2)} m/s · ${(t-t0).toFixed(1)}s`;
-      const w=tipT.getComputedTextLength()+12, tx=Math.min(W-R-w, Math.max(L, x-w/2)), ty=y-24<Tp?y+8:y-24;
-      tipR.setAttribute("width",w); tipG.setAttribute("transform",`translate(${tx},${ty})`); tipT.setAttribute("x",6);
-      [cross,dot,tipG].forEach(e=>e.setAttribute("visibility","visible"));
-    };
-    const hide=()=>[cross,dot,tipG].forEach(e=>e.setAttribute("visibility","hidden"));
-    const nearest=evt=>{ const r=svg.getBoundingClientRect(), x=(evt.clientX-r.left)/r.width*W, t=t0+(x-L)/pw*xMax;
-      let b=0; a.curve.forEach((p,i)=>{ if(Math.abs(p[0]-t)<Math.abs(a.curve[b][0]-t)) b=i; }); return b; };
-    svg.addEventListener("pointermove",e=>show(nearest(e)));
-    svg.addEventListener("pointerdown",e=>show(nearest(e)));
-    svg.addEventListener("pointerleave",hide);
-    svg.addEventListener("focus",()=>show(idx<0?0:idx));
-    svg.addEventListener("blur",hide);
-    svg.addEventListener("keydown",e=>{ if(e.key==="ArrowRight"){ show(idx+1); e.preventDefault(); } if(e.key==="ArrowLeft"){ show(idx-1); e.preventDefault(); } });
-    return svg;
-  }
-
-  const TREND={constant:["→","σταθερή","steady"],accelerating:["↗","επιτάχυνση","speeding up"],slowing:["↘","επιβράδυνση","slowing down"],switch:["⇅","απότομη αλλαγή","sudden change"],variable:["〰","μεταβλητή","variable"]};
-  const hhmm=ms=>new Date(ms).toLocaleTimeString(lang==="en"?"en-GB":"el-GR",{hour:"2-digit",minute:"2-digit"});
-  const f2=x=>x.toFixed(2);
-  function card(h, n, live){
-    const a=analysis(h);
-    const c=document.createElement("div"); c.className="hl-card"+(live?" live":"");
-    const head=document.createElement("div"); head.className="hl-ch";
-    const left=document.createElement("span");
-    left.innerHTML=(live?'<span class="live-dot"></span>':"")+`<b>Hunt #${n}</b> <span class="meta">${hhmm(h.at)}${a?` · ${Math.round(a.duration)} s · ${h.steps.length} ${T("βήματα","steps")}`:""}</span>`;
-    head.appendChild(left);
-    const right=document.createElement("span");
-    if(a){ const tr=TREND[a.trend]; const b=document.createElement("span"); b.className="hl-trend "+a.trend; b.textContent=`${tr[0]} ${lang==="en"?tr[2]:tr[1]}`; right.appendChild(b); }
-    if(!live){ const x=document.createElement("button"); x.className="x"; x.title=T("Διαγραφή (π.χ. βήματα συμπαίκτη)","Delete (e.g. a teammate's footsteps)"); x.textContent="✕";
-      x.onclick=()=>{ hunts=hunts.filter(o=>o!==h); save(); paint(); }; right.appendChild(x); }
-    head.appendChild(right); c.appendChild(head);
-    if(!a){ const p=document.createElement("div"); p.className="hl-empty"; p.textContent=T("ακούω… (χρειάζονται ~6 καθαρά βήματα)","listening… (needs ~6 clean steps)"); c.appendChild(p); return c; }
-    const nums=document.createElement("div"); nums.className="hl-nums";
-    nums.innerHTML=`<span>${T("αρχή","start")} <b>${f2(a.start)}</b></span><span>${T("μ.ό.","avg")} <b>${f2(a.mean)}</b></span><span>min <b>${f2(a.min)}</b></span><span>max <b>${f2(a.max)}</b></span><span>${T("τέλος","end")} <b>${f2(a.end)}</b></span>${a.loudness?`<span title="${T("Πόσο άλλαζε η ένταση των βημάτων: μεγάλη αλλαγή = το ghost πλησίαζε/απομακρυνόταν","How much the step loudness varied: a big change = the ghost moved closer/away")}">${T("ένταση","loudness")} <b>±${a.loudness.std.toFixed(1)} dB</b></span>`:""}`;
-    c.appendChild(nums);
-    c.appendChild(chart(a));
-    hints(a).forEach(x=>{
-      const d=document.createElement("div"); d.className="hl-hint"+(x.strong?" strong":""); d.innerHTML=x.html;
-      if(x.bh){ // ένα πάτημα: «ναι, έτσι ήταν» → ενεργοποιεί το αντίστοιχο φίλτρο LoS
-        const b=document.createElement("button"); b.className="btn"+(bhState[x.bh]===1?" on":"");
-        b.textContent = x.bh==="losSpeedup" ? T((bhState[x.bh]?"✓ ":"")+"📈 Ναι, επιτάχυνε με LoS",(bhState[x.bh]?"✓ ":"")+"📈 Yes, LoS speed-up")
-                                            : T((bhState[x.bh]?"✓ ":"")+"➖ Ναι, με έβλεπε χωρίς να επιταχύνει",(bhState[x.bh]?"✓ ":"")+"➖ Yes, it saw me and didn't speed up");
-        b.onclick=()=>{ setLos(x.bh); paint(); };
-        d.appendChild(document.createElement("br")); d.appendChild(b);
-      }
-      c.appendChild(d);
-    });
-    const fb=document.createElement("button"); fb.className="btn"; fb.textContent=T(`🔍 Φίλτρο με αρχική ${f2(a.start)} m/s`,`🔍 Filter by start ${f2(a.start)} m/s`);
-    fb.onclick=()=>{ speedFilter=a.start; speedPick=null; buildSpeedRows(); speedClear.textContent="✕ "+speedFilter.toFixed(2)+" m/s"; speedClear.style.display="inline-block"; render(); };
-    c.appendChild(fb);
-    return c;
-  }
-  function paint(){
-    const done=hunts.map(h=>({h,a:analysis(h)})).filter(x=>x.a);
-    listEl.innerHTML="";
-    if(cur && counts(analysis(cur))) listEl.appendChild(card(cur, hunts.length+1, true));
-    const ig=document.getElementById("earIgnored");
-    if(ignoredMsg && Date.now()-ignoredMsg.at<5*60000){ ig.hidden=false; ig.textContent=T(`👣 Αγνόησα ${ignoredMsg.n} βήματα στα ~1.6 m/s στις ${hhmm(ignoredMsg.at)} (περπάτημα παίκτη, μάλλον εσύ).`,`👣 Ignored ${ignoredMsg.n} steps at ~1.6 m/s at ${hhmm(ignoredMsg.at)} (player walking speed, probably you).`); }
-    else ig.hidden=true;
-    for(let i=hunts.length-1;i>=0;i--) listEl.appendChild(card(hunts[i], i+1, false));
-    emptyEl.style.display=((cur&&counts(analysis(cur)))||hunts.length)?"none":"";
-    clearBtn.style.display=hunts.length?"inline-block":"none";
-    // σύνοψη παιχνιδιού
-    sumEl.innerHTML=""; gameEl.innerHTML="";
-    if(done.length){
-      const starts=done.map(x=>x.a.start), all=done.flatMap(x=>x.a.curve.map(p=>p[1]));
-      const avg=all.reduce((s,v)=>s+v,0)/all.length;
-      const stat=(v,l)=>{ const d=document.createElement("div"); d.className="hl-stat"; d.innerHTML=`<b>${v}</b><span>${l}</span>`; sumEl.appendChild(d); };
-      stat(done.length, "hunts");
-      stat(f2(starts.reduce((s,v)=>s+v,0)/starts.length), T("μ.ό. αρχικής","avg start"));
-      stat(f2(avg), T("μ.ό. ταχύτητας","avg speed"));
-      stat(f2(Math.min(...done.map(x=>x.a.min))), "min");
-      stat(f2(Math.max(...done.map(x=>x.a.max))), "max");
-      const g=gameHint(starts);
-      if(g){ const d=document.createElement("div"); d.className="hl-hint"+(g.strong?" strong":""); d.innerHTML=g.html; gameEl.appendChild(d); }
-    }
-    if(window.phasmSections) window.phasmSections.refresh(); // «· N hunts» όταν είναι μαζεμένο
-  }
-  function clear(){ cur=null; hunts=[]; ignoredMsg=null; save(); paint(); }
-  function setIgnoreSelf(v){ ignoreSelf=!!v; paint(); }
-  clearBtn.onclick=clear;
-  paint();
-  return { step, finalize, clear, paint, setIgnoreSelf };
-})();
-
-const ear=(()=>{
-  const EAR_LS="phasm-ear-v1";
-  let cfg={sens:0.5, port:47213, ignoreSelf:true};
-  try{ Object.assign(cfg, JSON.parse(localStorage.getItem(EAR_LS)||"{}")); }catch(e){}
-  const saveCfg=()=>{ try{ localStorage.setItem(EAR_LS, JSON.stringify(cfg)); }catch(e){} };
-
-  const box=document.getElementById("ear"), stateEl=document.getElementById("earState");
-  const bHelper=document.getElementById("earHelper"), bScreen=document.getElementById("earScreen"), bStop=document.getElementById("earStop");
-  const levelEl=document.getElementById("earLevel"), floorEl=document.getElementById("earFloor");
-  const sens=document.getElementById("earSens"), sensVal=document.getElementById("earSensVal");
-
-  let mode=null;            // null | "helper" | "screen"
-  let det=null, ws=null, retry=null, media=null, ctx=null, node=null, blink=null;
-  const T=(el,en)=>lang==="en"?en:el;
-
-  function setState(cls, el, en){
-    stateEl.className="ear-state"+(cls?" "+cls:"");
-    stateEl.textContent=T(el,en);
-  }
-  function newDetector(sampleRate){
-    det=new PhasmFootsteps.FootstepDetector({
-      sampleRate, sensitivity:cfg.sens,
-      onStep:e=>{ // καταγραφή στο ιστορικό hunts· το TAP αναβοσβήνει μόνο για βήματα με ρυθμό
-        if(!e.rhythmic) return; // πόρτες, φωνές, αντικείμενα: χωρίς ρυθμό → ούτε ιστορικό ούτε ένδειξη
-        if(e.backfill) e.backfill.forEach(([t,st])=>huntLog.step(t, det, st));
-        huntLog.step(e.t, det, e.strength);
-        if(cfg.ignoreSelf && e.selfLike) return; // δικά σου βήματα
-        tapBtn.classList.add("pressed"); clearTimeout(blink);
-        blink=setTimeout(()=>tapBtn.classList.remove("pressed"), 90);
-      },
-      onTempo:t=>{
-        if(!t) return; // η σειρά έληξε: κράτα την τελευταία ένδειξη για να φιλτράρεις μετά το hunt
-        if(!t.rhythmic) return; // χωρίς σταθερό ρυθμό = όχι βήματα
-        if(cfg.ignoreSelf && t.selfLike){
-          if(speedSrc!=="tap") tapSrcEl.textContent=T(`👣 ${t.speed.toFixed(2)} m/s = περπάτημα παίκτη (1.6): μάλλον εσύ · αγνοήθηκε`,`👣 ${t.speed.toFixed(2)} m/s = player walking speed (1.6): probably you · ignored`);
-          return;
-        }
-        speedSrc="auto";
-        const sure=t.confidence>=0.6 && t.steps>=8;
-        const sprint = t.maybeSprint ? T(" · ή εσύ που τρέχεις"," · or you sprinting")
-                     : t.speed/ghostMult()<1.15 ? T(" · 🐢 πολύ αργό: Deildegast / Deogen / Thaye / Revenant χωρίς LoS"," · 🐢 very slow: Deildegast / Deogen / Thaye / Revenant no LoS") : "";
-        const src = t.source==="ac" ? T("ρυθμός (σιγανά βήματα)","rhythm (quiet steps)") : T(`${t.steps} βήματα`,`${t.steps} steps`);
-        showSpeed(t.bpm, t.speed,
-          T(`🎧 auto · ${src} · σιγουριά ${Math.round(t.confidence*100)}%`, `🎧 auto · ${src} · ${Math.round(t.confidence*100)}% sure`)+sprint, sure);
-      },
-      onLevel:l=>{
-        const pct=x=>Math.max(0,Math.min(100,(x+80)*1.25));
-        levelEl.style.width=pct(l.db)+"%"; floorEl.style.left=pct(l.floor)+"%";
-      },
-    });
-  }
-  function ui(){
-    box.classList.toggle("on", !!mode);
-    bHelper.classList.toggle("on", mode==="helper");
-    bScreen.classList.toggle("on", mode==="screen");
-    bStop.style.display=mode?"inline-block":"none";
-    if(!mode){ setState("", "off", "off"); levelEl.style.width="0"; }
-  }
-
-  // ---- (α) PhasmListener ----
-  function connectHelper(){
-    clearTimeout(retry);
-    setState("wait", "σύνδεση…", "connecting…");
-    let sock;
-    try{ sock=new WebSocket(`ws://localhost:${cfg.port}`); }catch(e){ setState("err","σφάλμα","error"); return; }
-    sock.binaryType="arraybuffer";
-    ws=sock;
-    let opened=false;
-    sock.onopen=()=>{ opened=true; };
-    sock.onmessage=ev=>{
-      if(typeof ev.data==="string"){
-        let m; try{ m=JSON.parse(ev.data); }catch(e){ return; }
-        if(m.type==="hello") newDetector(m.sampleRate||16000);
-        if(m.type==="status"){
-          if(m.state==="capturing") setState("live", "ακούω το game ✓", "hearing the game ✓");
-          else if(m.state==="waiting") setState("wait", "περιμένω το Phasmophobia…", "waiting for Phasmophobia…");
-          else setState("err", "σφάλμα helper", "helper error");
-          if(m.state==="error" && m.message) console.warn("PhasmListener:", m.message);
-          stateEl.title=m.message||"";
-        }
-        return;
-      }
-      if(!det) return;
-      const i16=new Int16Array(ev.data), f=new Float32Array(i16.length);
-      for(let i=0;i<f.length;i++) f[i]=i16[i]/32768;
-      rec.push(i16, det.fs);
-      det.process(f);
-    };
-    sock.onclose=()=>{
-      if(ws!==sock) return; // αντικαταστάθηκε / σταμάτησε
-      ws=null;
-      if(mode!=="helper") return;
-      setState(opened?"wait":"err", opened?"χάθηκε, ξαναδοκιμάζω…":"PhasmListener δεν τρέχει", opened?"lost, retrying…":"PhasmListener not running");
-      stateEl.title=T("Άνοιξε το PhasmListener.exe (ή επέτρεψε την πρόσβαση σε τοπικό δίκτυο στον browser).", "Start PhasmListener.exe (or allow local network access in the browser).");
-      retry=setTimeout(connectHelper, 3000);
-    };
-  }
-
-  // ---- (β) ήχος συστήματος μέσω screen share ----
-  const WORKLET=`registerProcessor("phasm-tap",class extends AudioWorkletProcessor{
-    process(inp){const ch=inp[0]; if(ch&&ch.length){const n=ch[0].length,m=new Float32Array(n);
-      for(let c=0;c<ch.length;c++){const d=ch[c];for(let i=0;i<n;i++)m[i]+=d[i]/ch.length;}
-      this.port.postMessage(m,[m.buffer]);} return true;}});`;
-  async function startScreen(){
-    if(!navigator.mediaDevices?.getDisplayMedia){ setState("err","δεν υποστηρίζεται","not supported"); return false; }
-    setState("wait", "διάλεξε οθόνη + «Share system audio»", "pick a screen + “Share system audio”");
-    try{
-      media=await navigator.mediaDevices.getDisplayMedia({video:true,
-        audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}, systemAudio:"include"});
-    }catch(e){
-      console.warn("auto-listen getDisplayMedia:", e);
-      if(e && e.name==="NotAllowedError") setState("err","ακυρώθηκε","cancelled");
-      else setState("err","σφάλμα: "+(e&&e.name||"?"),"error: "+(e&&e.name||"?"));
-      return false;
-    }
-    const at=media.getAudioTracks()[0];
-    media.getVideoTracks().forEach(t=>t.stop()); // θέλουμε μόνο τον ήχο
-    if(!at){ setState("err","χωρίς ήχο — τσέκαρε «Share system audio»","no audio — tick “Share system audio”"); media=null; return false; }
-    at.addEventListener("ended", ()=>{ if(mode==="screen") stop(); });
-    ctx=new AudioContext();
-    const url=URL.createObjectURL(new Blob([WORKLET],{type:"text/javascript"}));
-    await ctx.audioWorklet.addModule(url); URL.revokeObjectURL(url);
-    const src=ctx.createMediaStreamSource(new MediaStream([at]));
-    node=new AudioWorkletNode(ctx,"phasm-tap",{numberOfOutputs:0});
-    newDetector(ctx.sampleRate);
-    node.port.onmessage=e=>{ if(!det) return; rec.pushFloat(e.data, ctx.sampleRate); det.process(e.data); };
-    src.connect(node);
-    setState("live", "ακούω τον ήχο συστήματος ✓", "hearing system audio ✓");
-    return true;
-  }
-
-  function stop(){
-    const m=mode; mode=null;
-    huntLog.finalize();
-    clearTimeout(retry);
-    if(ws){ const s=ws; ws=null; try{ s.close(); }catch(e){} }
-    if(node){ try{ node.port.onmessage=null; node.disconnect(); }catch(e){} node=null; }
-    if(ctx){ ctx.close().catch(()=>{}); ctx=null; }
-    if(media){ media.getTracks().forEach(t=>t.stop()); media=null; }
-    det=null;
-    ui();
-    return m;
-  }
-  bHelper.onclick=()=>{ if(mode==="helper"){ stop(); return; } stop(); mode="helper"; ui(); connectHelper(); };
-  bScreen.onclick=async()=>{ if(mode==="screen"){ stop(); return; } stop(); mode="screen"; ui(); if(!(await startScreen())) { const err=stateEl.textContent, cls=stateEl.className; stop(); stateEl.className=cls; stateEl.textContent=err; } };
-  bStop.onclick=stop;
-
-  // ---- εγγραφή: κρατάει τα τελευταία 2 λεπτά ήχου (ό,τι ακούει και ο detector) για αποθήκευση σε WAV ----
-  const recBtn=document.getElementById("earRec");
-  const rec=(()=>{
-    const KEEP_S=120; let chunks=[], total=0, rate=0;
-    function push(i16, r){
-      if(r!==rate){ chunks=[]; total=0; rate=r; }
-      chunks.push(i16.slice ? i16.slice() : new Int16Array(i16)); total+=i16.length;
-      while(chunks.length && total-chunks[0].length>=KEEP_S*rate){ total-=chunks[0].length; chunks.shift(); }
-      if(recBtn.disabled && total>rate*5) recBtn.disabled=false;
-    }
-    function pushFloat(f32, r){ const o=new Int16Array(f32.length); for(let i=0;i<f32.length;i++){ const x=Math.max(-1,Math.min(1,f32[i])); o[i]=Math.round(x*32767); } push(o, r); }
-    function save(){
-      if(!total) return;
-      const dataBytes=total*2, buf=new ArrayBuffer(44+dataBytes), v=new DataView(buf);
-      const w=(o,str)=>{ for(let i=0;i<str.length;i++) v.setUint8(o+i,str.charCodeAt(i)); };
-      w(0,"RIFF"); v.setUint32(4,36+dataBytes,true); w(8,"WAVE"); w(12,"fmt "); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
-      v.setUint32(24,rate,true); v.setUint32(28,rate*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,"data"); v.setUint32(40,dataBytes,true);
-      let off=44; for(const c of chunks){ new Int16Array(buf, off, c.length).set(c); off+=c.length*2; }
-      const d=new Date(), pad=n=>String(n).padStart(2,"0");
-      const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([buf],{type:"audio/wav"}));
-      a.download=`phasm-audio-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.wav`;
-      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 10000);
-    }
-    return { push, pushFloat, save, get seconds(){ return rate?total/rate:0; } };
-  })();
-  recBtn.onclick=()=>rec.save();
-
-  const selfChk=document.getElementById("earSelf");
-  selfChk.checked=cfg.ignoreSelf!==false; huntLog.setIgnoreSelf(selfChk.checked);
-  selfChk.addEventListener("change",()=>{ cfg.ignoreSelf=selfChk.checked; huntLog.setIgnoreSelf(cfg.ignoreSelf); saveCfg(); });
-
-  function paintSens(){ sens.value=cfg.sens; sensVal.textContent=Math.round(cfg.sens*100)+"%"; }
-  sens.addEventListener("input",()=>{ cfg.sens=Number(sens.value); paintSens(); if(det) det.setSensitivity(cfg.sens); saveCfg(); });
-  paintSens(); ui();
-  return { stop, get mode(){ return mode; }, rec };
-})();
 
 // ---- persistence (refresh-proof evidence board & sanity) ----
 const LS_KEY="phasmo-journal-v1";
@@ -2551,7 +2034,6 @@ document.getElementById("resetBtn").onclick=()=>{
   sanFilter.checked=false;
   speedFilter=null; speedPick=null; speedClear.style.display="none"; buildSpeedRows();
   manualOut.clear();
-  huntLog.clear(); // νέο παιχνίδι = νέο ιστορικό hunts
   render();
 };
 
@@ -2560,12 +2042,10 @@ const diffSel=document.getElementById("diffSel");
 const customDiffBox=document.getElementById("customDiffBox");
 const ccEvid=document.getElementById("ccEvid"), ccSmall=document.getElementById("ccSmall"),
       ccMedium=document.getElementById("ccMedium"), ccLarge=document.getElementById("ccLarge"),
-      ccGrace=document.getElementById("ccGrace"), ccMult=document.getElementById("ccMult"),
-      ccSpeed=document.getElementById("ccSpeed");
+      ccGrace=document.getElementById("ccGrace"), ccMult=document.getElementById("ccMult");
 function syncCCInputs(){
   ccEvid.value=customCfg.evid; ccSmall.value=customCfg.small; ccMedium.value=customCfg.medium;
   ccLarge.value=customCfg.large; ccGrace.value=customCfg.grace; ccMult.value=customCfg.mult;
-  ccSpeed.value=String(customCfg.speed);
 }
 function readCCInputs(){
   customCfg={
@@ -2575,21 +2055,18 @@ function readCCInputs(){
     large:Math.min(300,Math.max(1,Number(ccLarge.value)||50)),
     grace:Math.min(60,Math.max(0,Number(ccGrace.value)||0)),
     mult:Math.min(10,Math.max(0,Number(ccMult.value)||1)),
-    speed:GHOST_SPEEDS.includes(Number(ccSpeed.value)) ? Number(ccSpeed.value) : 1,
   };
   rebuildCustomDiff();
   if(diff==="custom") applyDiff();
   else saveState();
 }
-[ccEvid,ccSmall,ccMedium,ccLarge,ccGrace,ccMult,ccSpeed].forEach(el=>el.addEventListener("input",readCCInputs));
+[ccEvid,ccSmall,ccMedium,ccLarge,ccGrace,ccMult].forEach(el=>el.addEventListener("input",readCCInputs));
 
 function applyDiff(){
   const d=DIFF[diff];
   diffSel.value=diff;
   customDiffBox.style.display = diff==="custom" ? "block" : "none";
   if(diff==="custom") syncCCInputs();
-  PhasmFootsteps.setGhostSpeed(ghostMult()); // όρια listener + κλίμακα ανάλυσης hunts
-  huntLog.paint();
   document.querySelectorAll("[data-map]").forEach(b=>{
     const secs=d.hunts[b.dataset.map];
     b.dataset.hunt=secs;
@@ -2673,12 +2150,6 @@ window.phasmSections=(()=>{
     add({key:"ev-"+id, head:label, label, body:()=>[grid],
       sum:()=>{ const n=grid.querySelectorAll(".ev.on").length; return n ? T(`· ${n} ενεργά`,`· ${n} active`) : ""; }});
   });
-  // 4. Μέσα στο Hunt Toolkit: Auto-listen και Ιστορικό hunts
-  const ear=document.getElementById("ear");
-  if(ear) add({key:"ear", box:ear, head:ear.querySelector(".ear-head"), label:ear.querySelector(".ear-head > span:first-child")});
-  const hl=document.getElementById("huntLog");
-  if(hl) add({key:"huntlog", box:hl, head:hl.querySelector(".hl-head"), label:hl.querySelector(".hl-head > span:first-child"),
-    sum:()=>{ const n=hl.querySelectorAll("#hlList .hl-card").length; return n ? `· ${n} hunts` : ""; }});
 
   // Πάτημα στο μενού πλοήγησης → άνοιξε την ενότητα αν είναι μαζεμένη
   navLinks.forEach(a=>a.addEventListener("click",()=>{ const k=a.getAttribute("href").slice(1); if(st[k]) set(k,false); }));
@@ -2731,7 +2202,6 @@ function setLang(l){
   buildEvBoard(); buildBhBoard(); buildCards(); buildThresh(); buildHuntBehaviorTable(); buildRuleOuts(); buildSpeedRows(); buildAbilities();
   applyDiff();
   render();
-  if(typeof huntLog!=="undefined") huntLog.paint();
 }
 langBtn.onclick=()=>setLang(lang==="el" ? "en" : "el");
 
